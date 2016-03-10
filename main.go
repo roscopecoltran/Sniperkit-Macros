@@ -9,6 +9,7 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "nut"
+	app.Version = "0.0.1 dev"
 	app.Usage = "the development environment, containerized"
 	// define nut subcommands
 	app.Commands = []cli.Command{
