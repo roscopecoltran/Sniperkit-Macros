@@ -17,7 +17,7 @@ func main() {
 			Name:  "init",
 			Usage: "init a nut project",
 			Action: func(c *cli.Context) {
-				initProject()
+				initSubcommand(c)
 			},
 		},
 		{
