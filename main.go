@@ -14,6 +14,13 @@ func main() {
 	// define nut subcommands
 	app.Commands = []cli.Command{
 		{
+			Name:  "init",
+			Usage: "init a nut project",
+			Action: func(c *cli.Context) {
+				initProject()
+			},
+		},
+		{
 			Name:  "status",
 			Usage: "gives status of the dev env",
 			Action: func(c *cli.Context) {
