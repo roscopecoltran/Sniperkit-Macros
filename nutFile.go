@@ -1,20 +1,45 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
+type MountArgument struct {
+	host string `yaml:host_path`
+	container string `yaml:container_path`
+}
+
+type BaseEnvironment struct {
+	DockerImage string `yaml:"docker_image,omitempty"`
+	FileURL string `yaml:"nut_file_url,omitempty"`
+	FilePath string `yaml:"nut_file_path,omitempty"`
+}
+
 // project represents a nut project
 type project struct {
+	SyntaxVersion string `yaml:"syntax_version"`
 	ProjectName string `yaml:"project_name"`
-	DockerImage string `yaml:"docker_image"`
+	Base BaseEnvironment `yaml:"based_on"`
+	WorkingDir string `yaml:"container_working_directory,omitempty"`
+	Mount map[string][]string `yaml:"mount,omitempty"`
+	Macros map[string][]string `yaml:"macros,omitempty"`
 }
 
 func NewProject() *project {
 	var p *project = &project{
 		ProjectName: "",
-		DockerImage: "",
+		Base: BaseEnvironment{},
+		Macros: make(map[string][]string),
+		Mount: make(map[string][]string),
+		// Mount: make(map[string]MountArgument),
+		// Mount: []MountArgument{},
+		// Mount: []MountArgument{MountArgument{".", "/go/src/project"}},
+	}
+	for i, v := range p.Mount {
+		fmt.Println(i)
+		fmt.Println(v)
 	}
 	return p
 }
@@ -25,7 +50,7 @@ func (p *project) Marshal() string {
 	if err != nil {
 		logrus.Fatalf("error: %v", err)
 	}
-	logrus.Printf("--- t dump:\n%s\n\n", string(d))
+	// logrus.Printf("--- t dump:\n%s\n\n", string(d))
 	return string(d)
 }
 

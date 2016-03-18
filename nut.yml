@@ -1,0 +1,14 @@
+syntax_version: "1"
+project_name: nut
+based_on:
+  docker_image: golang:1.6
+container_working_directory: /go/src/project
+mount:
+  main:
+  - .
+  - /go/src/project
+macros:
+  build:
+  - go build -o output
+  run:
+  - ./output
