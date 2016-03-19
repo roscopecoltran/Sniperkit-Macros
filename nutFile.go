@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	// "os"
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -33,15 +34,16 @@ func NewProject() *project {
 		Base: BaseEnvironment{},
 		Macros: make(map[string][]string),
 		Mount: make(map[string][]string),
-		// Mount: make(map[string]MountArgument),
-		// Mount: []MountArgument{},
-		// Mount: []MountArgument{MountArgument{".", "/go/src/project"}},
 	}
 	for i, v := range p.Mount {
 		fmt.Println(i)
 		fmt.Println(v)
 	}
 	return p
+}
+
+func loadProject() (*project, error) {
+	return parseNutFileAtPath("nut.yml")
 }
 
 // object to YAML

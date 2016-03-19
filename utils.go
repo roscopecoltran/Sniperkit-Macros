@@ -7,26 +7,29 @@ import (
 	"path"
 
 	"github.com/Sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 // parseNutFileAtPath reads and parses the nut file at the given path
-func parseNutFileAtPath(nutFilePath string) error {
+func parseNutFileAtPath(nutFilePath string) (*project, error) {
 	// check file exists
 	exists, err := fileExists(nutFilePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if exists == false {
-		return errors.New("nut file not found")
+		return nil, errors.New("nut file not found")
 	}
 	// file exists
 	bytes, err := ioutil.ReadFile(nutFilePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	// TODO: gdevillele: finish this with YAML parsing
-	logrus.Println(string(bytes))
-	return errors.New("NOT IMPLEMENTED")
+
+	var p *project = &project{}
+	err = yaml.Unmarshal(bytes, &p)
+	logrus.Println(p)
+	return p, err
 }
 
 // nutFileExistsAtPath return whether a nut.yml file exists at the given path

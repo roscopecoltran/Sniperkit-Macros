@@ -11,6 +11,7 @@ func main() {
 	app.Name = "nut"
 	app.Version = "0.0.1 dev"
 	app.Usage = "the development environment, containerized"
+	app.EnableBashCompletion = true
 	// define nut subcommands
 	app.Commands = []cli.Command{
 		{
@@ -38,7 +39,7 @@ func main() {
 			Name:  "run",
 			Usage: "run project in a container",
 			Action: func(c *cli.Context) {
-				run()
+				run(c)
 			},
 		},
 	}
