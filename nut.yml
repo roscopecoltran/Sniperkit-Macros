@@ -5,13 +5,17 @@ based_on:
 container_working_directory: /go/src/project
 mount:
   main:
-  - .
+  - /Users/matthieudelaro/Documents/projects/docker/nut
   - /go/src/project
 macros:
   build:
-  - go build -o output
+  # - go build -o output
+  # - env GOOS=darwin GOARCH=amd64 go build -o outputForMac
+  - env GOOS=darwin GOARCH=amd64 go build  # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
   run:
   # - ./output
-  - pwd
+  # - pwd
+  # - ls -la | grep '323'
+  - echo "hello  $PWD"
   # - ls -la
   # - ls -la matthieudelaro/nut

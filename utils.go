@@ -28,7 +28,6 @@ func parseNutFileAtPath(nutFilePath string) (*project, error) {
 
 	var p *project = &project{}
 	err = yaml.Unmarshal(bytes, &p)
-	logrus.Println(p)
 	return p, err
 }
 

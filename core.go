@@ -6,7 +6,7 @@ import (
     "github.com/fsouza/go-dockerclient"
     // "bytes"
     "os"
-    "strings" // words := strings.Fields(someString)
+    // "strings" // words := strings.Fields(someString)
 )
 
 func execCommandInContainer(client *docker.Client, container *docker.Container, command string) {
@@ -14,6 +14,23 @@ func execCommandInContainer(client *docker.Client, container *docker.Container, 
         dExec  *docker.Exec
         err    error
     )
+
+    // Issues with command = "ls -la | grep '323'" (the pipe is an issue in most cases)
+    // cmd := []string{command}
+        // "ls -la | grep '323'": executable file not found in $PATH
+    // cmd := strings.Fields(command)
+        // ls: cannot access |: No such file or directory
+        // ls: cannot access grep: No such file or directory
+        // ls: cannot access '323': No such file or directory
+    // cmd := strings.Fields("bash -c \"" + command + "\"")
+        // -la: -c: line 0: unexpected EOF while looking for matching `"'
+        // -la: -c: line 1: syntax error: unexpected end of file
+    cmd := []string{"bash", "-c", command}
+        // runs properly. Using bash does not seem like an elegant solution,
+        // but this is the best so far.
+    // for i, v := range cmd {
+    //     logrus.Println("command field ", i, ": ", v)
+    // }
     de := docker.CreateExecOptions{
         AttachStderr: true,
         AttachStdin:  true,
@@ -22,7 +39,7 @@ func execCommandInContainer(client *docker.Client, container *docker.Container, 
         // Cmd:          []string{"echo", "hello world2", "&&", "echo", "blabla"}, //, ";", "echo", "blabla2"},
         // Cmd:          []string{"/bin/sh"},
         // Cmd:          []string{"top"},
-        Cmd:          strings.Fields(command),
+        Cmd:          cmd,
         Container:    container.ID,
     }
     fmt.Println("CreateExec")

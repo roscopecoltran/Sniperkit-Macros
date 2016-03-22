@@ -5,5 +5,11 @@ import (
 )
 
 func build() {
-	logrus.Println("BUILD does nothing for now...")
+    p, err := loadProject()
+    if err == nil {
+        commands := p.Macros["build"]
+        execInContainer(commands, p)
+    } else {
+        logrus.Println("Could not load nut file")
+    }
 }

@@ -39,7 +39,14 @@ func main() {
 			Name:  "run",
 			Usage: "run project in a container",
 			Action: func(c *cli.Context) {
-				run(c)
+				run()
+			},
+		},
+		{
+			Name:  "exec",
+			Usage: "execute a command in a container. Surround the whole command with simple quotes to obtain expected result.",
+			Action: func(c *cli.Context) {
+				exec(c)
 			},
 		},
 	}
