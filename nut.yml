@@ -12,5 +12,6 @@ macros:
   - go build -o output
   run:
   # - ./output
-  # - pwd
-  - ls -la
+  - pwd
+  # - ls -la
+  # - ls -la matthieudelaro/nut

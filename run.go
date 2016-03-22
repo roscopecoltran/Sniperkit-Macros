@@ -106,7 +106,7 @@ func execInContainer(commands []string, proj *project) {
         AttachStdout: true,
         AttachStderr: true,
         Tty:          true,
-        // WorkingDir:   "/go/src/project",
+        WorkingDir:   proj.WorkingDir,
     }
     // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
     // User: set it to the user of the host, instead of root
@@ -126,8 +126,26 @@ func execInContainer(commands []string, proj *project) {
 
 
     //Try to start the container
+
+    // prepare names of directories to mount
+    mountingPoints := proj.getMountingPoints()
+    binds := make([]string, 0, len(mountingPoints))
+    for _, directory := range(mountingPoints) {
+        hostPath, hostPathErr := directory.fullHostPath()
+        containerPath, containerPathErr := directory.fullContainerPath()
+        if hostPathErr != nil {
+            fmt.Println(hostPathErr.Error())
+            return
+        }
+        if containerPathErr != nil {
+            fmt.Println(containerPathErr.Error())
+            return
+        }
+        binds = append(binds, hostPath + ":" + containerPath)
+    }
+    fmt.Println("binds", binds)
     err = client.StartContainer(container.ID, &docker.HostConfig{
-        // Binds: []string{"/go/src/github.com/matthieudelaro/nut:/go/src/project"},
+        Binds: binds,
     })
     if( err != nil) {
         fmt.Println(err.Error())

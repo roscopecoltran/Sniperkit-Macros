@@ -5,6 +5,8 @@ import (
 	// "os"
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+    "path/filepath"
+
 )
 
 type MountArgument struct {
@@ -54,6 +56,27 @@ func (p *project) Marshal() string {
 	}
 	// logrus.Printf("--- t dump:\n%s\n\n", string(d))
 	return string(d)
+}
+
+func (p *project) getMountingPoints() map[string]MountArgument {
+	mountingPoints := make(map[string]MountArgument)
+	for name, data := range(p.Mount) {
+		mountingPoints[name] = MountArgument{
+			host: data[0],
+			container: data[1],
+		}
+	}
+	return mountingPoints
+}
+
+func (self *MountArgument) fullHostPath() (string, error) {
+	absolutePath, err := filepath.Abs(self.host)
+	return absolutePath, err
+}
+
+func (self *MountArgument) fullContainerPath() (string, error) {
+	absolutePath, err := filepath.Abs(self.container)
+	return absolutePath, err
 }
 
 // func (p *project) InitFromYaml(yaml string) {
