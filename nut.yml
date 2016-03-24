@@ -1,34 +1,37 @@
-syntax_version: "1"
+syntax_version: "2"
 project_name: nut
 based_on:
   docker_image: golang:1.6
 container_working_directory: /go/src/project
 mount:
   main:
-  - /Users/matthieudelaro/Documents/projects/docker/nut
+  - .
   - /go/src/project
 macros:
   build:
-    # - go build -o output
-    # - env GOOS=darwin GOARCH=amd64 go build -o outputForMac
-    - env GOOS=darwin GOARCH=amd64 go build # -o nutForMac  # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
+    usage: build the project
+    actions:
+    - go build -o nut
+  build-linux:
+    usage: build the project for Linux
+    actions:
+    - env GOOS=linux GOARCH=amd64 go build -o nutLinux
+    aliases:
+    - bl
+  build-osx:
+    usage: build the project for OSX
+    actions:
+    - env GOOS=darwin GOARCH=amd64 go build -o nutOSX
+    aliases:
+    - bo
+    description: cross-compile the project to run on OSX, with architecture amd64.
+  build-windows:
+    usage: build the project for Windows
+    actions:
+    - env GOOS=windows GOARCH=amd64 go build -o nutWindows
+    aliases:
+    - bw
   run:
-    # - ./output
-    # - pwd
-    # - ls -la | grep '323'
-    - echo "hello  $PWD"
-    # - ls -la
-    # - ls -la matthieudelaro/nut
-  helloworld:
-    - echo "helloworld"
-  build-macos:
-    - env GOOS=darwin GOARCH=amd64 go build # -o nutForMac  # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
-
-  # build:
-  #   - echo _____build_____
-  # run:
-  #   - echo _____run_____
-  # helloworld:
-  #   - echo _____helloworld_____
-  # build-macos:
-  #   - echo _____buildmacos_____
+    usage: run the project in the container
+    actions:
+    - ./nut

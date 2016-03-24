@@ -2,9 +2,11 @@ package main
 
 import (
 	"os"
+    "sort"
 
 	"github.com/codegangsta/cli"
 	log "github.com/Sirupsen/logrus"
+    "fmt"
 )
 
 func main() {
@@ -12,86 +14,99 @@ func main() {
 
 	// try to parse the folder's configuration to add macros
 	var macros []cli.Command
-	proj, err := loadProject()
+	project, err := loadProject()
 	if err == nil {
-		macros = make([]cli.Command, len(proj.Macros))
-		counter := 0
-		for name, macro := range proj.Macros {
-			log.Debug(name, ":", macro[0])
+        // Macros are stored in a random order.
+        // But we want to display them in the same order everytime.
+        // So sort the names of the macros.
+        macroNamesOrdered := make([]string, 0, len(macros))
+        for key, _ := range project.Macros {
+            macroNamesOrdered = append(macroNamesOrdered, key)
+        }
+        sort.Strings(macroNamesOrdered)
+
+
+		macros = make([]cli.Command, len(project.Macros))
+		for index, name := range macroNamesOrdered {
+            macro := project.Macros[name]
+			log.Debug(name, ":", macro.Actions[0])
 
 			nameClosure := name
-			macroClosure := macro
+            usage := "macro: "
+            if macro.Usage == "" {
+                usage += "undefined usage. define one with 'usage' property for this macro."
+            } else {
+                usage += macro.Usage
+            }
 
-			macros[counter] = cli.Command{
+			macros[index] = cli.Command{
 				Name:  name,
-				Usage: name + " is a macro defined in configuration.",
+				Usage: usage,
+                Aliases: macro.Aliases,
+                UsageText: macro.UsageText,
+                Description: macro.Description,
 				Action: func(c *cli.Context) {
-					log.Debug(nameClosure, ":", macroClosure[0])
-					execMacro(macroClosure, proj)
+					log.Debug(nameClosure, ":", macro.Actions[0])
+					execMacro(&macro, project)
 				},
 				// Action: func(name string, macro []string) func(*cli.Context)  {
 				// 	return func(c *cli.Context) {
 				// 		log.Debug(name, ":", macro[0])
-				// 		execMacro(macro, proj)
+				// 		execMacro(macro, project)
 				// 	}
 				// }(name, macro),
 			}
-			counter += 1
 		}
 	} else {
 		macros = []cli.Command{}
 	}
 
+    initFlag := false
+    statusFlag := false
+    execFlag := ""
 
-	app := cli.NewApp()
+    app := cli.NewApp()
 	app.Name = "nut"
-	app.Version = "0.0.1 dev"
+	app.Version = "0.0.2 dev"
 	app.Usage = "the development environment, containerized"
 	app.EnableBashCompletion = true
-	// define nut subcommands
-	nutCommands := []cli.Command{
-		{
-			Name:  "init",
-			Usage: "init a nut project",
-			Action: func(c *cli.Context) {
-				initSubcommand(c)
-			},
-		},
-		{
-			Name:  "status",
-			Usage: "gives status of the dev env",
-			Action: func(c *cli.Context) {
-				status()
-			},
-		},
-		{
-			Name:  "exec",
-			Usage: "execute a command in a container. Surround the whole command with simple quotes to obtain expected result.",
-			Action: func(c *cli.Context) {
-				exec(c)
-			},
-		},
-	}
-
-	log.Debug("debug")
-	for index, command := range macros {
-		log.Debug(index, command.Name)
-	}
-	// merge built-in nut commands with project-defined macros
-	for _, command := range nutCommands {
-		// find out whether there is or not a macro with the same name
-		found := false
-		for counter := len(macros) - 1; counter >= 0 && found == false; counter-- {
-			log.Debug(counter)
-			if macros[counter].Name == command.Name {
-				found = true
-			}
-		}
-		// if there isn't any macro with the same name, add the command
-		if found == false {
-			macros = append(macros, command)
-		}
-	}
+    app.Flags = []cli.Flag {
+        cli.BoolFlag{
+            Name:        "init",
+            Usage:       "initialize a nut project",
+            Destination: &initFlag,
+        },
+        cli.BoolFlag{
+            Name:  "status",
+            Usage: "gives status of the dev env",
+            Destination: &statusFlag,
+        },
+        cli.StringFlag{
+            Name:  "exec",
+            Usage: "execute a command in a container.",
+            Destination: &execFlag,
+        },
+    }
+    defaultAction := app.Action
+    app.Action = func(c *cli.Context) {
+        if statusFlag {
+            status()
+            return
+        }
+        if initFlag {
+            initSubcommand(c)
+            return
+        }
+        if execFlag != "" {
+            if project != nil {
+                exec(project, c, execFlag)
+            } else {
+                fmt.Println("Could not find nut configuration.")
+            }
+            return
+        }
+        defaultAction(c)
+    }
 
 	app.Commands = macros
 

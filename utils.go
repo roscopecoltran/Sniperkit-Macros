@@ -11,7 +11,7 @@ import (
 )
 
 // parseNutFileAtPath reads and parses the nut file at the given path
-func parseNutFileAtPath(nutFilePath string) (*project, error) {
+func parseNutFileAtPath(nutFilePath string) (*Project, error) {
 	// check file exists
 	exists, err := fileExists(nutFilePath)
 	if err != nil {
@@ -26,9 +26,9 @@ func parseNutFileAtPath(nutFilePath string) (*project, error) {
 		return nil, err
 	}
 
-	var p *project = &project{}
-	err = yaml.Unmarshal(bytes, &p)
-	return p, err
+	var project *Project = &Project{}
+	err = yaml.Unmarshal(bytes, &project)
+	return project, err
 }
 
 // nutFileExistsAtPath return whether a nut.yml file exists at the given path

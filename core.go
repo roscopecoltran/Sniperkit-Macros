@@ -74,17 +74,7 @@ func execCommandInContainer(client *docker.Client, container *docker.Container, 
 // TODO: to solve tty size, use func (c *Client) ResizeContainerTTY(id string, height, width int) error
 // and/or func (c *Client) ResizeExecTTY(id string, height, width int) error
 // TODO: fix bug "StartExec Error: %s read /dev/stdin: bad file descriptor" when executing several commands
-func execInContainer(commands []string, proj *project) {
-    fmt.Println(commands)
-    for _, command := range commands {
-        fmt.Printf(command)
-        // for _, word := range command {
-        //     logrus.Printf(word)
-        //     logrus.Printf(", ")
-        // }
-        fmt.Printf("\n")
-    }
-    // import "strings" // words := strings.Fields(someString) // http://play.golang.org/
+func execInContainer(commands []string, project *Project) {
 
     endpoint := "unix:///var/run/docker.sock"
     client, err := docker.NewClient(endpoint)
@@ -95,7 +85,7 @@ func execInContainer(commands []string, proj *project) {
     fmt.Println("Created client")
 
     //Pull image from Registry, if not present
-    imageName := proj.Base.DockerImage
+    imageName := project.Base.DockerImage
     _, err = client.InspectImage(imageName)
     if err != nil {
         fmt.Println(err.Error())
@@ -122,7 +112,7 @@ func execInContainer(commands []string, proj *project) {
         AttachStdout: true,
         AttachStderr: true,
         Tty:          true,
-        WorkingDir:   proj.WorkingDir,
+        WorkingDir:   project.WorkingDir,
     }
     // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
     // User: set it to the user of the host, instead of root
@@ -153,7 +143,7 @@ func execInContainer(commands []string, proj *project) {
     //Try to start the container
 
     // prepare names of directories to mount
-    mountingPoints := proj.getMountingPoints()
+    mountingPoints := project.getMountingPoints()
     binds := make([]string, 0, len(mountingPoints))
     for _, directory := range(mountingPoints) {
         hostPath, hostPathErr := directory.fullHostPath()
@@ -195,6 +185,6 @@ func execInContainer(commands []string, proj *project) {
 
 }
 
-func execMacro(commands []string, proj *project) {
-    execInContainer(commands, proj)
+func execMacro(macro *Macro, project *Project) {
+    execInContainer(macro.Actions, project)
 }
