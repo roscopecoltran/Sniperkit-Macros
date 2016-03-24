@@ -9,13 +9,26 @@ mount:
   - /go/src/project
 macros:
   build:
-  # - go build -o output
-  # - env GOOS=darwin GOARCH=amd64 go build -o outputForMac
-  - env GOOS=darwin GOARCH=amd64 go build  # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
+    # - go build -o output
+    # - env GOOS=darwin GOARCH=amd64 go build -o outputForMac
+    - env GOOS=darwin GOARCH=amd64 go build # -o nutForMac  # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
   run:
-  # - ./output
-  # - pwd
-  # - ls -la | grep '323'
-  - echo "hello  $PWD"
-  # - ls -la
-  # - ls -la matthieudelaro/nut
+    # - ./output
+    # - pwd
+    # - ls -la | grep '323'
+    - echo "hello  $PWD"
+    # - ls -la
+    # - ls -la matthieudelaro/nut
+  helloworld:
+    - echo "helloworld"
+  build-macos:
+    - env GOOS=darwin GOARCH=amd64 go build # -o nutForMac  # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
+
+  # build:
+  #   - echo _____build_____
+  # run:
+  #   - echo _____run_____
+  # helloworld:
+  #   - echo _____helloworld_____
+  # build-macos:
+  #   - echo _____buildmacos_____

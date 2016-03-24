@@ -137,6 +137,15 @@ func execInContainer(commands []string, proj *project) {
     if err != nil {
         fmt.Println(err.Error())
         return
+    } else {
+        defer func() {
+            err = client.RemoveContainer(docker.RemoveContainerOptions{ID: container.ID})
+            if( err != nil) {
+                fmt.Println(err.Error())
+                return
+            }
+            fmt.Println("Removed container with ID", container.ID)
+        }()
     }
     fmt.Println("Created container with ID", container.ID)
 
@@ -166,6 +175,16 @@ func execInContainer(commands []string, proj *project) {
     if( err != nil) {
         fmt.Println(err.Error())
         return
+    } else {
+        // And once it is done with all the commands, remove the container.
+        defer func () {
+            err = client.StopContainer(container.ID, 0)
+            if( err != nil) {
+                fmt.Println(err.Error())
+                return
+            }
+            fmt.Println("Stopped container with ID", container.ID)
+        }()
     }
     fmt.Println("Started container with ID", container.ID)
 
@@ -173,19 +192,9 @@ func execInContainer(commands []string, proj *project) {
         execCommandInContainer(client, container, command)
     }
 
-    // And once it is done with all the commands, remove the container.
-    err = client.StopContainer(container.ID, 0)
-    if( err != nil) {
-        fmt.Println(err.Error())
-        return
-    }
-    fmt.Println("Stopped container with ID", container.ID)
 
-    err = client.RemoveContainer(docker.RemoveContainerOptions{ID: container.ID})
-    if( err != nil) {
-        fmt.Println(err.Error())
-        return
-    }
-    fmt.Println("Removed container with ID", container.ID)
+}
 
+func execMacro(commands []string, proj *project) {
+    execInContainer(commands, proj)
 }
