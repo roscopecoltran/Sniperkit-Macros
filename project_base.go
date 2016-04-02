@@ -145,7 +145,6 @@ func loadProject() (Project, error) {
 }
 
 func ProjectFromBytes(bytes []byte) (Project, error) {
-	log.SetLevel(log.DebugLevel)
 	var err error
 	for _, syntax := range getSyntaxes() {
 		version := syntax.getSyntaxVersion()

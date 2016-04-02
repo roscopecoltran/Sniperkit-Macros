@@ -5,7 +5,6 @@ import (
     "sort"
 	"github.com/codegangsta/cli"
 	log "github.com/Sirupsen/logrus"
-    "fmt"
 )
 
 func main() {
@@ -29,7 +28,6 @@ func main() {
 		macros = make([]cli.Command, len(projectMacros))
 		for index, name := range macroNamesOrdered {
             macro := projectMacros[name]
-			log.Debug(name, ":", macro.getActions()[0])
 
 			nameClosure := name
             usage := "macro: "
@@ -40,13 +38,12 @@ func main() {
             }
 
 			macros[index] = cli.Command{
-				Name:  name,
+				Name:  nameClosure,
 				Usage: usage,
                 Aliases: macro.getAliases(),
                 UsageText: macro.getUsageText(),
                 Description: macro.getDescription(),
 				Action: func(c *cli.Context) {
-					log.Debug(nameClosure, ":", macro.getActions()[0])
 					execMacro(macro, project)
 				},
 			}
@@ -57,6 +54,7 @@ func main() {
 
     initFlag := false
     statusFlag := false
+    logsFlag := false
     execFlag := ""
 
     app := cli.NewApp()
@@ -71,6 +69,11 @@ func main() {
             Destination: &initFlag,
         },
         cli.BoolFlag{
+            Name:        "logs",
+            Usage:       "display log messages. Useful for contributors and to report an issue",
+            Destination: &logsFlag,
+        },
+        cli.BoolFlag{
             Name:  "status",
             Usage: "gives status of the dev env",
             Destination: &statusFlag,
@@ -83,6 +86,9 @@ func main() {
     }
     defaultAction := app.Action
     app.Action = func(c *cli.Context) {
+        if logsFlag {
+            log.SetLevel(log.DebugLevel)
+        }
         if statusFlag {
             status()
             return
@@ -95,7 +101,7 @@ func main() {
             if project != nil {
                 exec(project, c, execFlag)
             } else {
-                fmt.Println("Could not find nut configuration.")
+                log.Error("Could not find nut configuration.")
             }
             return
         }

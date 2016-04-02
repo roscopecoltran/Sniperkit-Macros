@@ -1,9 +1,9 @@
-syntax_version: "3"
+syntax_version: "2"
 project_name: nut
 based_on:
   docker_image: golang:1.6
 container_working_directory: /go/src/project
-enable_gui: true
+# enable_gui: true
 mount:
   main:
   - /Users/matthieudelaro/Documents/projects/docker/nut
@@ -36,3 +36,7 @@ macros:
     usage: run the project in the container
     actions:
     - ./nut
+  hello:
+    usage: test
+    actions:
+    - echo hello

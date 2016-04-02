@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"github.com/codegangsta/cli"
+	"fmt"
 )
 
 // create a nut.yml at the current path
@@ -41,9 +42,9 @@ func initSubcommand(c *cli.Context) {
 	project.WorkingDir = "/go/src/project"
 
 	data := project.toYAML()
-	log.Println("Project configuration:")
-	log.Println("")
-	log.Println(data)
+	fmt.Println("Project configuration:")
+	fmt.Println("")
+	fmt.Println(data)
 	// check is nut.yml exists at the current path
 	if nutFileExistsAtPath(".") {
 		log.Error("Could not save new Nut project because a nut.yml file already exists")
