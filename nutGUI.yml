@@ -1,0 +1,14 @@
+syntax_version: "3"
+project_name: geary
+based_on:
+  docker_image: jess/geary
+container_working_directory: /go/src/project
+enable_gui: true
+mount:
+  main:
+  - .
+  - /go/src/project
+macros:
+  gui:
+    actions:
+    - geary

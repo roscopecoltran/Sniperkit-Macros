@@ -5,7 +5,10 @@ import (
     "github.com/fsouza/go-dockerclient"
     // "bytes"
     "os"
+    "net"
+    "io"
     log "github.com/Sirupsen/logrus"
+    // "time"
     // "strings" // words := strings.Fields(someString)
 )
 
@@ -66,6 +69,64 @@ func execCommandInContainer(client *docker.Client, container *docker.Container, 
     }
 }
 
+func forward(conn net.Conn, ip string, port string) {
+    // client, err := net.Dial("unix", ip + ":" + port)
+    displayVariable := os.Getenv("DISPLAY")
+    if displayVariable == "" {
+        log.Error("DISPLAY variable is empty. Did you install Xquatz properly?")
+    }
+    client, err := net.Dial("unix", displayVariable)
+    // client, err := net.Dial("unix", "/private/tmp/com.apple.launchd.aogNZRsTSx/org.macosforge.xquartz:0")
+    if err != nil {
+        log.Error("GUI: Dial failed: %v", err)
+    }
+    log.Printf("GUI: Connected to localhost %v\n", conn)
+    go func() {
+        defer client.Close()
+        defer conn.Close()
+        io.Copy(client, conn)
+    }()
+    go func() {
+        defer client.Close()
+        defer conn.Close()
+        io.Copy(conn, client)
+    }()
+}
+
+func getMyIP() (string, error) {
+    log.Debug("getMyIP")
+    ifaces, err := net.Interfaces()
+    if err != nil {
+        return "", err
+    }
+    log.Debug("no error to get interfaces: ", len(ifaces))
+
+    for _, i := range ifaces {
+        log.Debug("processing interface ", i.Name)
+        addrs, err := i.Addrs()
+        // addrs, err := net.InterfaceAddrs()
+        if err == nil && (i.Name == "docker" || i.Name == "bridge100")  {
+            log.Debug("no error to get Addrs from ", i.Name)
+            for _, addr := range addrs {
+                var ip net.IP
+                switch v := addr.(type) {
+                case *net.IPNet:
+                        ip = v.IP
+                case *net.IPAddr:
+                        ip = v.IP
+                default:
+                        log.Debug("no case for ", v)
+                }
+                // process IP address
+                log.Debug("ip on %s: %s", i.Name, ip.String())
+                return ip.String(), nil
+            }
+        }
+    }
+
+    return "", nil
+}
+
 // Start the container, execute the list of commands, and then stops the container.
 // This function should be used by run(), build(), etc.
 // Inspired from https://github.com/fsouza/go-dockerclient/issues/287
@@ -108,6 +169,44 @@ func execInContainer(commands []string, project Project) {
     }
 
 
+    log.SetLevel(log.DebugLevel)
+    // port binding
+    portBindings := map[docker.Port][]docker.PortBinding{}
+    envVariables := []string{}
+    guiPortNumber := "6000"
+    if project.getEnableGui() {
+        ip, err := getMyIP()
+        // ip = "192.168.64.1"
+        if err != nil {
+            log.Debug("get IP failed: %v", err)
+        } else {
+            log.Debug("got ip:", string(ip))
+            envVariables = append(envVariables, "DISPLAY=" + ip + ":0")
+            // guiPort := []docker.PortBinding{{HostIP: ip, HostPort: guiPortNumber}}
+            // var dockerGuiPort docker.Port
+            // // dockerGuiPort = string(guiPortNumber + "/tcp")
+            // dockerGuiPort = "6000/tcp"
+            // portBindings[dockerGuiPort] = guiPort
+
+            go func() {
+                listener, err := net.Listen("tcp", ip + ":" + guiPortNumber)
+                if err != nil {
+                    log.Error("Failed to setup listener: %v", err)
+                } else {
+                    for {
+                        conn, err := listener.Accept()
+                        if err != nil {
+                            log.Error("ERROR: failed to accept listener: %v", err)
+                        }
+                        go forward(conn, ip, guiPortNumber)
+                    }
+                }
+            }()
+        }
+    } else {
+        log.Debug("gui is not enabled")
+    }
+
     //Try to create a container from the imageID
     // config := docker.Config{AttachStdout: true, AttachStdin: true, Image: imageName, Tty: true, OpenStdin: true}
     config := docker.Config{
@@ -120,6 +219,7 @@ func execInContainer(commands []string, project Project) {
         AttachStderr: true,
         Tty:          true,
         WorkingDir:   project.getWorkingDir(),
+        Env:          envVariables,
     }
     // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
     // User: set it to the user of the host, instead of root
@@ -166,8 +266,10 @@ func execInContainer(commands []string, project Project) {
         binds = append(binds, hostPath + ":" + containerPath)
     }
     log.Debug("binds", binds)
+
     err = client.StartContainer(container.ID, &docker.HostConfig{
         Binds: binds,
+        PortBindings: portBindings,
     })
     if( err != nil) {
         log.Debug(err.Error())
@@ -188,8 +290,6 @@ func execInContainer(commands []string, project Project) {
     for _, command := range commands {
         execCommandInContainer(client, container, command)
     }
-
-
 }
 
 func execMacro(macro Macro, project Project) {
