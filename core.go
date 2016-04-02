@@ -2,10 +2,10 @@ package main
 
 import (
     // "github.com/Sirupsen/logrus"
-    "fmt"
     "github.com/fsouza/go-dockerclient"
     // "bytes"
     "os"
+    log "github.com/Sirupsen/logrus"
     // "strings" // words := strings.Fields(someString)
 )
 
@@ -42,12 +42,12 @@ func execCommandInContainer(client *docker.Client, container *docker.Container, 
         Cmd:          cmd,
         Container:    container.ID,
     }
-    fmt.Println("CreateExec")
+    log.Debug("CreateExec")
     if dExec, err = client.CreateExec(de); err != nil {
-        fmt.Println("CreateExec Error: %s", err)
+        log.Debug("CreateExec Error: %s", err)
         return
     }
-    fmt.Println("Created Exec")
+    log.Debug("Created Exec")
     // var stdout, stderr bytes.Buffer
     // var reader = strings.NewReader("echo hello world")
     execId := dExec.ID
@@ -59,9 +59,9 @@ func execCommandInContainer(client *docker.Client, container *docker.Container, 
         InputStream:  os.Stdin,
         RawTerminal:  true,
     }
-    fmt.Println("StartExec")
+    log.Debug("StartExec")
     if err = client.StartExec(execId, opts); err != nil {
-        fmt.Println("StartExec Error: %s", err)
+        log.Debug("StartExec Error: %s", err)
         return
     }
 }
@@ -74,30 +74,37 @@ func execCommandInContainer(client *docker.Client, container *docker.Container, 
 // TODO: to solve tty size, use func (c *Client) ResizeContainerTTY(id string, height, width int) error
 // and/or func (c *Client) ResizeExecTTY(id string, height, width int) error
 // TODO: fix bug "StartExec Error: %s read /dev/stdin: bad file descriptor" when executing several commands
-func execInContainer(commands []string, project *Project) {
-
-    endpoint := "unix:///var/run/docker.sock"
-    client, err := docker.NewClient(endpoint)
+func execInContainer(commands []string, project Project) {
+    imageName, err := project.getBaseEnv().getDockerImageName()
     if err != nil {
-        fmt.Println(err.Error())
+        log.Error(err.Error())
         return
     }
-    fmt.Println("Created client")
+
+    endpoint := os.Getenv("DOCKER_HOST")
+    if endpoint == "" {
+        endpoint = "unix:///var/run/docker.sock"
+    }
+    client, err := docker.NewClient(endpoint)
+    if err != nil {
+        log.Debug(err.Error())
+        return
+    }
+    log.Debug("Created client")
 
     //Pull image from Registry, if not present
-    imageName := project.Base.DockerImage
     _, err = client.InspectImage(imageName)
     if err != nil {
-        fmt.Println(err.Error())
-        fmt.Println("Pulling image...")
+        log.Debug(err.Error())
+        log.Debug("Pulling image...")
 
         opts := docker.PullImageOptions{Repository: imageName}
         err = client.PullImage(opts, docker.AuthConfiguration{})
         if err != nil {
-            fmt.Println(err.Error())
+            log.Debug(err.Error())
             return
         }
-        fmt.Println("Pulled image")
+        log.Debug("Pulled image")
     }
 
 
@@ -112,7 +119,7 @@ func execInContainer(commands []string, project *Project) {
         AttachStdout: true,
         AttachStderr: true,
         Tty:          true,
-        WorkingDir:   project.WorkingDir,
+        WorkingDir:   project.getWorkingDir(),
     }
     // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
     // User: set it to the user of the host, instead of root
@@ -125,19 +132,19 @@ func execInContainer(commands []string, project *Project) {
     opts2 := docker.CreateContainerOptions{Config: &config}
     container, err := client.CreateContainer(opts2)
     if err != nil {
-        fmt.Println(err.Error())
+        log.Debug(err.Error())
         return
     } else {
         defer func() {
             err = client.RemoveContainer(docker.RemoveContainerOptions{ID: container.ID})
             if( err != nil) {
-                fmt.Println(err.Error())
+                log.Debug(err.Error())
                 return
             }
-            fmt.Println("Removed container with ID", container.ID)
+            log.Debug("Removed container with ID", container.ID)
         }()
     }
-    fmt.Println("Created container with ID", container.ID)
+    log.Debug("Created container with ID", container.ID)
 
 
     //Try to start the container
@@ -149,34 +156,34 @@ func execInContainer(commands []string, project *Project) {
         hostPath, hostPathErr := directory.fullHostPath()
         containerPath, containerPathErr := directory.fullContainerPath()
         if hostPathErr != nil {
-            fmt.Println(hostPathErr.Error())
+            log.Debug(hostPathErr.Error())
             return
         }
         if containerPathErr != nil {
-            fmt.Println(containerPathErr.Error())
+            log.Debug(containerPathErr.Error())
             return
         }
         binds = append(binds, hostPath + ":" + containerPath)
     }
-    fmt.Println("binds", binds)
+    log.Debug("binds", binds)
     err = client.StartContainer(container.ID, &docker.HostConfig{
         Binds: binds,
     })
     if( err != nil) {
-        fmt.Println(err.Error())
+        log.Debug(err.Error())
         return
     } else {
         // And once it is done with all the commands, remove the container.
         defer func () {
             err = client.StopContainer(container.ID, 0)
             if( err != nil) {
-                fmt.Println(err.Error())
+                log.Debug(err.Error())
                 return
             }
-            fmt.Println("Stopped container with ID", container.ID)
+            log.Debug("Stopped container with ID", container.ID)
         }()
     }
-    fmt.Println("Started container with ID", container.ID)
+    log.Debug("Started container with ID", container.ID)
 
     for _, command := range commands {
         execCommandInContainer(client, container, command)
@@ -185,6 +192,6 @@ func execInContainer(commands []string, project *Project) {
 
 }
 
-func execMacro(macro *Macro, project *Project) {
-    execInContainer(macro.Actions, project)
+func execMacro(macro Macro, project Project) {
+    execInContainer(macro.getActions(), project)
 }

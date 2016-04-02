@@ -5,13 +5,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-
 	"github.com/Sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 )
 
-// parseNutFileAtPath reads and parses the nut file at the given path
-func parseNutFileAtPath(nutFilePath string) (*Project, error) {
+
+func parseNutFileAtPath(nutFilePath string) (Project, error) {
 	// check file exists
 	exists, err := fileExists(nutFilePath)
 	if err != nil {
@@ -20,16 +18,17 @@ func parseNutFileAtPath(nutFilePath string) (*Project, error) {
 	if exists == false {
 		return nil, errors.New("nut file not found")
 	}
-	// file exists
+
+	// file exists: open it
 	bytes, err := ioutil.ReadFile(nutFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	var project *Project = &Project{}
-	err = yaml.Unmarshal(bytes, &project)
+	project, err := ProjectFromBytes(bytes)
 	return project, err
 }
+
 
 // nutFileExistsAtPath return whether a nut.yml file exists at the given path
 func nutFileExistsAtPath(parentPath string) bool {

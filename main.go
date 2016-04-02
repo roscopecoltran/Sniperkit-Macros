@@ -3,7 +3,6 @@ package main
 import (
 	"os"
     "sort"
-
 	"github.com/codegangsta/cli"
 	log "github.com/Sirupsen/logrus"
     "fmt"
@@ -19,42 +18,37 @@ func main() {
         // Macros are stored in a random order.
         // But we want to display them in the same order everytime.
         // So sort the names of the macros.
-        macroNamesOrdered := make([]string, 0, len(macros))
-        for key, _ := range project.Macros {
+        projectMacros := project.getMacros()
+        macroNamesOrdered := make([]string, 0, len(projectMacros))
+        for key, _ := range projectMacros {
             macroNamesOrdered = append(macroNamesOrdered, key)
         }
         sort.Strings(macroNamesOrdered)
 
 
-		macros = make([]cli.Command, len(project.Macros))
+		macros = make([]cli.Command, len(projectMacros))
 		for index, name := range macroNamesOrdered {
-            macro := project.Macros[name]
-			log.Debug(name, ":", macro.Actions[0])
+            macro := projectMacros[name]
+			log.Debug(name, ":", macro.getActions()[0])
 
 			nameClosure := name
             usage := "macro: "
-            if macro.Usage == "" {
+            if macro.getUsage() == "" {
                 usage += "undefined usage. define one with 'usage' property for this macro."
             } else {
-                usage += macro.Usage
+                usage += macro.getUsage()
             }
 
 			macros[index] = cli.Command{
 				Name:  name,
 				Usage: usage,
-                Aliases: macro.Aliases,
-                UsageText: macro.UsageText,
-                Description: macro.Description,
+                Aliases: macro.getAliases(),
+                UsageText: macro.getUsageText(),
+                Description: macro.getDescription(),
 				Action: func(c *cli.Context) {
-					log.Debug(nameClosure, ":", macro.Actions[0])
-					execMacro(&macro, project)
+					log.Debug(nameClosure, ":", macro.getActions()[0])
+					execMacro(macro, project)
 				},
-				// Action: func(name string, macro []string) func(*cli.Context)  {
-				// 	return func(c *cli.Context) {
-				// 		log.Debug(name, ":", macro[0])
-				// 		execMacro(macro, project)
-				// 	}
-				// }(name, macro),
 			}
 		}
 	} else {
@@ -110,5 +104,5 @@ func main() {
 
 	app.Commands = macros
 
-	app.Run(os.Args)
+    app.Run(os.Args)
 }
