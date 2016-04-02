@@ -56,7 +56,7 @@ func initSubcommand(c *cli.Context) {
 		if err != nil {
 			log.Error(err)
 		} else {
-			log.Error("Project configuration saved in ", nutfileName)
+			fmt.Printf("Project configuration saved in ", nutfileName)
 		}
 	}
 }
