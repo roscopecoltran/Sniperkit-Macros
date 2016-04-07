@@ -1,83 +1,30 @@
 package main
 
 import (
-    // "github.com/Sirupsen/logrus"
     "github.com/fsouza/go-dockerclient"
-    // "bytes"
-    "os"
-    // "net"
-    // "io"
+    "github.com/fgrehm/go-dockerpty"
     log "github.com/Sirupsen/logrus"
-    // "time"
-    // "strings" // words := strings.Fields(someString)
+    "strings"
 )
 
-func execCommandInContainer(client *docker.Client, container *docker.Container, command string) {
-    var (
-        dExec  *docker.Exec
-        err    error
-    )
-
-    // Issues with command = "ls -la | grep '323'" (the pipe is an issue in most cases)
-    // cmd := []string{command}
-        // "ls -la | grep '323'": executable file not found in $PATH
-    // cmd := strings.Fields(command)
-        // ls: cannot access |: No such file or directory
-        // ls: cannot access grep: No such file or directory
-        // ls: cannot access '323': No such file or directory
-    // cmd := strings.Fields("bash -c \"" + command + "\"")
-        // -la: -c: line 0: unexpected EOF while looking for matching `"'
-        // -la: -c: line 1: syntax error: unexpected end of file
-    cmd := []string{"bash", "-c", command}
-        // runs properly. Using bash does not seem like an elegant solution,
-        // but this is the best so far.
-    // for i, v := range cmd {
-    //     logrus.Println("command field ", i, ": ", v)
-    // }
-    de := docker.CreateExecOptions{
-        AttachStderr: true,
-        AttachStdin:  true,
-        AttachStdout: true,
-        Tty:          true,
-        // Cmd:          []string{"echo", "hello world2", "&&", "echo", "blabla"}, //, ";", "echo", "blabla2"},
-        // Cmd:          []string{"/bin/sh"},
-        // Cmd:          []string{"top"},
-        Cmd:          cmd,
-        Container:    container.ID,
-    }
-    log.Debug("CreateExec")
-    if dExec, err = client.CreateExec(de); err != nil {
-        log.Debug("CreateExec Error: %s", err)
-        return
-    }
-    log.Debug("Created Exec")
-    // var stdout, stderr bytes.Buffer
-    // var reader = strings.NewReader("echo hello world")
-    execId := dExec.ID
-
-    opts := docker.StartExecOptions{
-        OutputStream: os.Stdout,
-        ErrorStream:  os.Stderr,
-        // InputStream:  reader,
-        InputStream:  os.Stdin,
-        RawTerminal:  true,
-    }
-    log.Debug("StartExec")
-    if err = client.StartExec(execId, opts); err != nil {
-        log.Debug("StartExec Error: %s", err)
-        return
-    }
-}
-
 // Start the container, execute the list of commands, and then stops the container.
-// This function should be used by run(), build(), etc.
 // Inspired from https://github.com/fsouza/go-dockerclient/issues/287
 // and from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
-// TODO: solve key issue (Ctrl+C, q, ...). See if that can help: https://github.com/fgrehm/go-dockerpty
-// TODO: to solve tty size, use func (c *Client) ResizeContainerTTY(id string, height, width int) error
+// DONE: solve key issue (Ctrl+C, q, ...). See if that can help: https://github.com/fgrehm/go-dockerpty : it does :)
+// DONE: to solve tty size, use func (c *Client) ResizeContainerTTY(id string, height, width int) error : solved with dockerpty
 // and/or func (c *Client) ResizeExecTTY(id string, height, width int) error
-// TODO: fix bug "StartExec Error: %s read /dev/stdin: bad file descriptor" when executing several commands
+// TODO: report bug "StartExec Error: %s read /dev/stdin: bad file descriptor" when executing several commands : post issue on dockerpty
 func execInContainer(commands []string, project Project) {
+    cmd := ""
+    if len(commands) == 0 {
+        log.Warn("Given list of commands is empty.")
+        return
+    } else if len(commands) == 1 {
+        cmd = commands[0]
+    } else {
+        cmd = strings.Join(commands, "; ")
+    }
+
     imageName, err := project.getBaseEnv().getDockerImageName()
     if err != nil {
         log.Error(err.Error())
@@ -107,8 +54,6 @@ func execInContainer(commands []string, project Project) {
         log.Debug("Pulled image")
     }
 
-
-    log.SetLevel(log.DebugLevel)
     portBindings := map[docker.Port][]docker.PortBinding{}
     envVariables := []string{}
     if project.getEnableGui() {
@@ -119,10 +64,9 @@ func execInContainer(commands []string, project Project) {
     }
 
     //Try to create a container from the imageID
-    // config := docker.Config{AttachStdout: true, AttachStdin: true, Image: imageName, Tty: true, OpenStdin: true}
     config := docker.Config{
         Image: imageName,
-        // Cmd:          []string{"/bin/sh"},
+        Cmd:          []string{"bash", "-c", cmd},
         OpenStdin:    true,
         StdinOnce:    true,
         AttachStdin:  true,
@@ -133,12 +77,9 @@ func execInContainer(commands []string, project Project) {
         Env:          envVariables,
     }
     // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
-    // User: set it to the user of the host, instead of root
+    // User: set it to the user of the host, instead of root, to manage file permissions properly
 
-    // I think https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
-    // is a good starting point to mount volumes and bind sockets.
-
-    //
+    // TODO: ? Give the container a name? Can be done with docker.CreateContainerOptions{Name: "nut_myproject"}
     // opts2 := docker.CreateContainerOptions{Name: "nut_" + , Config: &config}
     opts2 := docker.CreateContainerOptions{Config: &config}
     container, err := client.CreateContainer(opts2)
@@ -147,7 +88,10 @@ func execInContainer(commands []string, project Project) {
         return
     } else {
         defer func() {
-            err = client.RemoveContainer(docker.RemoveContainerOptions{ID: container.ID})
+            err = client.RemoveContainer(docker.RemoveContainerOptions{
+                ID: container.ID,
+                Force: true,
+            })
             if( err != nil) {
                 log.Debug(err.Error())
                 return
@@ -157,10 +101,8 @@ func execInContainer(commands []string, project Project) {
     }
     log.Debug("Created container with ID", container.ID)
 
-
-    //Try to start the container
-
     // prepare names of directories to mount
+    // inspired from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
     mountingPoints := project.getMountingPoints()
     binds := make([]string, 0, len(mountingPoints))
     for _, directory := range(mountingPoints) {
@@ -178,11 +120,11 @@ func execInContainer(commands []string, project Project) {
     }
     log.Debug("binds", binds)
 
-    err = client.StartContainer(container.ID, &docker.HostConfig{
+    //Try to start the container
+    if err = dockerpty.Start(client, container, &docker.HostConfig{
         Binds: binds,
         PortBindings: portBindings,
-    })
-    if( err != nil) {
+    }); err != nil {
         log.Debug(err.Error())
         return
     } else {
@@ -197,10 +139,6 @@ func execInContainer(commands []string, project Project) {
         }()
     }
     log.Debug("Started container with ID", container.ID)
-
-    for _, command := range commands {
-        execCommandInContainer(client, container, command)
-    }
 }
 
 func execMacro(macro Macro, project Project) {
