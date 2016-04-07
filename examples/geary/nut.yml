@@ -1,0 +1,8 @@
+syntax_version: "3"
+project_name: geary
+based_on:
+  docker_image: jess/geary
+enable_gui: true
+macros:
+  geary:
+    usage: run geary in the container

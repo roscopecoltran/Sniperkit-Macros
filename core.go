@@ -15,15 +15,17 @@ import (
 // and/or func (c *Client) ResizeExecTTY(id string, height, width int) error
 // TODO: report bug "StartExec Error: %s read /dev/stdin: bad file descriptor" when executing several commands : post issue on dockerpty
 func execInContainer(commands []string, project Project) {
-    cmd := ""
+    log.Debug("commands (len = ", len(commands), ") : ", commands)
+    var cmdConfig []string
     if len(commands) == 0 {
-        log.Warn("Given list of commands is empty.")
-        return
+        log.Debug("Given list of commands is empty.")
+        cmdConfig = []string{}
     } else if len(commands) == 1 {
-        cmd = commands[0]
+        cmdConfig = []string{"bash", "-c", commands[0]}
     } else {
-        cmd = strings.Join(commands, "; ")
+        cmdConfig = []string{"bash", "-c", strings.Join(commands, "; ")}
     }
+    log.Debug("cmdConfig: ", cmdConfig)
 
     imageName, err := project.getBaseEnv().getDockerImageName()
     if err != nil {
@@ -66,7 +68,7 @@ func execInContainer(commands []string, project Project) {
     //Try to create a container from the imageID
     config := docker.Config{
         Image: imageName,
-        Cmd:          []string{"bash", "-c", cmd},
+        Cmd:          cmdConfig,
         OpenStdin:    true,
         StdinOnce:    true,
         AttachStdin:  true,
