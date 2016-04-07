@@ -39,6 +39,18 @@ func initSubcommand(c *cli.Context) {
 		Actions: []string{"env GOOS=windows GOARCH=amd64 go build -o nutWindows"},
 		Aliases: []string{"bw"},
 	}
+	project.Macros["build-all"] = &MacroV3{
+		Usage: "build the project for linux, OSX, and for Windows",
+		Actions: []string{
+			"echo Building for linux...",
+			"env GOOS=linux GOARCH=amd64 go build -o nutLinux",
+			"echo Building for OSX...",
+			"env GOOS=darwin GOARCH=amd64 go build -o nutOSX",
+			"echo Building for Windows...",
+			"env GOOS=windows GOARCH=amd64 go build -o nutWindows",
+		},
+		Aliases: []string{"ba"},
+	}
 	project.WorkingDir = "/go/src/project"
 
 	data := project.toYAML()
