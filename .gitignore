@@ -4,5 +4,4 @@ nutLinux
 nutOSX
 nutWindows
 nutWindows.exe
-./*.yml
-./nut.yml
+nut.yml
