@@ -5,3 +5,4 @@ nutOSX
 nutWindows
 nutWindows.exe
 ./*.yml
+./nut.yml
