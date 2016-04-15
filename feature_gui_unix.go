@@ -6,11 +6,20 @@ package main
 import (
     "github.com/fsouza/go-dockerclient"
     "errors"
+    "os"
 )
 
-func enableGui(project Project) (map[docker.Port][]docker.PortBinding, []string, error) {
+func enableGui(project Project) (map[docker.Port][]docker.PortBinding, []string, []string, error) {
     portBindings := map[docker.Port][]docker.PortBinding{}
     envVariables := []string{}
+    binds := make([]string, 0)
 
-    return portBindings, envVariables, errors.New("Could not enable GUI: it has not been implemented for linux yet.")
+    display := os.Getenv("DISPLAY")
+    if display == "" {
+        return portBindings, envVariables, binds, errors.New("$DISPLAY is undefined")
+    } else {
+        envVariables = append(envVariables, "DISPLAY=unix" + display)
+        binds = append(binds, "/tmp/.X11-unix" + ":" + "/tmp/.X11-unix")
+        return portBindings, envVariables, binds, nil
+    }
 }

@@ -56,12 +56,37 @@ func execInContainer(commands []string, project Project) {
         log.Debug("Pulled image")
     }
 
+    // prepare names of directories to mount
+    // inspired from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
+    mountingPoints := project.getMountingPoints()
+    binds := make([]string, 0, len(mountingPoints))
+    for _, directory := range(mountingPoints) {
+        hostPath, hostPathErr := directory.fullHostPath()
+        containerPath, containerPathErr := directory.fullContainerPath()
+        if hostPathErr != nil {
+            log.Debug(hostPathErr.Error())
+            return
+        }
+        if containerPathErr != nil {
+            log.Debug(containerPathErr.Error())
+            return
+        }
+        binds = append(binds, hostPath + ":" + containerPath)
+    }
+    log.Debug("binds", binds)
+
     portBindings := map[docker.Port][]docker.PortBinding{}
     envVariables := []string{}
     if project.getEnableGui() {
-        portBindings, envVariables, err = enableGui(project)
+        portBindingsGUI, envVariablesGUI, bindsGUI, err := enableGui(project)
         if err != nil {
             log.Error("Could not enable GUI: ", err)
+        } else {
+            envVariables = append(envVariables, envVariablesGUI...)
+            binds = append(binds, bindsGUI...)
+            for k, v := range portBindingsGUI {
+                portBindings[k] = v
+            }
         }
     }
 
@@ -102,25 +127,6 @@ func execInContainer(commands []string, project Project) {
         }()
     }
     log.Debug("Created container with ID", container.ID)
-
-    // prepare names of directories to mount
-    // inspired from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
-    mountingPoints := project.getMountingPoints()
-    binds := make([]string, 0, len(mountingPoints))
-    for _, directory := range(mountingPoints) {
-        hostPath, hostPathErr := directory.fullHostPath()
-        containerPath, containerPathErr := directory.fullContainerPath()
-        if hostPathErr != nil {
-            log.Debug(hostPathErr.Error())
-            return
-        }
-        if containerPathErr != nil {
-            log.Debug(containerPathErr.Error())
-            return
-        }
-        binds = append(binds, hostPath + ":" + containerPath)
-    }
-    log.Debug("binds", binds)
 
     //Try to start the container
     if err = dockerpty.Start(client, container, &docker.HostConfig{
