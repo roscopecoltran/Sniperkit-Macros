@@ -1,10 +1,10 @@
 ### Wetting Your Appetite
-Have you ever experienced headache to install libraries and dependencies?  
-Ever had to deal with two incompatible versions of a program at once?  
-Ever wished to try out a new language first, and install it only if it pleases you?  
-Ever wished to develop for Linux when you use Mac OS or Windows?  
-Ever wished to develop in Go from the folder of your choice?  
-Ever wished to have a unified development tool, across all platforms, customizable to any languages?  
+Have you ever experienced headache to install libraries and dependencies?
+Ever had to deal with two incompatible versions of a program at once?
+Ever wished to try out a new language first, and install it only if it pleases you?
+Ever wished to develop for Linux when you use Mac OS or Windows?
+Ever wished to develop in Go from the folder of your choice?
+Ever wished to have a unified development tool, across all platforms, customizable to any languages?
 
 ### Nut
 **Nut** is a command line tool which offers a solution to common frustrations of developers. It hides the complexity of development environments, and extends them with customizable macros. Whether you develop in Swift, Go, Java, or C++, what you need is build/run/test the app. So just do it:
@@ -25,14 +25,14 @@ Ever wished to have a unified development tool, across all platforms, customizab
     cd nut
 
     # Build Nut for Linux, in a container (you don't need to install Go on your computer)
-    docker run -i -t --rm -v $PWD:/go/src/project -w /go/src/project golang:1.6 go build -o nut
+    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 go build -o nut
 
     # Build Nut for OSX, in a container (you don't need to install Go on your computer)
-    docker run -i -t --rm -v $PWD:/go/src/project -w /go/src/project golang:1.6 env GOOS=darwin GOARCH=amd64 go build -o nut
+    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=darwin GOARCH=amd64 go build -o nut
 
     # Build Nut for Windows, in a container (you don't need to install Go on your computer)
-    docker run -i -t --rm -v $PWD:/go/src/project -w /go/src/project golang:1.6 env GOOS=windows GOARCH=amd64 go build -o nut
-    
+    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=windows GOARCH=amd64 go build -o nut
+
     # Add nut to your PATH
 
 ### Nut File Syntax
@@ -84,7 +84,7 @@ As opposed to:
 This will keep Nut easy to integrate in text editors and IDEs.
 
 ### What the Nut???
-Achieved with Nut:  
+Achieved with Nut:
 - use Caffe with `nut checkModelDefinition`, `nut train`, `nut test`.
 - compile CUDA code on a Mac Book Air, which has not any Nvidia GPU. Just `nut build`
 - test code in a whole infrastructure, by defining a macro running *docker-compose* in a container.

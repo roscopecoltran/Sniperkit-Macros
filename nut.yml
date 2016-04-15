@@ -2,11 +2,11 @@ syntax_version: "3"
 project_name: nut
 based_on:
   docker_image: golang:1.6
-container_working_directory: /go/src/project
+container_working_directory: /go/src/github.com/matthieudelaro/nut
 mount:
   main:
   - .
-  - /go/src/project
+  - /go/src/github.com/matthieudelaro/nut
 macros:
   build:
     usage: build the project
