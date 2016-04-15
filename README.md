@@ -15,6 +15,26 @@ Ever wished to have a unified development tool, across all platforms, customizab
 
 **Nut** mounts the current folder in a [Docker](https://www.docker.com/) container, and executes commands on your behalf, according to the project configuration. The configuration is read from `nut.yml` file, in the current folder. You can choose the Docker image to use, declare volumes to mount, and define commands (called macros) such as *build*, *run*, and *test*.
 
+
+### Getting Nut
+#### Compile from source
+    # Download sources
+    git clone git@github.com:matthieudelaro/nut.git --recursive
+
+    # Move to nut folder
+    cd nut
+
+    # Build Nut for Linux, in a container (you don't need to install Go on your computer)
+    docker run -i -t --rm -v $PWD:/go/src/project -w /go/src/project golang:1.6 go build -o nut
+
+    # Build Nut for OSX, in a container (you don't need to install Go on your computer)
+    docker run -i -t --rm -v $PWD:/go/src/project -w /go/src/project golang:1.6 env GOOS=darwin GOARCH=amd64 go build -o nut
+
+    # Build Nut for Windows, in a container (you don't need to install Go on your computer)
+    docker run -i -t --rm -v $PWD:/go/src/project -w /go/src/project golang:1.6 env GOOS=windows GOARCH=amd64 go build -o nut
+    
+    # Add nut to your PATH
+
 ### Nut File Syntax
 #### Example
 Here is an example of `nut.yml` to develop in Go. You can generate a sample configuration with  :
