@@ -21,19 +21,30 @@ Ever wished to have a unified development tool, across all platforms, customizab
     # Download sources
     git clone git@github.com:matthieudelaro/nut.git --recursive
 
-    # Move to nut folder
+    # 1 - Move to nut folder
     cd nut
 
-    # Build Nut for Linux, in a container (you don't need to install Go on your computer)
-    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 go build -o nut
+    # 2 - Build Nut
+        # Build Nut for Linux, in a container (you don't need to install Go on your computer)
+        docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 go build -o nut
 
-    # Build Nut for OSX, in a container (you don't need to install Go on your computer)
-    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=darwin GOARCH=amd64 go build -o nut
+        # Build Nut for OSX, in a container (you don't need to install Go on your computer)
+        docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=darwin GOARCH=amd64 go build -o nut
 
-    # Build Nut for Windows, in a container (you don't need to install Go on your computer)
-    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=windows GOARCH=amd64 go build -o nut
+        # Build Nut for Windows, in a container (you don't need to install Go on your computer)
+        docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=windows GOARCH=amd64 go build -o nut
 
-    # Add nut to your PATH
+    # 3 - Run nut
+    ./nut
+
+    # 4 - Optional: Add nut to your PATH
+        # Copy it in the path
+        sudo cp nut /usr/local/bin/nut # on linux and osx
+        
+        # Or modify the path
+        echo "PATH=`pwd`:\$PATH" >> ~/.bashrc  # on linux
+        echo "PATH=`pwd`:\$PATH" >> ~/.bash_profile  # on osx
+        
 
 ### Nut File Syntax
 #### Example
@@ -86,7 +97,7 @@ This will keep Nut easy to integrate in text editors and IDEs.
 ### What the Nut???
 Achieved with Nut:
 - use Caffe with `nut checkModelDefinition`, `nut train`, `nut test`.
-- compile CUDA code on a Mac Book Air, which has not any Nvidia GPU. Just `nut build`
+- compile CUDA code on a Mac Book Air, which hasn't got any Nvidia GPU. Just `nut build`
 - test code in a whole infrastructure, by defining a macro running *docker-compose* in a container.
 
 ### Milestones
