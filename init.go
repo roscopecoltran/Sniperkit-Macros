@@ -64,11 +64,11 @@ func initSubcommand(c *cli.Context) {
 		// TODO: define and retrieve CLI parameters from the "c" argument
 	} else {
 		nutfileName := "./nut.yml"  // TODO: pick this name from a well documented and centralized list of legit nut file names
-		err := ioutil.WriteFile(nutfileName, []byte(data), 0644)
+		err := ioutil.WriteFile(nutfileName, []byte(data), 0644) // TODO: discuss this permission level
 		if err != nil {
 			log.Error(err)
 		} else {
-			fmt.Printf("Project configuration saved in ", nutfileName)
+			fmt.Printf("Project configuration saved in %s.", nutfileName) // TODO: make sure that bug Project configuration saved in %!(EXTRA string=./nut.yml) is fixed.
 		}
 	}
 }
