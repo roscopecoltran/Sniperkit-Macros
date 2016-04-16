@@ -1,0 +1,5 @@
+syntax_version: "4"
+project_name: go
+based_on:
+  docker_image: golang:latest
+  nut_file_path: ../go1.5/nut.yml

@@ -56,8 +56,6 @@ type BaseEnvironmentV2 struct {
 	BaseEnvironmentBase `yaml:"inheritedValues,inline"`
 
     DockerImage string `yaml:"docker_image,omitempty"`
-    FileURL string `yaml:"nut_file_url,omitempty"`
-    FilePath string `yaml:"nut_file_path,omitempty"`
 }
         func (self *BaseEnvironmentV2) getDockerImageName() (string, error) {
             if self.DockerImage != "" {

@@ -14,7 +14,7 @@ func main() {
 
 	// try to parse the folder's configuration to add macros
 	var macros []cli.Command
-	project, err := loadProject()
+	project, err := LoadProject()
 	if err == nil {
         // Macros are stored in a random order.
         // But we want to display them in the same order everytime.
@@ -64,6 +64,7 @@ func main() {
             }
 		}
 	} else {
+        log.Error("Could not parse nut.yml: " + err.Error())
 		macros = []cli.Command{}
 	}
 

@@ -1,4 +1,4 @@
-syntax_version: "3"
+syntax_version: "4"
 project_name: geary
 based_on:
   docker_image: jess/geary

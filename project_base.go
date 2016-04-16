@@ -56,6 +56,12 @@ type MountingPoint interface {
 
 type BaseEnvironment interface {
     getDockerImageName() (string, error)
+    getFilePath() string
+    setParentBase(parentBase BaseEnvironment) error
+}
+
+type BooleanFeature interface {
+    getEnable() bool
 }
 
 type Project interface {
@@ -68,6 +74,8 @@ type Project interface {
     getEnableGui() bool
     toYAML() string
     fromYAML(bytes []byte) error
+    getParentProject() Project
+    setParentProject(project Project) error
 }
 
 /////// Base classes
@@ -104,6 +112,12 @@ type BaseEnvironmentBase struct {
         func (self *BaseEnvironmentBase) getDockerImageName() (string, error) {
             return "", errors.New("BaseEnvironmentBase.getDockerImageName() must be overloaded.")
         }
+        func (self *BaseEnvironmentBase) getFilePath() string{
+            return ""
+        }
+        func (self *BaseEnvironmentBase) setParentBase(parentBase BaseEnvironment) error {
+            return errors.New("This version of configuration cannot inherite configuration.")
+        }
 
 type ProjectBase struct {
 }
@@ -139,9 +153,36 @@ type ProjectBase struct {
         func (self *ProjectBase) getEnableGui() bool {
         	return false
         }
+        func (self *ProjectBase) getParentProject() Project {
+            return nil
+        }
+        func (self *ProjectBase) setParentProject(project Project) error {
+            return errors.New("This version of configuration cannot inherite configuration.")
+        }
 
-func loadProject() (Project, error) {
-	return parseNutFileAtPath("nut.yml")
+
+func loadProjectInheritance(nutFilePath string) (Project, error) {
+    log.Debug("loadProjectInheritance ", nutFilePath)
+    project, err := parseNutFileAtPath(nutFilePath)
+    if err != nil {
+        return project, err
+    } else {
+        if parentFilePath := project.getBaseEnv().getFilePath(); parentFilePath != "" {
+            parentFilePath = filepath.Join(filepath.Dir(nutFilePath), parentFilePath)
+            log.Debug("loadProjectInheritance inherite from ", parentFilePath)
+            parent, err := loadProjectInheritance(parentFilePath)
+            if err != nil {
+                return nil, errors.New("Could not inherite configuration from " + parentFilePath + ": " + err.Error())
+            } else {
+                project.setParentProject(parent)
+            }
+        }
+    }
+    return project, nil
+}
+
+func LoadProject() (Project, error) {
+    return loadProjectInheritance("nut.yml")
 }
 
 func ProjectFromBytes(bytes []byte) (Project, error) {
@@ -160,6 +201,7 @@ func ProjectFromBytes(bytes []byte) (Project, error) {
 
 func getSyntaxes() []Project {
 	return []Project{
+        NewProjectV4(),
 		NewProjectV3(),
 		NewProjectV2(),
 	}

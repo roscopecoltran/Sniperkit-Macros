@@ -1,49 +1,9 @@
-syntax_version: "3"
+syntax_version: "4"
 project_name: nut
 based_on:
-  docker_image: golang:1.6
-container_working_directory: /go/src/project
+  nut_file_path: examples/go1.6/nut.yml
+container_working_directory: /go/src/github.com/matthieudelaro/nut
 mount:
   main:
   - .
-  - /go/src/project
-macros:
-  build:
-    usage: build the project
-    actions:
-    - go build -o nut
-  build-all:
-    usage: build the project for linux, OSX, and for Windows
-    actions:
-    - echo Building for linux...
-    - env GOOS=linux GOARCH=amd64 go build -o nutLinux
-    - echo Building for OSX...
-    - env GOOS=darwin GOARCH=amd64 go build -o nutOSX
-    - echo Building for Windows...
-    - env GOOS=windows GOARCH=amd64 go build -o nutWindows
-    aliases:
-    - ba
-  build-linux:
-    usage: build the project for Linux
-    actions:
-    - env GOOS=linux GOARCH=amd64 go build -o nutLinux
-    aliases:
-    - bl
-  build-osx:
-    usage: build the project for OSX
-    actions:
-    - env GOOS=darwin GOARCH=amd64 go build -o nutOSX
-    aliases:
-    - bo
-    description: cross-compile the project to run on OSX, with architecture amd64.
-  build-windows:
-    usage: build the project for Windows
-    actions:
-    - env GOOS=windows GOARCH=amd64 go build -o nutWindows
-    aliases:
-    - bw
-  run:
-    usage: run the project in the container
-    actions:
-    - ./nut
-
+  - /go/src/github.com/matthieudelaro/nut
