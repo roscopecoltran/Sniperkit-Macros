@@ -58,6 +58,7 @@ type BaseEnvironmentV4 struct {
     DockerImage string `yaml:"docker_image,omitempty"`
     // FileURL string `yaml:"nut_file_url,omitempty"`
     FilePath string `yaml:"nut_file_path,omitempty"`
+    GitHub string `yaml:"github,omitempty"`
     parentBase BaseEnvironment
 }
         func (self *BaseEnvironmentV4) getDockerImageName() (string, error) {
@@ -77,6 +78,9 @@ type BaseEnvironmentV4 struct {
         }
         func (self *BaseEnvironmentV4) getFilePath() string{
             return self.FilePath
+        }
+        func (self *BaseEnvironmentV4) getGitHub() string{
+            return self.GitHub
         }
         func (self *BaseEnvironmentV4) setParentBase(parentBase BaseEnvironment) error {
             self.parentBase = parentBase

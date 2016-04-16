@@ -1,7 +1,7 @@
 syntax_version: "4"
 project_name: nut
 based_on:
-  nut_file_path: examples/go1.6/nut.yml
+  github: matthieudelaro/nutfile_go1.6
 container_working_directory: /go/src/github.com/matthieudelaro/nut
 mount:
   main:

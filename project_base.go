@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
     "path/filepath"
+    "github.com/matthieudelaro/nut/persist"
 )
 
 ////// README
@@ -58,6 +59,7 @@ type BaseEnvironment interface {
     getDockerImageName() (string, error)
     getFilePath() string
     setParentBase(parentBase BaseEnvironment) error
+    getGitHub() string
 }
 
 type BooleanFeature interface {
@@ -118,6 +120,9 @@ type BaseEnvironmentBase struct {
         func (self *BaseEnvironmentBase) setParentBase(parentBase BaseEnvironment) error {
             return errors.New("This version of configuration cannot inherite configuration.")
         }
+        func (self *BaseEnvironmentBase) getGitHub() string{
+            return ""
+        }
 
 type ProjectBase struct {
 }
@@ -167,7 +172,48 @@ func loadProjectInheritance(nutFilePath string) (Project, error) {
     if err != nil {
         return project, err
     } else {
-        if parentFilePath := project.getBaseEnv().getFilePath(); parentFilePath != "" {
+        parentFilePath := project.getBaseEnv().getFilePath()
+        parentGitHub := project.getBaseEnv().getGitHub()
+        if parentFilePath != "" && parentGitHub != "" {
+            return nil, errors.New("Cannot inherite both from GitHub" +
+                " and from a file.")
+        }
+        if parentGitHub != "" {
+            // TODO: handle path properly, instead of just "."
+            store, err := persist.InitStore(".") // TODO: handle the store in a smart way
+            if err != nil {
+                return nil, errors.New("Could not init storage: " + err.Error())
+            }
+
+            githubFile := filepath.Join(persist.EnvironmentsFolder, parentGitHub, "nut.yml")
+            fullPath := filepath.Join(store.GetPath(), githubFile)
+            _, err = persist.ReadFile(store, githubFile)
+            if err != nil {
+                log.Error("File from GitHub (" + parentGitHub + ") not available yet. Downloading...")
+                fullPath, err = persist.StoreFile(store,
+                    githubFile,
+                    []byte{0})
+                if err != nil {
+                    return nil, errors.New(
+                        "Could not prepare destination for file from GitHub: " + err.Error())
+                }
+                err = wget("https://raw.githubusercontent.com/" + parentGitHub + "/master/nut.yml",
+                    fullPath)
+                if err != nil {
+                    return nil, errors.New("Could not download from GitHub: " + err.Error())
+                }
+                log.Error("File from GitHub (" + parentGitHub + ") downloaded.")
+            }
+
+            log.Debug("loadProjectInheritance inherite from ", fullPath)
+            parent, err := loadProjectInheritance(fullPath)
+            if err != nil {
+                return nil, errors.New("Could not inherite configuration from " + fullPath + ": " + err.Error())
+            } else {
+                project.setParentProject(parent)
+            }
+        }
+        if parentFilePath != "" {
             parentFilePath = filepath.Join(filepath.Dir(nutFilePath), parentFilePath)
             log.Debug("loadProjectInheritance inherite from ", parentFilePath)
             parent, err := loadProjectInheritance(parentFilePath)
