@@ -75,7 +75,7 @@ func main() {
 
     app := cli.NewApp()
 	app.Name = "nut"
-	app.Version = "0.0.3 dev"
+	app.Version = "0.0.4 dev"
 	app.Usage = "the development environment, containerized"
 	app.EnableBashCompletion = true
     app.Flags = []cli.Flag {

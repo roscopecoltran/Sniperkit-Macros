@@ -5,6 +5,7 @@ import (
     "github.com/fgrehm/go-dockerpty"
     log "github.com/Sirupsen/logrus"
     "strings"
+    // Persist "github.com/matthieudelaro/nut/persist"
 )
 
 // Start the container, execute the list of commands, and then stops the container.
@@ -34,9 +35,9 @@ func execInContainer(commands []string, project Project) {
     }
 
     endpoint := getDockerEndpoint()
-    client, err := docker.NewClient(endpoint)
+    client, err := docker.NewClient(endpoint) // TODO : fix https for boot2docker (with https://github.com/fsouza/go-dockerclient/issues/166)
     if err != nil {
-        log.Debug(err.Error())
+        log.Error("Could not reach Docker host (", endpoint, "): ", err.Error())
         return
     }
     log.Debug("Created client")
@@ -44,13 +45,14 @@ func execInContainer(commands []string, project Project) {
     //Pull image from Registry, if not present
     _, err = client.InspectImage(imageName)
     if err != nil {
-        log.Error("Could not pull image:", err.Error())
-        log.Debug("Pulling image...")
+        log.Error("Could not inspect image ", imageName, ": ", err.Error())
 
+        log.Debug("Pulling image...")
         opts := docker.PullImageOptions{Repository: imageName}
         err = client.PullImage(opts, docker.AuthConfiguration{})
         if err != nil {
-            log.Debug(err.Error())
+            log.Error("Could not pull image ", imageName, ": ", err.Error())
+            // log.Debug(err.Error())
             return
         }
         log.Debug("Pulled image")
