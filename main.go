@@ -6,6 +6,7 @@ import (
 	"github.com/codegangsta/cli"
 	log "github.com/Sirupsen/logrus"
     "reflect"
+    "github.com/matthieudelaro/nut/persist"
 )
 
 func main() {
@@ -71,6 +72,7 @@ func main() {
     initFlag := false
     statusFlag := false
     logsFlag := false
+    cleanFlag := false
     execFlag := ""
     gitHubFlag := ""
 
@@ -78,38 +80,46 @@ func main() {
 	app.Name = "nut"
 	app.Version = "0.0.5 dev"
 	app.Usage = "the development environment, containerized"
-	app.EnableBashCompletion = true
+	// app.EnableBashCompletion = true
     app.Flags = []cli.Flag {
+        cli.BoolFlag{
+            Name:  "clean",
+            Usage: "clean all data stored in .nut",
+            Destination: &cleanFlag,
+        },
         cli.BoolFlag{
             Name:        "init",
             Usage:       "initialize a nut project",
             Destination: &initFlag,
-        },
-        cli.BoolFlag{
-            Name:        "logs",
-            Usage:       "display log messages. Useful for contributors and to report an issue",
-            Destination: &logsFlag,
-        },
-        cli.BoolFlag{
-            Name:  "status",
-            Usage: "gives status of the dev env",
-            Destination: &statusFlag,
-        },
-        cli.StringFlag{
-            Name:  "exec",
-            Usage: "execute a command in a container.",
-            Destination: &execFlag,
         },
         cli.StringFlag{
             Name:  "github",
             Usage: "Use with --init: provide a GitHub repository to initialize Nut.",
             Destination: &gitHubFlag,
         },
+        cli.BoolFlag{
+            Name:        "logs",
+            Usage:       "Use with --exec: display log messages. Useful for contributors and to report an issue",
+            Destination: &logsFlag,
+        },
+        cli.StringFlag{
+            Name:  "exec",
+            Usage: "execute a command in a container.",
+            Destination: &execFlag,
+        },
+        cli.BoolFlag{
+            Name:  "status",
+            Usage: "gives status of the dev env",
+            Destination: &statusFlag,
+        },
     }
     defaultAction := app.Action
     app.Action = func(c *cli.Context) {
         if logsFlag {
             log.SetLevel(log.DebugLevel)
+        }
+        if cleanFlag {
+            persist.CleanStoreFromProject(".") // TODO: do better than "."
         }
         if statusFlag {
             status()

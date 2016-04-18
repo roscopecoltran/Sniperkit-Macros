@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	log "github.com/Sirupsen/logrus"
+    "fmt"
 	"gopkg.in/yaml.v2"
     "path/filepath"
     "github.com/matthieudelaro/nut/persist"
@@ -213,7 +214,7 @@ func loadProjectInheritance(nutFilePath string, project Project) (Project, error
             fullPath := filepath.Join(store.GetPath(), githubFile)
             _, err = persist.ReadFile(store, githubFile)
             if err != nil {
-                log.Error("File from GitHub (" + parentGitHub + ") not available yet. Downloading...")
+                fmt.Println("File from GitHub (" + parentGitHub + ") not available yet. Downloading...")
                 fullPath, err = persist.StoreFile(store,
                     githubFile,
                     []byte{0})
@@ -226,7 +227,7 @@ func loadProjectInheritance(nutFilePath string, project Project) (Project, error
                 if err != nil {
                     return nil, errors.New("Could not download from GitHub: " + err.Error())
                 }
-                log.Error("File from GitHub (" + parentGitHub + ") downloaded.")
+                fmt.Println("File from GitHub (" + parentGitHub + ") downloaded.")
             }
 
             log.Debug("loadProjectInheritance inherite from ", fullPath)

@@ -49,8 +49,13 @@ func InitStore(path string) (Store, error) {
 }
 
 // Remove the store from hard drive
-func ClearStore(store Store) {
+func CleanStore(store Store) {
     os.RemoveAll(store.GetPath())
+}
+
+// Remove the store from hard drive
+func CleanStoreFromProject(path string) {
+    os.RemoveAll(filepath.Join(path, FolderName))
 }
 
 // Returns the path of the environment folder
