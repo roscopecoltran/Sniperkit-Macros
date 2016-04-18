@@ -34,10 +34,12 @@ func execInContainer(commands []string, project Project) {
         return
     }
 
-    endpoint := getDockerEndpoint()
-    client, err := docker.NewClient(endpoint) // TODO : fix https for boot2docker (with https://github.com/fsouza/go-dockerclient/issues/166)
+    // endpoint := getDockerEndpoint()
+    // client, err := docker.NewClient(endpoint) // TODO : fix https for boot2docker (with https://github.com/fsouza/go-dockerclient/issues/166)
+    client, err := getDockerClient() // TODO : fix https for boot2docker (with https://github.com/fsouza/go-dockerclient/issues/166)
     if err != nil {
-        log.Error("Could not reach Docker host (", endpoint, "): ", err.Error())
+        // log.Error("Could not reach Docker host (", endpoint, "): ", err.Error())
+        log.Error(err)
         return
     }
     log.Debug("Created client")
@@ -66,11 +68,11 @@ func execInContainer(commands []string, project Project) {
         hostPath, hostPathErr := directory.fullHostPath()
         containerPath, containerPathErr := directory.fullContainerPath()
         if hostPathErr != nil {
-            log.Debug(hostPathErr.Error())
+            log.Error("Couldn't mount host directory: ", hostPathErr.Error())
             return
         }
         if containerPathErr != nil {
-            log.Debug(containerPathErr.Error())
+            log.Error("Couldn't container host directory: ", containerPathErr.Error())
             return
         }
         binds = append(binds, hostPath + ":" + containerPath)
@@ -113,7 +115,7 @@ func execInContainer(commands []string, project Project) {
     opts2 := docker.CreateContainerOptions{Config: &config}
     container, err := client.CreateContainer(opts2)
     if err != nil {
-        log.Debug(err.Error())
+        log.Error("Couldn't create container: ", err.Error())
         return
     } else {
         defer func() {
@@ -122,7 +124,7 @@ func execInContainer(commands []string, project Project) {
                 Force: true,
             })
             if( err != nil) {
-                log.Debug(err.Error())
+                log.Error("Coundn't remove container: ", container.ID, ": ", err.Error())
                 return
             }
             log.Debug("Removed container with ID", container.ID)
@@ -135,14 +137,14 @@ func execInContainer(commands []string, project Project) {
         Binds: binds,
         PortBindings: portBindings,
     }); err != nil {
-        log.Debug(err.Error())
+        log.Error(err.Error())
         return
     } else {
         // And once it is done with all the commands, remove the container.
         defer func () {
             err = client.StopContainer(container.ID, 0)
             if( err != nil) {
-                log.Debug(err.Error())
+                log.Debug("Could not stop container ", container.ID, ": ", err.Error())
                 return
             }
             log.Debug("Stopped container with ID", container.ID)
