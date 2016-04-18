@@ -66,6 +66,7 @@ Here is an example of `nut.yml` to develop in Go. You can generate a sample conf
 project_name: nut
 enable_gui: yes # forward X11 to run graphical application from within the container
                 # On Ubuntu, depending on your config, you may need to run "xhost+" before running nut.
+privileged: true # run container with --privileged flag 
 
 based_on: # configuration can be inherited from:
   github: matthieudelaro/nutfile_go1.6 # a GitHub repository
@@ -121,7 +122,9 @@ As opposed to:
 This will keep Nut easy to integrate in text editors and IDEs.
 
 ### What the Nut???
-- use Caffe with `nut checkModelDefinition`, `nut train`, `nut test`.
+- build [Nut](nut.yml) within Nut (never installed Go, and never going to :)
+- build [Docker](examples/docker/nut.yml)
+- build and run [Caffe](examples/caffe/nut.yml) with `nut checkModelDefinition`, `nut train`, `nut test`.
 - compile CUDA code on a Mac Book Air, which hasn't got any Nvidia GPU. Just `nut build`
 - test code in a whole infrastructure, by defining a macro running *docker-compose* in a container.
 
@@ -133,7 +136,7 @@ This will keep Nut easy to integrate in text editors and IDEs.
 - plugin for Sublime Text, to call `nut run`, `nut build`, and `nut test` from the editor.
 
 ### Stay Tune
-Wanna receive updates? Or share your thoughts? You can post an issue or follow me on Twitter [Twitter](https://twitter.com/matthieudelaro).
+Wanna receive updates? Or share your thoughts? You can post an issue or follow me on  [Twitter](https://twitter.com/matthieudelaro).
 
 ### Authors and Contributors
 @matthieudelaro and @gdevillele
