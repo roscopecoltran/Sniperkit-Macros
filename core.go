@@ -134,6 +134,7 @@ func execInContainer(commands []string, project Project) {
     if err = dockerpty.Start(client, container, &docker.HostConfig{
         Binds: binds,
         PortBindings: portBindings,
+        Privileged: project.getPrivileged(),
     }); err != nil {
         log.Debug(err.Error())
         return

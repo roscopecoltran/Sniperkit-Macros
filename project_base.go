@@ -81,6 +81,7 @@ type Project interface {
     fromYAML(bytes []byte) error
     getParentProject() Project
     setParentProject(project Project) error
+    getPrivileged() bool
 }
 
 /////// Base classes
@@ -168,13 +169,16 @@ type ProjectBase struct {
 	    	return errors.New("ProjectBase.fromYAML() must be overloaded.")
 	    }
         func (self *ProjectBase) getEnableGui() bool {
-        	return false
+            return false
         }
         func (self *ProjectBase) getParentProject() Project {
             return nil
         }
         func (self *ProjectBase) setParentProject(project Project) error {
             return errors.New("This version of configuration cannot inherite configuration.")
+        }
+        func (self *ProjectBase) getPrivileged() bool {
+        	return false
         }
 
 

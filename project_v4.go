@@ -105,6 +105,7 @@ type ProjectV4 struct {
     Mount map[string][]string `yaml:"mount,omitempty"`
     Macros map[string]*MacroV4 `yaml:"macros,omitempty"`
     EnableGUI string `yaml:"enable_gui,omitempty"`
+    Privileged string `yaml:"privileged,omitempty"`
     parentProject Project
     cacheMountingPoints map[string]MountingPoint
     cacheMacros map[string]Macro
@@ -234,6 +235,18 @@ type ProjectV4 struct {
             self.cacheMountingPoints = nil
             self.Base.setParentBase(project.getBaseEnv())
             return nil
+        }
+        func (self *ProjectV4) getPrivileged() bool {
+            if self.Privileged == "" && self.parentProject != nil {
+                return self.parentProject.getPrivileged()
+            } else {
+                if self.Privileged == "true" {
+                    return true
+                } else {
+                    return false
+                }
+            }
+            return false
         }
 
 func NewProjectV4() *ProjectV4 {
