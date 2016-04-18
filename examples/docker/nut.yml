@@ -17,4 +17,4 @@ macros:
     usage: run docker in the container
     actions:
     - cp bundles/latest/binary/docker /usr/bin
-    - docker daemon -D & (sleep 5; docker run --rm hello-world) # start deamon in Debug mode, and run hello-world image
+    - docker daemon -D & (sleep 5; docker run --rm hello-world) # start daemon in Debug mode, and run hello-world image
