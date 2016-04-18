@@ -60,6 +60,8 @@ type BaseEnvironment interface {
     getFilePath() string
     setParentBase(parentBase BaseEnvironment) error
     getGitHub() string
+    setGitHub(repositoryName string)
+    setFilePath(filePath string)
 }
 
 type BooleanFeature interface {
@@ -123,6 +125,15 @@ type BaseEnvironmentBase struct {
         func (self *BaseEnvironmentBase) getGitHub() string{
             return ""
         }
+        func (self *BaseEnvironmentBase) setGitHub(repositoryName string) {
+            log.Error("This version of configuration cannot inherite ",
+                "configuration from GitHub ", repositoryName)
+        }
+
+        func (self *BaseEnvironmentBase) setFilePath(filePath string) {
+            log.Error("This version of configuration cannot inherite ",
+                "configuration from file ", filePath)
+        }
 
 type ProjectBase struct {
 }
@@ -166,12 +177,25 @@ type ProjectBase struct {
         }
 
 
-func loadProjectInheritance(nutFilePath string) (Project, error) {
-    log.Debug("loadProjectInheritance ", nutFilePath)
-    project, err := parseNutFileAtPath(nutFilePath)
-    if err != nil {
-        return project, err
+func loadProjectInheritance(nutFilePath string, project Project) (Project, error) {
+    log.Debug("loadProjectInheritance ", nutFilePath, project)
+    var err error
+    if project == nil && nutFilePath != "" {
+        project, err = parseNutFileAtPath(nutFilePath)
+        if err != nil {
+            return project, err
+        }
+    } else if project != nil && nutFilePath == "" {
+        // nothing to do, we already have the project
     } else {
+        return nil, errors.New("Bad usage: should provide either a project or name of a file.")
+    }
+
+
+    // project, err := parseNutFileAtPath(nutFilePath)
+    // if err != nil {
+        // return project, err
+    // } else {
         parentFilePath := project.getBaseEnv().getFilePath()
         parentGitHub := project.getBaseEnv().getGitHub()
         if parentFilePath != "" && parentGitHub != "" {
@@ -206,7 +230,7 @@ func loadProjectInheritance(nutFilePath string) (Project, error) {
             }
 
             log.Debug("loadProjectInheritance inherite from ", fullPath)
-            parent, err := loadProjectInheritance(fullPath)
+            parent, err := loadProjectInheritance(fullPath, nil)
             if err != nil {
                 return nil, errors.New("Could not inherite configuration from " + fullPath + ": " + err.Error())
             } else {
@@ -216,19 +240,24 @@ func loadProjectInheritance(nutFilePath string) (Project, error) {
         if parentFilePath != "" {
             parentFilePath = filepath.Join(filepath.Dir(nutFilePath), parentFilePath)
             log.Debug("loadProjectInheritance inherite from ", parentFilePath)
-            parent, err := loadProjectInheritance(parentFilePath)
+            parent, err := loadProjectInheritance(parentFilePath, nil)
             if err != nil {
                 return nil, errors.New("Could not inherite configuration from " + parentFilePath + ": " + err.Error())
             } else {
                 project.setParentProject(parent)
             }
         }
-    }
+    // }
     return project, nil
 }
 
+func LoadProjectHierarchy(project Project) error {
+    _, err := loadProjectInheritance("", project)
+    return err
+}
+
 func LoadProject() (Project, error) {
-    return loadProjectInheritance("nut.yml")
+    return loadProjectInheritance("nut.yml", nil)
 }
 
 func ProjectFromBytes(bytes []byte) (Project, error) {
@@ -243,6 +272,28 @@ func ProjectFromBytes(bytes []byte) (Project, error) {
 		}
 	}
 	return nil, err
+}
+
+// Compares a map of MountingPoint, and a given new MountingPoint.
+// Returns the first conflict element from the map, or nil if
+// there wasn't any conflict.
+func CheckConflict(key string, newPoint MountingPoint, mountingPoints map[string]MountingPoint) MountingPoint {
+    h, errh := newPoint.fullHostPath()
+    c, errc := newPoint.fullContainerPath()
+
+    for key2, mountingPoint2 := range mountingPoints {
+        log.Debug("child point ", key)
+        h2, errh2 := mountingPoint2.fullHostPath()
+        c2, errc2 := mountingPoint2.fullContainerPath()
+        if key2 == key ||
+           h == h2 ||
+           c == c2 ||
+           errh != nil || errc != nil || errh2 != nil || errc2 != nil {
+            log.Debug("conflic between mounting points ", key, " and ", key2)
+            return mountingPoint2
+       }
+    }
+    return nil
 }
 
 func getSyntaxes() []Project {

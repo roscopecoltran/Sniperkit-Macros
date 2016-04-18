@@ -1,9 +1,13 @@
 syntax_version: "4"
 project_name: nut
 based_on:
-  github: matthieudelaro/nutfile_go1.6
+  # github: matthieudelaro/nutfile_go1.6
+  docker_image: golang:latest
 container_working_directory: /go/src/github.com/matthieudelaro/nut
 mount:
-  main:
+  main: # mount current directory
   - .
   - /go/src/github.com/matthieudelaro/nut
+  dockersock: # mount docker socket run nut in a container
+  - /var/run/docker.sock
+  - /var/run/docker.sock

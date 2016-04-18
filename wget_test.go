@@ -2,10 +2,15 @@ package main
 
 import (
     "testing"
+    "os"
+    "io/ioutil"
 )
 
 func TestWget(t *testing.T) {
-    err := wget("https://raw.githubusercontent.com/matthieudelaro/nutfile_go1.5/master/nut.yml", "testWget")
+    file, err := ioutil.TempFile(os.TempDir(), "testWgetNut")
+    defer os.Remove(file.Name())
+
+    err = wget("https://raw.githubusercontent.com/matthieudelaro/nutfile_go1.5/master/nut.yml", file.Name())
     if err != nil {
         t.Error(
             err,

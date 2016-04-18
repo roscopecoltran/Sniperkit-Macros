@@ -72,10 +72,11 @@ func main() {
     statusFlag := false
     logsFlag := false
     execFlag := ""
+    gitHubFlag := ""
 
     app := cli.NewApp()
 	app.Name = "nut"
-	app.Version = "0.0.4 dev"
+	app.Version = "0.0.5 dev"
 	app.Usage = "the development environment, containerized"
 	app.EnableBashCompletion = true
     app.Flags = []cli.Flag {
@@ -99,6 +100,11 @@ func main() {
             Usage: "execute a command in a container.",
             Destination: &execFlag,
         },
+        cli.StringFlag{
+            Name:  "github",
+            Usage: "Use with --init: provide a GitHub repository to initialize Nut.",
+            Destination: &gitHubFlag,
+        },
     }
     defaultAction := app.Action
     app.Action = func(c *cli.Context) {
@@ -110,7 +116,7 @@ func main() {
             return
         }
         if initFlag {
-            initSubcommand(c)
+            initSubcommand(c, gitHubFlag)
             return
         }
         if execFlag != "" {

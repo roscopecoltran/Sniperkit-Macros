@@ -5,6 +5,7 @@ import (
     "github.com/fgrehm/go-dockerpty"
     log "github.com/Sirupsen/logrus"
     "strings"
+    "fmt"
     // Persist "github.com/matthieudelaro/nut/persist"
 )
 
@@ -45,17 +46,16 @@ func execInContainer(commands []string, project Project) {
     //Pull image from Registry, if not present
     _, err = client.InspectImage(imageName)
     if err != nil {
-        log.Error("Could not inspect image ", imageName, ": ", err.Error())
+        fmt.Println("Could not inspect image", imageName, ":", err.Error())
 
-        log.Debug("Pulling image...")
+        fmt.Println("Pulling image...")
         opts := docker.PullImageOptions{Repository: imageName}
         err = client.PullImage(opts, docker.AuthConfiguration{})
         if err != nil {
             log.Error("Could not pull image ", imageName, ": ", err.Error())
-            // log.Debug(err.Error())
             return
         }
-        log.Debug("Pulled image")
+        fmt.Println("Pulled image")
     }
 
     // prepare names of directories to mount

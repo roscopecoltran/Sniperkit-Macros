@@ -82,6 +82,12 @@ type BaseEnvironmentV4 struct {
         func (self *BaseEnvironmentV4) getGitHub() string{
             return self.GitHub
         }
+        func (self *BaseEnvironmentV4) setGitHub(repositoryName string) {
+            self.GitHub = repositoryName
+        }
+        func (self *BaseEnvironmentV4) setFilePath(filePath string) {
+            self.FilePath = filePath
+        }
         func (self *BaseEnvironmentV4) setParentBase(parentBase BaseEnvironment) error {
             self.parentBase = parentBase
             return nil
@@ -123,11 +129,10 @@ type ProjectV4 struct {
                 return self.WorkingDir
             }
         }
-        func (self *ProjectV4) getMountingPoints() map[string]MountingPoint {
-            // log.SetLevel(log.DebugLevel)
+        // Build cacheMountingPoints if it is nil.
+        // Returns cache miss.
+        func (self *ProjectV4) __cacheMountingPoints() bool {
             if self.cacheMountingPoints == nil {
-                log.Debug("cacheMountingPoints is nil")
-                // make the list of mounting points
                 self.cacheMountingPoints = make(map[string]MountingPoint)
                 for name, data := range(self.Mount) {
                     self.cacheMountingPoints[name] = &MountingPointV4{
@@ -135,30 +140,23 @@ type ProjectV4 struct {
                         container: data[1],
                     }
                 }
+                return true
+            } else {
+                return false
+            }
+
+        }
+
+        func (self *ProjectV4) getMountingPoints() map[string]MountingPoint {
+            if self.__cacheMountingPoints() {
                 // add the mounting points of the parent, if there is no conflict
                 if self.parentProject != nil {
                     log.Debug("there is a parent")
                     for key, mountingPoint := range self.parentProject.getMountingPoints() {
                         log.Debug("parent point ", key)
                         // verify that there is no conflict with current mounting points
-                        h, errh := mountingPoint.fullHostPath()
-                        c, errc := mountingPoint.fullContainerPath()
-                        conflict := false
-                        for key2, mountingPoint2 := range self.cacheMountingPoints {
-                            log.Debug("child point ", key)
-                            h2, errh2 := mountingPoint2.fullHostPath()
-                            c2, errc2 := mountingPoint2.fullContainerPath()
-                            if key2 == key ||
-                               h == h2 ||
-                               c == c2 ||
-                               errh != nil || errc != nil || errh2 != nil || errc2 != nil {
-                                log.Debug("conflic between mounting points ", key, " and ", key2)
-                                conflict = true
-                                break;
-                           }
-                        }
-                        // add mounting point
-                        if conflict == false {
+                        if CheckConflict(key, mountingPoint, self.cacheMountingPoints) == nil {
+                            // add mounting point
                             self.cacheMountingPoints[key] = mountingPoint
                             log.Debug("add mounting point ", key, " ", mountingPoint)
                         }
@@ -168,7 +166,6 @@ type ProjectV4 struct {
             } else {
                 log.Debug("cacheMountingPoints is ", self.cacheMountingPoints)
             }
-            // log.SetLevel(log.ErrorLevel)
             return self.cacheMountingPoints
         }
         func (self *ProjectV4) getMacros() map[string]Macro {
