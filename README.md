@@ -84,6 +84,7 @@ Here is an example of `nut.yml` to develop in Go. You can generate a sample conf
 # nut.yml
 project_name: nut
 enable_gui: yes # forward X11 to run graphical application from within the container
+                # On OSX, you have to install an X11 server first : XQuartz (http://www.xquartz.org/) (and you may need to restart your terminal or to reboot, in order to initialize environment variables properly)
                 # On Ubuntu, depending on your config, you may need to run "xhost+" before running nut.
 privileged: true # run container with --privileged flag
 
@@ -146,7 +147,8 @@ This will keep Nut easy to integrate in text editors and IDEs.
 - build and run [Caffe](https://github.com/matthieudelaro/nut/blob/master/examples/caffe/nut.yml) with `nut build`, `nut test`, `nut train-mnist`.
 - compile CUDA code on a Mac Book Air, which hasn't got any Nvidia GPU. Just `nut build`
 - test code in a whole infrastructure, by defining a macro running *docker-compose* in a container.
-- run linux [graphical applications](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml) on your Mac:
+- run linux [graphical applications](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml) on your Mac after installing [XQuartz](http://www.xquartz.org/):
+
 ![Linux application on your Mac](https://camo.githubusercontent.com/b32c086f7da89f3365062f9a6a49b7f64377cb35/687474703a2f2f692e696d6775722e636f6d2f4b6650676d72322e676966)
 
 ### Milestones
