@@ -35,7 +35,8 @@ Ever wished to have a unified development tool, across all platforms, customizab
 
 <p><strong>Nut</strong> is a command line tool which offers a solution to common frustrations of developers. It hides the complexity of development environments, and extends them with customizable macros. Whether you develop in Swift, Go, Java, or C++, what you need is build/run/test the app. So just do it:</p>
 
-<pre><code>$ nut build
+<pre><code>$ nut --init # create nut.yml file (equivalent of package.json for npm)
+$ nut build
 $ nut run
 $ nut test
 </code></pre>
@@ -45,31 +46,62 @@ $ nut test
 <p>Nut is in early stage of development. It has been tested on Ubuntu and on MacOS with <em>Docker for Mac</em>. Feedbacks and contributions to add features and to make Nut run on other systems are welcome (Windows, Docker Toolbox, etc).</p>
 
 <h3>
+<a id="share-and-reuse-environments" class="anchor" href="#share-and-reuse-environments" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Share and reuse environments</h3>
+
+<p>You can initialize <strong>Nut</strong> with an environment from a GitHub repository:</p>
+
+<pre><code>$ nut --init --github=matthieudelaro/nutfile_go1.6
+</code></pre>
+
+<p>This creates <code>nut.yml</code> file that inherites the configuration defined in the nut file at the root of the repository.
+This configuration can be overloaded by defining/redefining docker image, macros, mounting points, ... It makes it easy for developers to use libraries and development tools that provide a nut file.</p>
+
+<p>To inspect an environment, you can use <code>--exec</code> flag:</p>
+
+<pre><code>$ # --exec="command to run in the container"
+$ nut --exec="pwd"  # will display the path in working directory of the container 
+$ nut --exec="ls"  # will display the files in the container working directory
+$ nut --exec="echo hello &amp;&amp; echo world!" --logs  # --logs will display the logs for developers
+</code></pre>
+
+<p><code>--exec</code> flag can be really handy to build and test <strong>Nut</strong> on OSX:</p>
+
+<pre><code>$ nut build-osx &amp;&amp; nut --exec="./nut --init --logs &amp;&amp; ls -lah .nut"
+</code></pre>
+
+<h3>
 <a id="getting-nut" class="anchor" href="#getting-nut" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Getting Nut</h3>
 
 <h4>
 <a id="compile-from-source" class="anchor" href="#compile-from-source" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Compile from source</h4>
 
-<div class="highlight highlight-source-shell"><pre><span class="pl-c"># Download sources</span>
-git clone git@github.com:matthieudelaro/nut.git --recursive
+<p>Provided that you use Docker, you don't need to install anything on your computer.<br>
+Not even Go!</p>
 
-<span class="pl-c"># 1 - Move to nut folder</span>
+<div class="highlight highlight-source-shell"><pre><span class="pl-c"># 1 - Download sources</span>
+git clone git@github.com:matthieudelaro/nut.git --recursive
+    <span class="pl-c"># if you don't have git, you can download a zip file from http://matthieudelaro.github.io/nut/</span>
+
+<span class="pl-c"># 2 - Move to nut folder</span>
 <span class="pl-c1">cd</span> nut
 
-<span class="pl-c"># 2 - Build Nut</span>
-    <span class="pl-c"># Build Nut for Linux, in a container (you don't need to install Go on your computer)</span>
+<span class="pl-c"># 3 - Build Nut</span>
+    <span class="pl-c"># Build Nut for Linux, in a container</span>
     docker run -i -t --rm -v <span class="pl-smi">$PWD</span>:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 go build -o nut
 
-    <span class="pl-c"># Build Nut for OSX, in a container (you don't need to install Go on your computer)</span>
+    <span class="pl-c"># Build Nut for OSX, in a container</span>
     docker run -i -t --rm -v <span class="pl-smi">$PWD</span>:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=darwin GOARCH=amd64 go build -o nut
 
-    <span class="pl-c"># Build Nut for Windows, in a container (you don't need to install Go on your computer)</span>
+    <span class="pl-c"># Build Nut for Windows, in a container</span>
     docker run -i -t --rm -v <span class="pl-smi">$PWD</span>:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=windows GOARCH=amd64 go build -o nut
 
-<span class="pl-c"># 3 - Run nut</span>
+<span class="pl-c"># Run nut</span>
 ./nut
 
-<span class="pl-c"># 4 - Optional: Add nut to your PATH</span>
+<span class="pl-c"># Try out Nut</span>
+./nut <span class="pl-c1">test</span> <span class="pl-c"># will compile and run the tests in a container, according to nut.yml</span>
+
+<span class="pl-c"># Add nut to your PATH</span>
     <span class="pl-c"># Copy it in the path</span>
     sudo cp nut /usr/local/bin/nut <span class="pl-c"># on linux and osx</span>
 
@@ -90,6 +122,7 @@ git clone git@github.com:matthieudelaro/nut.git --recursive
 <div class="highlight highlight-source-yaml"><pre><span class="pl-c"># nut.yml</span>
 <span class="pl-s"><span class="pl-ent">project_name:</span> <span class="pl-s">nut</span></span>
 <span class="pl-s"><span class="pl-ent">enable_gui:</span> <span class="pl-s">yes </span></span><span class="pl-c"># forward X11 to run graphical application from within the container</span>
+                <span class="pl-c"># On OSX, you have to install an X11 server first : XQuartz (http://www.xquartz.org/) (and you may need to restart your terminal or to reboot, in order to initialize environment variables properly)</span>
                 <span class="pl-c"># On Ubuntu, depending on your config, you may need to run "xhost+" before running nut.</span>
 <span class="pl-s"><span class="pl-ent">privileged:</span> <span class="pl-s">true </span></span><span class="pl-c"># run container with --privileged flag</span>
 
@@ -167,15 +200,16 @@ This will keep Nut easy to integrate in text editors and IDEs.</li>
 <li>compile CUDA code on a Mac Book Air, which hasn't got any Nvidia GPU. Just <code>nut build</code>
 </li>
 <li>test code in a whole infrastructure, by defining a macro running <em>docker-compose</em> in a container.</li>
-<li>run linux <a href="https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml">graphical applications</a> on your Mac:
-<img src="https://camo.githubusercontent.com/b32c086f7da89f3365062f9a6a49b7f64377cb35/687474703a2f2f692e696d6775722e636f6d2f4b6650676d72322e676966" alt="Linux application on your Mac">
-</li>
+<li>run linux <a href="https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml">graphical applications</a> on your Mac after installing <a href="http://www.xquartz.org/">XQuartz</a>:</li>
 </ul>
+
+<p><img src="https://camo.githubusercontent.com/b32c086f7da89f3365062f9a6a49b7f64377cb35/687474703a2f2f692e696d6775722e636f6d2f4b6650676d72322e676966" alt="Linux application on your Mac"></p>
 
 <h3>
 <a id="milestones" class="anchor" href="#milestones" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Milestones</h3>
 
 <ul>
+<li>create container only once, and store its ID in .nut file</li>
 <li>add support for GPU (--device)</li>
 <li>add support for Windows</li>
 <li>add support for <em>Docker Toolbox</em> on Mac</li>
