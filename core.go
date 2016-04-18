@@ -127,10 +127,10 @@ func execInContainer(commands []string, project Project) {
                 log.Error("Coundn't remove container: ", container.ID, ": ", err.Error())
                 return
             }
-            log.Debug("Removed container with ID", container.ID)
+            log.Debug("Removed container with ID ", container.ID)
         }()
     }
-    log.Debug("Created container with ID", container.ID)
+    log.Debug("Created container with ID ", container.ID)
 
     //Try to start the container
     if err = dockerpty.Start(client, container, &docker.HostConfig{
@@ -147,10 +147,10 @@ func execInContainer(commands []string, project Project) {
                 log.Debug("Could not stop container ", container.ID, ": ", err.Error())
                 return
             }
-            log.Debug("Stopped container with ID", container.ID)
+            log.Debug("Stopped container with ID ", container.ID)
         }()
     }
-    log.Debug("Started container with ID", container.ID)
+    log.Debug("Started container with ID ", container.ID)
 }
 
 func execMacro(macro Macro, project Project) {
