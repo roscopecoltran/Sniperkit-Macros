@@ -115,7 +115,7 @@ So, when creating a `nut.yml` file, one should standard names for macros, such a
 - deploy
 
 As opposed to:
-- javac (should be generalized with *run*)
+- javac (should be generalized with *build*)
 - make (duplicate of *build*)
 - do (hum... *Do* what?)
 This will keep Nut easy to integrate in text editors and IDEs.
