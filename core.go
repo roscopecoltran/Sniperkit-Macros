@@ -78,7 +78,33 @@ func execInContainer(commands []string, project Project) {
     log.Debug("binds", binds)
 
     portBindings := map[docker.Port][]docker.PortBinding{}
+    exposedPorts := map[docker.Port]struct{}{}
+    for _, value := range project.getPorts() {
+        parts := strings.Split(value, ":") // TODO: support ranges of ports
+        hostPort := ""
+        containerPort := ""
+        if len(parts) == 2 {
+            hostPort = parts[0]
+            containerPort = parts[1]
+        } else if len(parts) == 1 {
+            hostPort = parts[0]
+            containerPort = parts[0]
+        } else {
+            log.Error("Could not parse port: " + value)
+            return
+        }
+        // name := containerPort + "/tcp" // TODO: support UDP
+        // dockerPort := docker.Port{containerPort + "/tcp"}
+        var dockerPort docker.Port = docker.Port(containerPort + "/tcp")
+        exposedPorts[dockerPort] = struct{}{}
+        portBindings[dockerPort] = []docker.PortBinding{
+            // {HostIP: "0.0.0.0", HostPort: "8080",}}
+            {HostPort: hostPort,}} // TODO: support HostIP
+    }
     envVariables := []string{}
+    for name, value := range project.getEnvironmentVariables() {
+        envVariables = append(envVariables, name + "=" + value)
+    }
     if project.getEnableGui() {
         portBindingsGUI, envVariablesGUI, bindsGUI, err := enableGui(project)
         if err != nil {
@@ -104,6 +130,7 @@ func execInContainer(commands []string, project Project) {
         Tty:          true,
         WorkingDir:   project.getWorkingDir(),
         Env:          envVariables,
+        ExposedPorts: exposedPorts,
     }
     // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
     // User: set it to the user of the host, instead of root, to manage file permissions properly

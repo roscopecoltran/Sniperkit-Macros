@@ -13,3 +13,6 @@
 [submodule "vendor/github.com/fgrehm/go-dockerpty"]
     path = vendor/github.com/fgrehm/go-dockerpty
     url = git@github.com:fgrehm/go-dockerpty.git
+[submodule "vendor/github.com/stretchr/testify.git"]
+    path = vendor/github.com/stretchr/testify
+    url = https://github.com/stretchr/testify.git

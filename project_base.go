@@ -76,6 +76,8 @@ type Project interface {
     getWorkingDir() string
     getMountingPoints() map[string]MountingPoint
     getMacros() map[string]Macro
+    getEnvironmentVariables() map[string]string
+    getPorts() []string
     getEnableGui() bool
     toYAML() string
     fromYAML(bytes []byte) error
@@ -156,7 +158,13 @@ type ProjectBase struct {
             return make(map[string]MountingPoint)
         }
         func (self *ProjectBase) getMacros() map[string]Macro {
-        	return make(map[string]Macro)
+            return make(map[string]Macro)
+        }
+        func (self *ProjectBase) getEnvironmentVariables() map[string]string {
+            return make(map[string]string)
+        }
+        func (self *ProjectBase) getPorts() []string {
+        	return []string{}
         }
         func (self *ProjectBase) toYAML() string {
             d, err := yaml.Marshal(&self)
@@ -303,6 +311,7 @@ func CheckConflict(key string, newPoint MountingPoint, mountingPoints map[string
 
 func getSyntaxes() []Project {
 	return []Project{
+        NewProjectV5(),
         NewProjectV4(),
 		NewProjectV3(),
 		NewProjectV2(),

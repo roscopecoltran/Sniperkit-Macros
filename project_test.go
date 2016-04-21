@@ -2,8 +2,12 @@ package main
 
 import (
     // "errors"
-    // log "github.com/Sirupsen/logrus"
+    log "github.com/Sirupsen/logrus"
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/require"
     "testing"
+    "reflect"
+    "strconv"
 )
 
 type projectPair struct {
@@ -228,4 +232,117 @@ func TestInheritanceMacros(t *testing.T) {
             }
         }
     }
+}
+
+func TestParsingV5(t *testing.T) {
+    log.SetLevel(log.DebugLevel)
+
+    type Tuple struct {
+        file string
+        env map[string]string
+        ports []string
+    }
+
+    nutFiles := []Tuple{}
+
+    nutFiles = append(nutFiles,
+Tuple{ file:`
+syntax_version: "5"
+based_on:
+  docker_image: golang:1.6
+`,
+ports: []string{},
+},
+Tuple{ file:`
+syntax_version: "5"
+based_on:
+  docker_image: golang:1.6
+environment:
+  A: 1
+  B: 2
+`,
+env: map[string]string{
+    "A": "1",
+    "B": "2",
+}, ports: []string{},
+},
+Tuple{ file:`
+syntax_version: "5"
+based_on:
+  docker_image: golang:1.6
+environment:
+  A: 1
+  B:
+ports:
+  - "3000:3000"
+  - 100:100
+`,
+env: map[string]string{
+    "A": "1",
+    "B": "",
+}, ports: []string{
+    "3000:3000",
+    "100:100",
+},
+},
+Tuple{ file:`
+syntax_version: "5"
+based_on:
+  docker_image: golang:1.6
+environment:
+  A: 1
+  B:
+ports:
+  - "3000:3000"
+`,
+env: map[string]string{
+    "A": "1",
+    "B": "",
+}, ports: []string{
+    "3000:3000",
+},
+},
+)
+
+    for index, tuple := range nutFiles {
+        byteArray := []byte(tuple.file)
+        project := NewProjectV5()
+        assert.Nil(t, project.fromYAML(byteArray))
+
+        assert.Equal(t, len(reflect.ValueOf(tuple.env).MapKeys()),
+            len(reflect.ValueOf(project.getEnvironmentVariables()).MapKeys()),
+            "Error with tuple " + strconv.Itoa(index) + ": not same keys")
+
+        for name, value := range project.getEnvironmentVariables() {
+            assert.Equal(t, value, tuple.env[name],
+                "Error with tuple " + strconv.Itoa(index) + ": not same " + name)
+            // execInContainer([]string{"echo $" + name}, project)
+            // TODO: automate this test
+        }
+
+        require.Equal(t, len(tuple.ports), len(project.getPorts()),
+            "Error with tuple " + strconv.Itoa(index) + ": not same port quantity")
+        for key, value := range project.getPorts() {
+            assert.Equal(t, value, tuple.ports[key],
+                "Error with tuple " + strconv.Itoa(index) +
+                ": not same port " + strconv.Itoa(key))
+        }
+    }
+
+    // test nginx
+    // TODO: automate this test
+//     nutFile := `
+// syntax_version: "5"
+// based_on:
+//   docker_image: nginx
+// ports:
+// #  - "80:80"  # works
+//   - "80"  # works
+// `
+//     project := NewProjectV5()
+//     byteArray := []byte(nutFile)
+//     assert.Nil(t, project.fromYAML(byteArray))
+//     execInContainer([]string{}, project)
+
+//     log.Error("end")
 }
