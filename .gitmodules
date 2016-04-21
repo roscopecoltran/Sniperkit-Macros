@@ -1,18 +1,18 @@
 [submodule "vendor/github.com/codegangsta/cli"]
 	path = vendor/github.com/codegangsta/cli
-	url = git@github.com:codegangsta/cli.git
+	url = https://github.com/codegangsta/cli.git
 [submodule "vendor/github.com/Sirupsen/logrus"]
 	path = vendor/github.com/Sirupsen/logrus
-	url = git@github.com:Sirupsen/logrus.git
+	url = https://github.com/Sirupsen/logrus.git
 [submodule "vendor/gopkg.in/yaml.v2"]
     path = vendor/gopkg.in/yaml.v2
     url = https://gopkg.in/yaml.v2.git
 [submodule "vendor/github.com/fsouza/go-dockerclient"]
     path = vendor/github.com/fsouza/go-dockerclient
-    url = git@github.com:fsouza/go-dockerclient.git
+    url = https://github.com/fsouza/go-dockerclient.git
 [submodule "vendor/github.com/fgrehm/go-dockerpty"]
     path = vendor/github.com/fgrehm/go-dockerpty
-    url = git@github.com:fgrehm/go-dockerpty.git
+    url = https://github.com/fgrehm/go-dockerpty.git
 [submodule "vendor/github.com/stretchr/testify.git"]
     path = vendor/github.com/stretchr/testify
     url = https://github.com/stretchr/testify.git
