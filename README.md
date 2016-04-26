@@ -126,9 +126,9 @@ Here are other instructive examples:
 
 
 ### Support for [nvidia-docker](https://github.com/NVIDIA/nvidia-docker.git)
-We are working on support for nvidia-docker on Linux (it is not possible to mount devices in containers neither on OSX nor on Windows).
+On Linux, Nut can leverage Nvidia GPUs for your environments. This is useful to use and develop deep learning frameworks, or even to run video games. Due to limitations of Docker on OSX and Windows, Nut does not support GPUs on those platforms.
 
-This support relies on [nvidia-docker-plugin](https://github.com/NVIDIA/nvidia-docker/wiki/Using-nvidia-docker-plugin). If it is not running automatically on your machine after [installation](https://github.com/NVIDIA/nvidia-docker/wiki/Installation), you can run it [this way](https://github.com/NVIDIA/nvidia-docker/wiki/Using-nvidia-docker-plugin#usage):
+GPU support relies on [nvidia-docker-plugin](https://github.com/NVIDIA/nvidia-docker/wiki/Using-nvidia-docker-plugin). If it is not running automatically on your machine after [installation](https://github.com/NVIDIA/nvidia-docker/wiki/Installation), you can run it [this way](https://github.com/NVIDIA/nvidia-docker/wiki/Using-nvidia-docker-plugin#usage):
 ```bash
 # Add a system user nvidia-docker
 adduser --system --home /var/lib/nvidia-docker nvidia-docker
@@ -140,6 +140,40 @@ setcap cap_fowner+pe /usr/bin/nvidia-docker-plugin
 
 # Run nvidia-docker-plugin as the nvidia-docker user
 sudo -u nvidia-docker nvidia-docker-plugin -s /var/lib/nvidia-docker
+```
+
+nvidia-docker-plugin **MUST** be running when you call **Nut**. You can check with:
+```bash
+curl -s http://0.0.0.0:3476/v1.0/gpu/info  # query the REST API exposed by nvidia-docker-plugin
+
+# should display something like
+Driver version:          352.63
+Supported CUDA version:  7.5
+
+Device #0
+  Model:         GeForce GTX TITAN X
+  UUID:          GPU-7e7b6b05-764c-8e74-d867-9a87868d5a1f
+  Path:          /dev/nvidia0
+  Family:        Maxwell
+  Arch:          5.2
+  Cores:         3072
+  Power:         250 W
+  CPU Affinity:  NUMA node0
+  PCI
+    Bus ID:     0000:01:00.0
+    BAR1:       256 MiB
+    Bandwidth:  15760 MB/s
+  Memory
+    ECC:        false
+    Global:     12287 MiB
+    Constant:   64 KiB
+    Shared:     96 KiB
+    L2 Cache:   3072 KiB
+    Bandwidth:  336480 MB/s
+  Clocks
+    Cores:        1391 MHz
+    Memory:       3505 MHz
+  P2P Available:  None
 ```
 
 #### Guidelines
