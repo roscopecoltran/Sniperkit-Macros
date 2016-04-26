@@ -6,7 +6,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "strings"
     "fmt"
-    // Persist "github.com/matthieudelaro/nut/persist"
+    "github.com/matthieudelaro/nut/nvidia"
 )
 
 // Start the container, execute the list of commands, and then stops the container.
@@ -62,6 +62,12 @@ func execInContainer(commands []string, project Project) {
     // inspired from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
     mountingPoints := project.getMountingPoints()
     binds := make([]string, 0, len(mountingPoints))
+    portBindings := map[docker.Port][]docker.PortBinding{}
+    exposedPorts := map[docker.Port]struct{}{}
+    envVariables := []string{}
+    volumeDriver := ""
+    devices := []docker.Device{}
+
     for _, directory := range(mountingPoints) {
         hostPath, hostPathErr := directory.fullHostPath()
         containerPath, containerPathErr := directory.fullContainerPath()
@@ -77,8 +83,6 @@ func execInContainer(commands []string, project Project) {
     }
     log.Debug("binds", binds)
 
-    portBindings := map[docker.Port][]docker.PortBinding{}
-    exposedPorts := map[docker.Port]struct{}{}
     for _, value := range project.getPorts() {
         parts := strings.Split(value, ":") // TODO: support ranges of ports
         hostPort := ""
@@ -101,7 +105,6 @@ func execInContainer(commands []string, project Project) {
             // {HostIP: "0.0.0.0", HostPort: "8080",}}
             {HostPort: hostPort,}} // TODO: support HostIP
     }
-    envVariables := []string{}
     for name, value := range project.getEnvironmentVariables() {
         envVariables = append(envVariables, name + "=" + value)
     }
@@ -114,6 +117,24 @@ func execInContainer(commands []string, project Project) {
             binds = append(binds, bindsGUI...)
             for k, v := range portBindingsGUI {
                 portBindings[k] = v
+            }
+        }
+    }
+    if project.getEnableNvidiaDevices() {
+        nvidiaDevices, driverName, driverVolume, err := nvidia.GetConfiguration()
+        if err != nil {
+            log.Error("Could not enable Nvidia devices: ", err,
+                "\nYou have to be on Linux for this to work. Also, make sure " +
+                "that nvidia-docker-plugin is running.\n")
+        } else {
+            binds = append(binds, driverVolume)
+            volumeDriver = driverName
+            for _, devicePath := range nvidiaDevices {
+                devices = append(devices, docker.Device{
+                    PathOnHost: devicePath,
+                    PathInContainer: devicePath,
+                    CgroupPermissions: "mrw", // TODO: discuss proper CgroupPermissions
+                })
             }
         }
     }
@@ -131,6 +152,7 @@ func execInContainer(commands []string, project Project) {
         WorkingDir:   project.getWorkingDir(),
         Env:          envVariables,
         ExposedPorts: exposedPorts,
+        VolumeDriver: volumeDriver,
     }
     // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
     // User: set it to the user of the host, instead of root, to manage file permissions properly
@@ -162,6 +184,7 @@ func execInContainer(commands []string, project Project) {
         Binds: binds,
         PortBindings: portBindings,
         Privileged: project.getPrivileged(),
+        Devices: devices,
     }); err != nil {
         log.Debug(err.Error())
         return

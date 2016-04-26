@@ -1,11 +1,13 @@
-syntax_version: "4"
+syntax_version: "5"
 project_name: caffe
 based_on:
   docker_image: matthieudelaro/work-on-caffe
 container_working_directory: /opt/caffe
+enable_nvidia_devices: true
 mount:
   caffe:
-  - ./caffe
+  # - ./caffe
+  - .
   - /opt/caffe
   dataset: # if you store your datasets in another folder, add them this way
   - /path/to/dataset
@@ -17,6 +19,12 @@ macros:
     - git clone https://github.com/BVLC/caffe.git .
     - cp Makefile.config.example Makefile.config
   build:
+    usage: build the project
+    actions:
+    - make all -j8
+    - echo "/opt/caffe/.build_release/lib/" >> /etc/ld.so.conf.d/caffe-ld-so.conf
+    - ldconfig
+  build-cpu:
     usage: build the project in CPU mode only (set CPU_ONLY from Makefile.config on the fly)
     actions:
     - sed -i 's/# CPU_ONLY := 1/CPU_ONLY := 1/' Makefile.config
@@ -24,7 +32,7 @@ macros:
     - echo "/opt/caffe/.build_release/lib/" >> /etc/ld.so.conf.d/caffe-ld-so.conf
     - ldconfig
   build-gpu:
-    usage: build the project in GPU mode (set CPU_ONLY from Makefile.config on the fly)
+    usage: build the project in GPU mode (unset CPU_ONLY from Makefile.config on the fly)
     actions:
     - sed -i 's/CPU_ONLY := 1/# CPU_ONLY := 1/' Makefile.config
     - make all -j8
@@ -35,14 +43,30 @@ macros:
     actions:
     - make pycaffe -j8
   test:
+    usage: run the tests
+    actions:
+    - make runtest -j8
+  test-cpu:
     usage: run the tests in CPU mode only (set CPU_ONLY from Makefile.config on the fly)
     actions:
     - sed -i 's/# CPU_ONLY := 1/CPU_ONLY := 1/' Makefile.config
     - make runtest -j8
-  train-mnist:
-    usage: attemps to train MNIST in CPU mode only (set CPU_ONLY from Makefile.config on the fly)
+  test-gpu:
+    usage: run the tests in GPU mode (unset CPU_ONLY from Makefile.config on the fly)
+    actions:
+    - sed -i 's/CPU_ONLY := 1/# CPU_ONLY := 1/' Makefile.config
+    - make runtest -j8
+  train-mnist-cpu:
+    usage: attemps to train MNIST in CPU mode only (solver_mode in examples/mnist/lenet_solver.prototxt on the fly)
     actions:
     - "sed -i 's/solver_mode: GPU/solver_mode: CPU/' examples/mnist/lenet_solver.prototxt"
+    - ./data/mnist/get_mnist.sh
+    - ./examples/mnist/create_mnist.sh
+    - caffe train --solver=examples/mnist/lenet_solver.prototxt
+  train-mnist-gpu:
+    usage: attemps to train MNIST in GPU mode (solver_mode in examples/mnist/lenet_solver.prototxt on the fly)
+    actions:
+    - "sed -i 's/solver_mode: CPU/solver_mode: GPU/' examples/mnist/lenet_solver.prototxt"
     - ./data/mnist/get_mnist.sh
     - ./examples/mnist/create_mnist.sh
     - caffe train --solver=examples/mnist/lenet_solver.prototxt

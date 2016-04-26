@@ -79,6 +79,7 @@ type Project interface {
     getEnvironmentVariables() map[string]string
     getPorts() []string
     getEnableGui() bool
+    getEnableNvidiaDevices() bool
     toYAML() string
     fromYAML(bytes []byte) error
     getParentProject() Project
@@ -177,6 +178,9 @@ type ProjectBase struct {
 	    	return errors.New("ProjectBase.fromYAML() must be overloaded.")
 	    }
         func (self *ProjectBase) getEnableGui() bool {
+            return false
+        }
+        func (self *ProjectBase) getEnableNvidiaDevices() bool {
             return false
         }
         func (self *ProjectBase) getParentProject() Project {

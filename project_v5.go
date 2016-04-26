@@ -106,6 +106,7 @@ type ProjectV5 struct {
     Ports []string `yaml:"ports,omitempty"`
     Macros map[string]*MacroV5 `yaml:"macros,omitempty"`
     EnableGUI string `yaml:"enable_gui,omitempty"`
+    EnableNvidiaDevices string `yaml:"enable_nvidia_devices,omitempty"`
     Privileged string `yaml:"privileged,omitempty"`
     parentProject Project
     cacheMountingPoints map[string]MountingPoint
@@ -222,6 +223,18 @@ type ProjectV5 struct {
                 return self.parentProject.getEnableGui()
             } else {
                 if self.EnableGUI == "true" {
+                    return true
+                } else {
+                    return false
+                }
+            }
+            return false
+        }
+        func (self *ProjectV5) getEnableNvidiaDevices() bool {
+            if self.EnableNvidiaDevices == "" && self.parentProject != nil {
+                return self.parentProject.getEnableNvidiaDevices()
+            } else {
+                if self.EnableNvidiaDevices == "true" {
                     return true
                 } else {
                     return false
