@@ -16,3 +16,6 @@
 [submodule "vendor/github.com/stretchr/testify.git"]
     path = vendor/github.com/stretchr/testify
     url = https://github.com/stretchr/testify.git
+[submodule "vendor/golang.org/x/crypto/"]
+    path = vendor/golang.org/x/crypto/
+    url = https://github.com/golang/crypto.git
