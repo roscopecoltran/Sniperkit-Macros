@@ -125,6 +125,23 @@ Here are other instructive examples:
 - [GUI application](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml)
 
 
+#### Guidelines
+Nut aims to unify development tools, not to replace compilers.
+Nut aims to unify development processes, not to expose language specific requirements.
+
+So, when creating a `nut.yml` file, one should standard names for macros, such as:
+- build
+- run
+- test
+- debug
+- deploy
+
+As opposed to:
+- javac (should be generalized with *build*)
+- make (duplicate of *build*)
+- do (hum... *Do* what?)
+This will keep Nut easy to integrate in text editors and IDEs.
+
 ### Support for [nvidia-docker](https://github.com/NVIDIA/nvidia-docker.git)
 On Linux, Nut can leverage Nvidia GPUs for your environments. This is useful to use and develop deep learning frameworks, or even to run video games. Due to limitations of Docker on OSX and Windows, Nut does not support GPUs on those platforms.
 
@@ -176,22 +193,6 @@ Device #0
   P2P Available:  None
 ```
 
-#### Guidelines
-Nut aims to unify development tools, not to replace compilers.
-Nut aims to unify development processes, not to expose language specific requirements.
-
-So, when creating a `nut.yml` file, one should standard names for macros, such as:
-- build
-- run
-- test
-- debug
-- deploy
-
-As opposed to:
-- javac (should be generalized with *build*)
-- make (duplicate of *build*)
-- do (hum... *Do* what?)
-This will keep Nut easy to integrate in text editors and IDEs.
 
 ### What the Nut???
 - build [Nut](https://github.com/matthieudelaro/nut/blob/master/nut.yml) within Nut (never installed Go, and never going to :)
