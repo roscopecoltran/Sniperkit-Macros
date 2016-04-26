@@ -124,6 +124,24 @@ Here are other instructive examples:
 - [Dynamic folder name](https://github.com/matthieudelaro/nutfile_go1.5/blob/master/nut.yml)
 - [GUI application](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml)
 
+
+### Support for [nvidia-docker](https://github.com/NVIDIA/nvidia-docker.git)
+We are working on support for nvidia-docker on Linux (it is not possible to mount devices in containers neither on OSX nor on Windows).
+
+This support relies on [nvidia-docker-plugin](https://github.com/NVIDIA/nvidia-docker/wiki/Using-nvidia-docker-plugin). If it is not running automatically on your machine after [installation](https://github.com/NVIDIA/nvidia-docker/wiki/Installation), you can run it [this way](https://github.com/NVIDIA/nvidia-docker/wiki/Using-nvidia-docker-plugin#usage):
+```bash
+# Add a system user nvidia-docker
+adduser --system --home /var/lib/nvidia-docker nvidia-docker
+# Register the plugin with the Docker daemon
+mkdir -p /etc/docker/plugins
+echo "unix:///var/lib/nvidia-docker/nvidia-docker.sock" > /etc/docker/plugins/nvidia-docker.spec
+# Set the mandatory permission
+setcap cap_fowner+pe /usr/bin/nvidia-docker-plugin
+
+# Run nvidia-docker-plugin as the nvidia-docker user
+sudo -u nvidia-docker nvidia-docker-plugin -s /var/lib/nvidia-docker
+```
+
 #### Guidelines
 Nut aims to unify development tools, not to replace compilers.
 Nut aims to unify development processes, not to expose language specific requirements.
