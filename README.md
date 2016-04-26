@@ -19,6 +19,8 @@ Ever wished to have a unified development tool, across all platforms, customizab
 
 Nut is in early stage of development. It has been tested on Ubuntu and on MacOS with *Docker for Mac*. Feedbacks and contributions to add features and to make Nut run on other systems are welcome (Windows, Docker Toolbox, etc).
 
+Check the [wiki](https://github.com/matthieudelaro/nut/wiki) to read some tutorials (GPU support, Caffe, TensorFlow, etc). 
+
 ### Share and reuse environments
 You can initialize **Nut** with an environment from a GitHub repository:
 
