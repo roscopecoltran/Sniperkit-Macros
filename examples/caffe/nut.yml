@@ -6,8 +6,7 @@ container_working_directory: /opt/caffe
 enable_nvidia_devices: true
 mount:
   caffe:
-  # - ./caffe
-  - .
+  - ./caffe
   - /opt/caffe
   dataset: # if you store your datasets in another folder, add them this way
   - /path/to/dataset
