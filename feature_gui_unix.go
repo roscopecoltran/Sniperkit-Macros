@@ -1,4 +1,6 @@
-// +build dragonfly freebsd linux nacl netbsd openbsd solaris, !darwin
+// +build dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build !darwin
+// +build !windows
 
 // Build for all unix platforms, except OSX (darwin)
 package main

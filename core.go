@@ -2,7 +2,8 @@ package main
 
 import (
     "github.com/fsouza/go-dockerclient"
-    "github.com/fgrehm/go-dockerpty"
+    // "github.com/fgrehm/go-dockerpty"
+    "github.com/matthieudelaro/go-dockerpty"
     log "github.com/Sirupsen/logrus"
     "strings"
     "fmt"
