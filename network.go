@@ -2,16 +2,87 @@ package main
 
 import (
     // "github.com/Sirupsen/logrus"
-    // "github.com/fsouza/go-dockerclient"
+    "github.com/fsouza/go-dockerclient"
     // "bytes"
     "os"
     "net"
     "io"
+    "io/ioutil"
     log "github.com/Sirupsen/logrus"
     "errors"
+    "crypto/x509"
+    "crypto/tls"
+    "path/filepath"
+    "net/http"
+    "net/url"
     // "time"
     // "strings" // words := strings.Fields(someString)
 )
+
+func getDockerClient() (*docker.Client, error) {
+    endpoint := getDockerEndpoint()
+    if !isDockerMachineInUse() { // using Docker on Linux, Docker for Mac, Docker for Windows
+        c, err := docker.NewClient(endpoint)
+        if err != nil {
+            return nil, errors.New("Could not reach Docker host (" +
+                endpoint+  "): " + err.Error())
+        } else {
+            return c, nil
+        }
+    } else { // using remote Docker, or Docker Toolbox
+        // inspired from https://github.com/fsouza/go-dockerclient/issues/166
+
+        // Still, attachToContainer does not seem to work on Mac with Docker Toolbox.
+        // Because of this issue ? https://github.com/fsouza/go-dockerclient/issues/126
+        roots := x509.NewCertPool()
+        dockerCertPath := os.Getenv("DOCKER_CERT_PATH")
+        pemData, err := ioutil.ReadFile(filepath.Join(dockerCertPath, "ca.pem"))
+        if err != nil {
+            return nil, errors.New("Error while loading ca.pem: " + err.Error())
+        }
+
+        //add to pool
+        roots.AppendCertsFromPEM(pemData)
+
+       //create certificate
+        crt, err := tls.LoadX509KeyPair(
+            filepath.Join(dockerCertPath, "cert.pem"),
+            filepath.Join(dockerCertPath, "key.pem"))
+        if err != nil {
+            return nil, errors.New("Error while loading cert.pem and key.pem: " + err.Error())
+        }
+
+        //creates the new tls configuration using both the authority and certificate
+        conf := &tls.Config{
+            RootCAs:      roots,
+            Certificates: []tls.Certificate{crt},
+        }
+
+        //create our own transport
+        tr := &http.Transport{
+            TLSClientConfig: conf,
+        }
+
+        host, err := url.Parse(endpoint)
+        if err != nil {
+            return nil, errors.New("Error while parsing endpoint (" + endpoint + "): " +
+                err.Error())
+        }
+        //change tcp to https connection
+        host.Scheme = "https"
+
+        //create fsouza/go-dockerclient
+        c, err := docker.NewClient(host.String())
+        if err != nil {
+            return nil, errors.New("Could not reach Docker host (" +
+                endpoint+  "): " + err.Error())
+        }
+
+        //create a new http client and set on our dockerclient
+        c.HTTPClient = &http.Client{Transport: tr}
+        return c, nil
+    }
+}
 
 func isDockerMachineInUse() bool {
     endpoint := os.Getenv("DOCKER_HOST")
