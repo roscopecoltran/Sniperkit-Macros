@@ -20,6 +20,9 @@ type MacroV5 struct {
     UsageText string `yaml:"usage_for_help_section,omitempty"`
     // A longer explanation of how the macro works
     Description string `yaml:"description,omitempty"`
+    DockerImage string `yaml:"docker_image,omitempty"`
+    EnableGUI string `yaml:"enable_gui,omitempty"`
+    SecurityOpts []string `yaml:"security_opts,omitempty"`
 }
         func (self *MacroV5) getUsage() string {
             return self.Usage
@@ -35,6 +38,23 @@ type MacroV5 struct {
         }
         func (self *MacroV5) getDescription() string {
             return self.Description
+        }
+        func (self *MacroV5) getDockerImageName() (string, error) {
+            if self.DockerImage != "" { return self.DockerImage, nil }
+            return self.project.getBaseEnv().getDockerImageName()
+        }
+        func (self *MacroV5) getEnableGui() bool {
+            if self.EnableGUI != "" {
+                if self.EnableGUI == "true" {
+                    return true
+                } else {
+                    return false
+                }
+            }
+            return self.project.getEnableGui()
+        }
+        func (self *MacroV5) getSecurityOpts() []string {
+            return self.SecurityOpts
         }
 
 type MountingPointV5 struct {
@@ -179,6 +199,7 @@ type ProjectV5 struct {
                 self.cacheMacros = make(map[string]Macro)
                 for name, data := range self.Macros {
                     self.cacheMacros[name] = data
+                    self.cacheMacros[name].setParentProject(self)
                 }
                 // add the macros of the parent, if there is no conflict
                 if self.parentProject != nil {
@@ -187,6 +208,7 @@ type ProjectV5 struct {
                         if self.cacheMacros[name] == nil {
                             log.Debug("add it")
                             self.cacheMacros[name] = macro
+                            self.cacheMacros[name].setParentProject(self)
                         } else {
                             log.Debug("already exist")
                         }

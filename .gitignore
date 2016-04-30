@@ -7,3 +7,7 @@ nutWindows.exe
 nut.sublime-project
 nut.sublime-workspace
 .nut
+*.a
+debug*
+src
+.vscode

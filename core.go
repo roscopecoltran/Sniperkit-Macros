@@ -16,7 +16,8 @@ import (
 // DONE: to solve tty size, use func (c *Client) ResizeContainerTTY(id string, height, width int) error : solved with dockerpty
 // and/or func (c *Client) ResizeExecTTY(id string, height, width int) error
 // TODO: report bug "StartExec Error: %s read /dev/stdin: bad file descriptor" when executing several commands : post issue on dockerpty
-func execInContainer(commands []string, project Project) {
+func execMacro(macro Macro) {
+    commands := macro.getActions()
     log.Debug("commands (len = ", len(commands), ") : ", commands)
     var cmdConfig []string
     if len(commands) == 0 {
@@ -29,7 +30,7 @@ func execInContainer(commands []string, project Project) {
     }
     log.Debug("cmdConfig: ", cmdConfig)
 
-    imageName, err := project.getBaseEnv().getDockerImageName()
+    imageName, err := macro.getDockerImageName()
     if err != nil {
         log.Error(err.Error())
         return
@@ -60,7 +61,7 @@ func execInContainer(commands []string, project Project) {
 
     // prepare names of directories to mount
     // inspired from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
-    mountingPoints := project.getMountingPoints()
+    mountingPoints := macro.getMountingPoints()
     binds := make([]string, 0, len(mountingPoints))
     for _, directory := range(mountingPoints) {
         hostPath, hostPathErr := directory.fullHostPath()
@@ -79,7 +80,7 @@ func execInContainer(commands []string, project Project) {
 
     portBindings := map[docker.Port][]docker.PortBinding{}
     exposedPorts := map[docker.Port]struct{}{}
-    for _, value := range project.getPorts() {
+    for _, value := range macro.getPorts() {
         parts := strings.Split(value, ":") // TODO: support ranges of ports
         hostPort := ""
         containerPort := ""
@@ -102,11 +103,11 @@ func execInContainer(commands []string, project Project) {
             {HostPort: hostPort,}} // TODO: support HostIP
     }
     envVariables := []string{}
-    for name, value := range project.getEnvironmentVariables() {
+    for name, value := range macro.getEnvironmentVariables() {
         envVariables = append(envVariables, name + "=" + value)
     }
-    if project.getEnableGui() {
-        portBindingsGUI, envVariablesGUI, bindsGUI, err := enableGui(project)
+    if macro.getEnableGui() {
+        portBindingsGUI, envVariablesGUI, bindsGUI, err := enableGui()
         if err != nil {
             log.Error("Could not enable GUI: ", err)
         } else {
@@ -128,9 +129,10 @@ func execInContainer(commands []string, project Project) {
         AttachStdout: true,
         AttachStderr: true,
         Tty:          true,
-        WorkingDir:   project.getWorkingDir(),
+        WorkingDir:   macro.getWorkingDir(),
         Env:          envVariables,
         ExposedPorts: exposedPorts,
+        SecurityOpts: macro.getSecurityOpts(),
     }
     // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
     // User: set it to the user of the host, instead of root, to manage file permissions properly
@@ -161,7 +163,7 @@ func execInContainer(commands []string, project Project) {
     if err = dockerpty.Start(client, container, &docker.HostConfig{
         Binds: binds,
         PortBindings: portBindings,
-        Privileged: project.getPrivileged(),
+        Privileged: macro.getPrivileged(),
     }); err != nil {
         log.Debug(err.Error())
         return
@@ -177,8 +179,4 @@ func execInContainer(commands []string, project Project) {
         }()
     }
     log.Debug("Started container with ID", container.ID)
-}
-
-func execMacro(macro Macro, project Project) {
-    execInContainer(macro.getActions(), project)
 }
