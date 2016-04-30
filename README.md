@@ -19,6 +19,8 @@ Ever wished to have a unified development tool, across all platforms, customizab
 
 Nut is in early stage of development. It has been tested on Ubuntu and on MacOS with *Docker for Mac*. Feedbacks and contributions to add features and to make Nut run on other systems are welcome (Windows, Docker Toolbox, etc).
 
+Check the [wiki](https://github.com/matthieudelaro/nut/wiki) to read some tutorials (GPU support, Caffe, TensorFlow, etc). 
+
 ### Share and reuse environments
 You can initialize **Nut** with an environment from a GitHub repository:
 
@@ -124,6 +126,7 @@ Here are other instructive examples:
 - [Dynamic folder name](https://github.com/matthieudelaro/nutfile_go1.5/blob/master/nut.yml)
 - [GUI application](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml)
 
+
 #### Guidelines
 Nut aims to unify development tools, not to replace compilers.
 Nut aims to unify development processes, not to expose language specific requirements.
@@ -140,6 +143,58 @@ As opposed to:
 - make (duplicate of *build*)
 - do (hum... *Do* what?)
 This will keep Nut easy to integrate in text editors and IDEs.
+
+### Support for [nvidia-docker](https://github.com/NVIDIA/nvidia-docker.git)
+On Linux, Nut can leverage Nvidia GPUs for your environments. This is useful to use and develop deep learning frameworks, or even to run video games. Due to limitations of Docker on OSX and Windows, Nut does not support GPUs on those platforms.
+
+GPU support relies on [nvidia-docker-plugin](https://github.com/NVIDIA/nvidia-docker/wiki/Using-nvidia-docker-plugin). If it is not running automatically on your machine after [installation](https://github.com/NVIDIA/nvidia-docker/wiki/Installation), you can run it [this way](https://github.com/NVIDIA/nvidia-docker/wiki/Using-nvidia-docker-plugin#usage):
+```bash
+# Add a system user nvidia-docker
+adduser --system --home /var/lib/nvidia-docker nvidia-docker
+# Register the plugin with the Docker daemon
+mkdir -p /etc/docker/plugins
+echo "unix:///var/lib/nvidia-docker/nvidia-docker.sock" > /etc/docker/plugins/nvidia-docker.spec
+# Set the mandatory permission
+setcap cap_fowner+pe /usr/bin/nvidia-docker-plugin
+
+# Run nvidia-docker-plugin as the nvidia-docker user
+sudo -u nvidia-docker nvidia-docker-plugin -s /var/lib/nvidia-docker
+```
+
+nvidia-docker-plugin **MUST** be running when you call **Nut**. You can check with:
+```bash
+curl -s http://0.0.0.0:3476/v1.0/gpu/info  # query the REST API exposed by nvidia-docker-plugin
+
+# should display something like
+Driver version:          352.63
+Supported CUDA version:  7.5
+
+Device #0
+  Model:         GeForce GTX TITAN X
+  UUID:          GPU-7e7b6b05-764c-8e74-d867-9a87868d5a1f
+  Path:          /dev/nvidia0
+  Family:        Maxwell
+  Arch:          5.2
+  Cores:         3072
+  Power:         250 W
+  CPU Affinity:  NUMA node0
+  PCI
+    Bus ID:     0000:01:00.0
+    BAR1:       256 MiB
+    Bandwidth:  15760 MB/s
+  Memory
+    ECC:        false
+    Global:     12287 MiB
+    Constant:   64 KiB
+    Shared:     96 KiB
+    L2 Cache:   3072 KiB
+    Bandwidth:  336480 MB/s
+  Clocks
+    Cores:        1391 MHz
+    Memory:       3505 MHz
+  P2P Available:  None
+```
+
 
 ### What the Nut???
 - build [Nut](https://github.com/matthieudelaro/nut/blob/master/nut.yml) within Nut (never installed Go, and never going to :)

@@ -59,7 +59,7 @@ type Macro interface {
     getPorts() []string
     getEnableGui() bool
     getPrivileged() bool
-    // may be promote this to project
+    getEnableNvidiaDevices() bool
     getSecurityOpts() []string
 }
 
@@ -91,11 +91,13 @@ type Project interface {
     getEnvironmentVariables() map[string]string
     getPorts() []string
     getEnableGui() bool
+    getEnableNvidiaDevices() bool
     toYAML() string
     fromYAML(bytes []byte) error
     getParentProject() Project
     setParentProject(project Project) error
     getPrivileged() bool
+    getSecurityOpts() []string
 }
 
 /////// Base classes
@@ -146,7 +148,10 @@ type MacroBase struct {
             return self.project.getPrivileged()
         }
         func (self *MacroBase) getSecurityOpts() []string {
-        	return []string{}
+        	return self.project.getSecurityOpts()
+        }
+        func (self *MacroBase) getEnableNvidiaDevices() bool {
+            return self.project.getEnableNvidiaDevices()
         }
 
 type MountingPointBase struct {
@@ -222,6 +227,9 @@ type ProjectBase struct {
         func (self *ProjectBase) getEnableGui() bool {
             return false
         }
+        func (self *ProjectBase) getEnableNvidiaDevices() bool {
+            return false
+        }
         func (self *ProjectBase) getParentProject() Project {
             return nil
         }
@@ -230,6 +238,9 @@ type ProjectBase struct {
         }
         func (self *ProjectBase) getPrivileged() bool {
         	return false
+        }
+        func (self *ProjectBase) getSecurityOpts() []string {
+        	return []string{}
         }
 
 

@@ -12,10 +12,14 @@ mount:
   - /var/run/docker.sock
 macros:
   code:
-    docker_image: ctaggart/golang-vscode
     usage: open this project in vscode
+    docker_image: ctaggart/golang-vscode
     enable_gui: true
     security_opts:
     - seccomp=unconfined
+    mount:
+      main:
+      - .
+      - /home/vscode/nut
     actions:
-    - su - vscode -c "GOPATH=/go code -w /go/src/github.com/matthieudelaro/nut"
+    - su - vscode -c "cd ~/nut; GOPATH=`pwd` code -w ."
