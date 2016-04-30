@@ -22,4 +22,4 @@ macros:
       - .
       - /home/vscode/nut
     actions:
-    - su - vscode -c "cd ~/nut; GOPATH=`pwd` code -w ."
+    - su - vscode -c "cd ~/nut; ./vscode.sh"
