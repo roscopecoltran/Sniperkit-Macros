@@ -154,7 +154,6 @@ func execMacro(macro Macro) {
         Env:          envVariables,
         ExposedPorts: exposedPorts,
         VolumeDriver: volumeDriver,
-        SecurityOpts: macro.getSecurityOpts(),
     }
     // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
     // User: set it to the user of the host, instead of root, to manage file permissions properly
@@ -187,6 +186,7 @@ func execMacro(macro Macro) {
         PortBindings: portBindings,
         Privileged: macro.getPrivileged(),
         Devices: devices,
+        SecurityOpt: macro.getSecurityOpts(),
     }); err != nil {
         log.Debug(err.Error())
         return
