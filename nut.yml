@@ -17,9 +17,13 @@ macros:
     enable_gui: true
     security_opts:
     - seccomp=unconfined
-    mount:
-      main:
-      - .
-      - /home/vscode/nut
     actions:
-    - su - vscode -c "cd ~/nut; ./vscode.sh"
+    # symlink workaround for vendor directory
+    # using vendor/src would be GOPATH compatible and remove the need for the symlink
+    - cmd='
+      nut=/go/src/github.com/matthieudelaro/nut;
+      rm -f $nut/src;
+      ln -s $nut/vendor $nut/src;
+      export GOPATH=/go:$nut;
+      code -w $nut'
+    - su - vscode -c "$cmd"
