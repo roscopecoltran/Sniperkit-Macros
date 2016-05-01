@@ -18,12 +18,4 @@ macros:
     security_opts:
     - seccomp=unconfined
     actions:
-    # symlink workaround for vendor directory
-    # using vendor/src would be GOPATH compatible and remove the need for the symlink
-    - cmd='
-      nut=/go/src/github.com/matthieudelaro/nut;
-      rm -f $nut/src;
-      ln -s $nut/vendor $nut/src;
-      export GOPATH=/go:$nut;
-      code -w $nut'
-    - su - vscode -c "$cmd"
+    - su - vscode -c "export GOPATH=/go; code -w /go/src/github.com/matthieudelaro/nut"
