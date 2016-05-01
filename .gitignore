@@ -9,5 +9,4 @@ nut.sublime-workspace
 .nut
 *.a
 debug*
-src
 .vscode
