@@ -46,18 +46,19 @@ type MacroV5 struct {
             return self.Description
         }
         func (self *MacroV5) getDockerImageName() (string, error) {
-            if self.DockerImage != "" { 
-                return self.DockerImage, nil 
+            if self.DockerImage != "" {
+                return self.DockerImage, nil
             }
             return self.project.getBaseEnv().getDockerImageName()
         }
         func (self *MacroV5) getWorkingDir() string {
-            if self.WorkingDir != "" { 
-                return self.WorkingDir 
+            if self.WorkingDir != "" {
+                return self.WorkingDir
             }
             return self.project.getWorkingDir()
         }
         func (self *MacroV5) getMountingPoints() map[string]MountingPoint {
+            // TODO: merge with values form the project
             if len(self.Mount) > 0 {
                 points := make(map[string]MountingPoint)
                 for name, data := range(self.Mount) {
@@ -71,12 +72,14 @@ type MacroV5 struct {
             return self.project.getMountingPoints()
         }
         func (self *MacroV5) getEnvironmentVariables() map[string]string {
+            // TODO: merge with values form the project
             if len(self.EnvironmentVariables) > 0 {
                 return self.EnvironmentVariables
             }
             return self.project.getEnvironmentVariables()
         }
         func (self *MacroV5) getPorts() []string {
+            // TODO: merge with values form the project
             if len(self.Ports) > 0 {
                 return self.Ports
             }
@@ -101,6 +104,7 @@ type MacroV5 struct {
             return self.project.getPrivileged()
         }
         func (self *MacroV5) getSecurityOpts() []string {
+            // TODO: merge with values form the project
             if len(self.SecurityOpts) > 0 {
                 return self.SecurityOpts
             }
