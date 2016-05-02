@@ -17,6 +17,9 @@ type MacroExec struct {
 
 func exec(project Project, c *cli.Context, command string) {
     macro := &MacroExec{
+        MacroBase: MacroBase{
+            project: project,
+        },
         actions: []string{command},
     }
     // macro.setActions()
