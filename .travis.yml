@@ -1,0 +1,10 @@
+language: go
+
+go:
+  - 1.6
+
+script:
+  - env GOOS=linux GOARCH=amd64 go build -o `echo $dirName`Linux
+  - env GOOS=darwin GOARCH=amd64 go build -o `echo $dirName`OSX
+  - env GOOS=windows GOARCH=amd64 go build -o `echo $dirName`Windows
+  - go test
