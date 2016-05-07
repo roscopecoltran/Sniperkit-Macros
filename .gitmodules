@@ -10,9 +10,15 @@
 [submodule "vendor/github.com/fsouza/go-dockerclient"]
     path = vendor/github.com/fsouza/go-dockerclient
     url = https://github.com/fsouza/go-dockerclient.git
+
+    
 [submodule "vendor/github.com/matthieudelaro/go-dockerpty"]
     path = vendor/github.com/matthieudelaro/go-dockerpty
     url = https://github.com/matthieudelaro/go-dockerpty.git
+[submodule "vendor/github.com/fgrehm/go-dockerpty"]
+    path = vendor/github.com/fgrehm/go-dockerpty
+    url = https://github.com/fgrehm/go-dockerpty.git
+
 [submodule "vendor/github.com/stretchr/testify"]
     path = vendor/github.com/stretchr/testify
     url = https://github.com/stretchr/testify.git
