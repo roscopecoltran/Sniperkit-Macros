@@ -8,3 +8,4 @@ script:
   - env GOOS=darwin GOARCH=amd64 go build -o `echo $dirName`OSX
   - env GOOS=windows GOARCH=amd64 go build -o `echo $dirName`Windows
   - go test
+  
