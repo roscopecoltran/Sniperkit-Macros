@@ -3,6 +3,9 @@ language: go
 go:
   - 1.6
 
+install:
+  - go get github.com/stretchr/testify/assert  # for fsouza/go-dockerclient
+
 script:
   - env GOOS=linux GOARCH=amd64 go build -o `echo $dirName`Linux
   - env GOOS=darwin GOARCH=amd64 go build -o `echo $dirName`OSX
