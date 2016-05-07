@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/matthieudelaro/nut.svg?branch=master)](https://travis-ci.org/matthieudelaro/nut)
+
 ### Wetting Your Appetite
 Tired of hearing: "works on my machine"?  
 Ever experienced headache to install libraries and dependencies?  
