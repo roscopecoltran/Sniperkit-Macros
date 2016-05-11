@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/matthieudelaro/nut.svg?branch=master)](https://travis-ci.org/matthieudelaro/nut)
+
 ### Wetting Your Appetite
 Tired of hearing: "works on my machine"?  
 Ever experienced headache to install libraries and dependencies?  
@@ -46,8 +48,8 @@ Provided that you use Docker, you don't need to install anything on your compute
 Not even Go!
 ```bash
 # 1 - Download sources
-git clone git@github.com:matthieudelaro/nut.git --recursive
-    # if you don't have git, you can download a zip file from http://matthieudelaro.github.io/nut/
+git clone https://github.com/matthieudelaro/nut.git --recursive
+    # if you don't have git, you can download a zip file https://github.com/matthieudelaro/nut/archive/master.zip
 
 # 2 - Move to nut folder
 cd nut
