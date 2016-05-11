@@ -1,7 +1,6 @@
-syntax_version: "4"
+syntax_version: "6"
 project_name: docker
-based_on:
-  docker_image: dry-run-test
+docker_image: dry-run-test
 privileged: true
 container_working_directory: /go/src/github.com/docker/docker
 mount:

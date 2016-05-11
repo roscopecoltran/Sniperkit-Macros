@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
     "io"
@@ -9,7 +9,7 @@ import (
 
 // inspired from https://www.socketloop.com/tutorials/golang-download-file-example
 // TODO: check with proxies
-func wget(rawURL string, fileName string) error {
+func Wget(rawURL string, fileName string) error {
     _, err := url.Parse(rawURL)
 
     if err != nil {

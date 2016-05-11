@@ -76,11 +76,11 @@ func StoreFile(store Store, fileName string, data []byte) (string, error) {
     }
 }
 
-// stores a file, and returns its full name, and an error
-func ReadFile(store Store, fileName string) ([]byte, error) {
+// Reads a file, and returns its content, its full name, and an error
+func ReadFile(store Store, fileName string) ([]byte, string, error) {
     fullPath := filepath.Join(store.GetPath(), fileName)
     bytes, err := ioutil.ReadFile(fullPath)
-    return bytes, err
+    return bytes, fullPath, err
 }
 
 // // return a saved value
