@@ -96,7 +96,8 @@ based_on: # configuration can be inherited from:
   github: matthieudelaro/nutfile_go1.6 # a GitHub repository
   nut_file_path: ../go1.5/nut.yml # a local file
   # You can inherite either from GitHub or from a file, not both.
-  docker_image: golang:1.6 # a Docker image. Will override image set on GitHub
+  
+docker_image: golang:1.6 # the Docker image. Will override image inherited from file or from GitHub
 
 mount: # declare folders to mount in the container
   main: # give each folder any name that you like
@@ -119,7 +120,7 @@ macros: # macros define operations that Nut can perform
     - go test
 
 container_working_directory: /go/src/project # where macros will be executed
-syntax_version: "4" # Nut evolves quickly ; its configuration file syntax as well.
+syntax_version: "6" # Nut evolves quickly ; its configuration file syntax as well.
                     # So nut files are versioned to ensure backward compatibility.
 
 ```
