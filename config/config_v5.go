@@ -71,7 +71,7 @@ type ConfigV5 struct {
             }
             return cacheVolumes
         }
-        func (self *ProjectV5) getEnvironmentVariables() map[string]string {
+        func (self *ConfigV5) getEnvironmentVariables() map[string]string {
             return self.EnvironmentVariables
         }
         func (self *ConfigV5) getPorts() []string {
