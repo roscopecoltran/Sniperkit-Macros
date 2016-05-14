@@ -1,10 +1,10 @@
 package main
 
 import (
-	"os"
+    "os"
     "sort"
-	"github.com/codegangsta/cli"
-	log "github.com/Sirupsen/logrus"
+    "github.com/codegangsta/cli"
+    log "github.com/Sirupsen/logrus"
     "reflect"
     "github.com/matthieudelaro/nut/persist"
     Utils "github.com/matthieudelaro/nut/utils"
@@ -13,7 +13,7 @@ import (
 
 func main() {
     log.SetLevel(log.ErrorLevel)
-	// log.SetLevel(log.DebugLevel)
+    // log.SetLevel(log.DebugLevel)
 
     // get the folder where nut has been called
     pwd, err := os.Getwd()
@@ -32,7 +32,7 @@ func main() {
     project, projectContext, err := Config.FindProject(context)
     log.Debug("main second context: ", projectContext)
 
-	if err == nil {
+    if err == nil {
         // Macros are stored in a random order.
         // But we want to display them in the same order everytime.
         // So sort the names of the macros.
@@ -44,9 +44,9 @@ func main() {
         sort.Strings(macroNamesOrdered)
 
 
-		macros = make([]cli.Command, len(projectMacros))
+        macros = make([]cli.Command, len(projectMacros))
         log.Debug(len(macroNamesOrdered), " macros")
-		for index, name := range macroNamesOrdered {
+        for index, name := range macroNamesOrdered {
             macro := projectMacros[name]
 
             log.Debug("macro ", name, ": ", macro)
@@ -68,22 +68,22 @@ func main() {
                     usage += macroUsage
                 }
 
-    			macros[index] = cli.Command{
-    				Name:  nameClosure,
-    				Usage: usage,
+                macros[index] = cli.Command{
+                    Name:  nameClosure,
+                    Usage: usage,
                     Aliases: Config.GetAliases(macro),
                     UsageText: Config.GetUsageText(macro),
                     Description: Config.GetDescription(macro),
-    				Action: func(c *cli.Context) {
-    					execMacro(macro, projectContext)
-    				},
-    			}
+                    Action: func(c *cli.Context) {
+                        execMacro(macro, projectContext)
+                    },
+                }
             }
-		}
-	} else {
+        }
+    } else {
         log.Error("Could not parse nut.yml: " + err.Error())
-		macros = []cli.Command{}
-	}
+        macros = []cli.Command{}
+    }
 
     initFlag := false
     logsFlag := false
@@ -92,10 +92,10 @@ func main() {
     gitHubFlag := ""
 
     app := cli.NewApp()
-	app.Name = "nut"
-	app.Version = "0.1.2 dev"
-	app.Usage = "the development environment, containerized"
-	// app.EnableBashCompletion = true
+    app.Name = "nut"
+    app.Version = "0.1.2 dev"
+    app.Usage = "the development environment, containerized"
+    // app.EnableBashCompletion = true
     app.Flags = []cli.Flag {
         cli.BoolFlag{
             Name:  "clean",
@@ -148,7 +148,7 @@ func main() {
         defaultAction(c)
     }
 
-	app.Commands = macros
+    app.Commands = macros
 
     app.Run(os.Args)
 }
