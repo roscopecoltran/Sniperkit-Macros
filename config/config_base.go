@@ -2,7 +2,7 @@ package config
 
 import (
     "errors"
-    "path/filepath"
+    containerFilepath "github.com/matthieudelaro/nut/container/filepath"
     Utils "github.com/matthieudelaro/nut/utils"
 )
 
@@ -42,7 +42,7 @@ type ConfigBase struct {
             return nil
         }
         func (self *ConfigBase) getWorkingDir() string {
-            str, _ := filepath.Abs(".")
+            str, _ := containerFilepath.Abs(".")
             return str
         }
         func (self *ConfigBase) getVolumes() map[string]Volume {

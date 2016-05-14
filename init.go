@@ -9,6 +9,7 @@ import (
 	Config "github.com/matthieudelaro/nut/config"
 	Utils "github.com/matthieudelaro/nut/utils"
 	Persist "github.com/matthieudelaro/nut/persist"
+    containerFilepath "github.com/matthieudelaro/nut/container/filepath"
 )
 
 // create a nut.yml at the current path
@@ -48,7 +49,7 @@ func initSubcommand(c *cli.Context, context Utils.Context, gitHubFlag string) {
 					    // 1 - mount folder "." if not already mounted by parent configuration
 					    mountingPointName := "main"
 					    hostDir := "."
-					    containerDir := filepath.Join("/nut/" + name)
+					    containerDir := containerFilepath.Join("/nut", name)
 					    mountingPoint := &Config.VolumeV6{
 					        Host: hostDir,
 					        Container: containerDir,

@@ -3,6 +3,7 @@ package config
 import(
     "path/filepath"
     Utils "github.com/matthieudelaro/nut/utils"
+    containerFilepath "github.com/matthieudelaro/nut/container/filepath"
 )
 
 type VolumeV5 struct {
@@ -20,11 +21,11 @@ type VolumeV5 struct {
             }
         }
         func (self *VolumeV5) fullContainerPath(context Utils.Context) (string, error) {
-            clean := filepath.Clean(self.Container)
-            if filepath.IsAbs(clean) {
+            clean := containerFilepath.Clean(self.Container)
+            if containerFilepath.IsAbs(clean) {
                 return clean, nil
             } else {
-                return filepath.Join(context.GetRootDirectory(), clean), nil
+                return containerFilepath.Join(context.GetRootDirectory(), clean), nil
             }
         }
 
