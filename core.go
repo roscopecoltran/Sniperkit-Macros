@@ -82,7 +82,7 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             return
         }
         if containerPathErr != nil {
-            log.Error("Couldn't container host directory: ", containerPathErr.Error())
+            log.Error("Couldn't mount container directory: ", containerPathErr.Error())
             return
         }
         binds = append(binds, hostPath + ":" + containerPath)
@@ -185,15 +185,30 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
     }
     log.Debug("Created container with ID ", container.ID)
 
-    //Try to start the container
-    if err = dockerpty.Start(client, container, &docker.HostConfig{
+    dockerHostConfig := docker.HostConfig{
         Binds: binds,
         PortBindings: portBindings,
         Privileged: Config.IsPrivileged(config),
         SecurityOpt: Config.GetSecurityOpts(config),
         Devices: devices,
-    }); err != nil {
-        log.Error(err.Error())
+    }
+
+    //Try to start the container
+    if err = dockerpty.Start(client, container, &dockerHostConfig); err != nil {
+        log.Error("Error while starting container, and attaching to it: ", err.Error(),
+            "\nBinds: ", dockerHostConfig.Binds,
+            "\nPortBindings: ", dockerHostConfig.PortBindings,
+            "\nPrivileged: ", dockerHostConfig.Privileged,
+            "\nSecurityOpt: ", dockerHostConfig.SecurityOpt,
+            "\nDevices: ", dockerHostConfig.Devices,
+
+            "\nImage: ", dockerConfig.Image,
+            "\nCmd: ", dockerConfig.Cmd,
+            "\nWorkingDir: ", dockerConfig.WorkingDir,
+            "\nEnv: ", dockerConfig.Env,
+            "\nExposedPorts: ", dockerConfig.ExposedPorts,
+            "\nVolumeDriver: ", dockerConfig.VolumeDriver,
+            )
         return
     } else {
         // And once it is done with all the commands, remove the container.
