@@ -96,7 +96,7 @@ type ConfigV6 struct {
 type ProjectV6 struct {
     SyntaxVersion string `yaml:"syntax_version"`
     ProjectName string `yaml:"project_name"`
-    Base BaseEnvironmentV6 `yaml:"based_on"`
+    Base BaseEnvironmentV6 `yaml:"based_on,omitempty"`
     Macros map[string]*MacroV6 `yaml:"macros,omitempty"`
     parent Project
 
