@@ -7,20 +7,36 @@ import (
 	log "github.com/Sirupsen/logrus"
     "reflect"
     "github.com/matthieudelaro/nut/persist"
+    Utils "github.com/matthieudelaro/nut/utils"
+    Config "github.com/matthieudelaro/nut/config"
 )
 
 func main() {
     log.SetLevel(log.ErrorLevel)
 	// log.SetLevel(log.DebugLevel)
 
-	// try to parse the folder's configuration to add macros
-	var macros []cli.Command
-	project, err := LoadProject()
+    // get the folder where nut has been called
+    pwd, err := os.Getwd()
+    if err != nil {
+        log.Fatal("find path error: ", err)
+    }
+
+    context, err := Utils.NewContext(pwd, pwd)
+    if err != nil {
+        log.Fatal("Error with context: ", err)
+    }
+
+    log.Debug("main first context: ", context)
+    // try to parse the folder's configuration to add macros
+    var macros []cli.Command
+    project, projectContext, err := Config.FindProject(context)
+    log.Debug("main second context: ", projectContext)
+
 	if err == nil {
         // Macros are stored in a random order.
         // But we want to display them in the same order everytime.
         // So sort the names of the macros.
-        projectMacros := project.getMacros()
+        projectMacros := Config.GetMacros(project)
         macroNamesOrdered := make([]string, 0, len(projectMacros))
         for key, _ := range projectMacros {
             macroNamesOrdered = append(macroNamesOrdered, key)
@@ -46,20 +62,20 @@ func main() {
             } else {
                 nameClosure := name
                 usage := "macro: "
-                if macro.getUsage() == "" {
+                if macroUsage := Config.GetUsage(macro); macroUsage == "" {
                     usage += "undefined usage. define one with 'usage' property for this macro."
                 } else {
-                    usage += macro.getUsage()
+                    usage += macroUsage
                 }
 
     			macros[index] = cli.Command{
     				Name:  nameClosure,
     				Usage: usage,
-                    Aliases: macro.getAliases(),
-                    UsageText: macro.getUsageText(),
-                    Description: macro.getDescription(),
+                    Aliases: Config.GetAliases(macro),
+                    UsageText: Config.GetUsageText(macro),
+                    Description: Config.GetDescription(macro),
     				Action: func(c *cli.Context) {
-    					execMacro(macro, project)
+    					execMacro(macro, projectContext)
     				},
     			}
             }
@@ -70,7 +86,6 @@ func main() {
 	}
 
     initFlag := false
-    statusFlag := false
     logsFlag := false
     cleanFlag := false
     execFlag := ""
@@ -78,7 +93,7 @@ func main() {
 
     app := cli.NewApp()
 	app.Name = "nut"
-	app.Version = "0.1.0 dev"
+	app.Version = "0.1.2 dev"
 	app.Usage = "the development environment, containerized"
 	// app.EnableBashCompletion = true
     app.Flags = []cli.Flag {
@@ -107,11 +122,6 @@ func main() {
             Usage: "execute a command in a container.",
             Destination: &execFlag,
         },
-        cli.BoolFlag{
-            Name:  "status",
-            Usage: "gives status of the dev env",
-            Destination: &statusFlag,
-        },
     }
     defaultAction := app.Action
     app.Action = func(c *cli.Context) {
@@ -121,17 +131,15 @@ func main() {
         if cleanFlag {
             persist.CleanStoreFromProject(".") // TODO: do better than "."
         }
-        if statusFlag {
-            status()
-            return
-        }
         if initFlag {
-            initSubcommand(c, gitHubFlag)
+            log.Debug("main context for init: ", context)
+            initSubcommand(c, context, gitHubFlag)
             return
         }
         if execFlag != "" {
             if project != nil {
-                exec(project, c, execFlag)
+                // exec(project, c, execFlag)
+                execInContainer([]string{execFlag}, project, projectContext)
             } else {
                 log.Error("Could not find nut configuration.")
             }

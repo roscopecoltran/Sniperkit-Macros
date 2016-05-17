@@ -1,11 +1,13 @@
+[![Build Status](https://travis-ci.org/matthieudelaro/nut.svg?branch=supportwindows)](https://travis-ci.org/matthieudelaro/nut)
+
 ### Wetting Your Appetite
-Tired of hearing: "works on my machine"?  
-Ever experienced headache to install libraries and dependencies?  
-Ever had to deal with two incompatible versions of a program at once?  
-Ever wished to try out a new language first, and install it only if it pleases you?  
-Ever wished to develop for Linux when you use Mac OS or Windows?  
-Ever wished to develop in Go from the folder of your choice?  
-Ever wished to have a unified development tool, across all platforms, customizable to any languages?  
+Tired of hearing: "works on my machine"?
+Ever experienced headache to install libraries and dependencies?
+Ever had to deal with two incompatible versions of a program at once?
+Ever wished to try out a new language first, and install it only if it pleases you?
+Ever wished to develop for Linux when you use Mac OS or Windows?
+Ever wished to develop in Go from the folder of your choice?
+Ever wished to have a unified development tool, across all platforms, customizable to any languages?
 
 ### Nut
 **Nut** is a command line tool which offers a solution to common frustrations of developers. It hides the complexity of development environments, and extends them with customizable macros. Whether you develop in Swift, Go, Java, or C++, what you need is build/run/test the app. So just do it:
@@ -19,20 +21,20 @@ Ever wished to have a unified development tool, across all platforms, customizab
 
 Nut is in early stage of development. It has been tested on Ubuntu and on MacOS with *Docker for Mac*. Feedbacks and contributions to add features and to make Nut run on other systems are welcome (Windows, Docker Toolbox, etc).
 
-Check the [wiki](https://github.com/matthieudelaro/nut/wiki) to read some tutorials (GPU support, Caffe, TensorFlow, etc). 
+Check the [wiki](https://github.com/matthieudelaro/nut/wiki) to read some tutorials (GPU support, Caffe, TensorFlow, etc).
 
 ### Share and reuse environments
 You can initialize **Nut** with an environment from a GitHub repository:
 
     $ nut --init --github=matthieudelaro/nutfile_go1.6
-    
+
 This creates `nut.yml` file that inherites the configuration defined in the nut file at the root of the repository.
 This configuration can be overloaded by defining/redefining docker image, macros, mounting points, ... It makes it easy for developers to use libraries and development tools that provide a nut file.
 
 To inspect an environment, you can use `--exec` flag:
-    
+
     $ # --exec="command to run in the container"
-    $ nut --exec="pwd"  # will display the path in working directory of the container 
+    $ nut --exec="pwd"  # will display the path in working directory of the container
     $ nut --exec="ls"  # will display the files in the container working directory
     $ nut --exec="echo hello && echo world!" --logs  # --logs will display the logs for developers
 
@@ -42,12 +44,12 @@ To inspect an environment, you can use `--exec` flag:
 
 ### Getting Nut
 #### Compile from source
-Provided that you use Docker, you don't need to install anything on your computer.  
+Provided that you use Docker, you don't need to install anything on your computer.
 Not even Go!
 ```bash
 # 1 - Download sources
-git clone git@github.com:matthieudelaro/nut.git --recursive
-    # if you don't have git, you can download a zip file from http://matthieudelaro.github.io/nut/
+git clone https://github.com/matthieudelaro/nut.git --recursive
+    # if you don't have git, you can download a zip file https://github.com/matthieudelaro/nut/archive/master.zip
 
 # 2 - Move to nut folder
 cd nut
@@ -94,7 +96,8 @@ based_on: # configuration can be inherited from:
   github: matthieudelaro/nutfile_go1.6 # a GitHub repository
   nut_file_path: ../go1.5/nut.yml # a local file
   # You can inherite either from GitHub or from a file, not both.
-  docker_image: golang:1.6 # a Docker image. Will override image set on GitHub
+
+docker_image: golang:1.6 # the Docker image. Will override image inherited from file or from GitHub
 
 mount: # declare folders to mount in the container
   main: # give each folder any name that you like
@@ -117,7 +120,7 @@ macros: # macros define operations that Nut can perform
     - go test
 
 container_working_directory: /go/src/project # where macros will be executed
-syntax_version: "4" # Nut evolves quickly ; its configuration file syntax as well.
+syntax_version: "6" # Nut evolves quickly ; its configuration file syntax as well.
                     # So nut files are versioned to ensure backward compatibility.
 
 ```

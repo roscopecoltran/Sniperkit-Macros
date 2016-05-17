@@ -8,6 +8,8 @@ import (
     "strings"
     "fmt"
     "github.com/matthieudelaro/nut/nvidia"
+    Config "github.com/matthieudelaro/nut/config"
+    Utils "github.com/matthieudelaro/nut/utils"
 )
 
 // Start the container, execute the list of commands, and then stops the container.
@@ -17,7 +19,8 @@ import (
 // DONE: to solve tty size, use func (c *Client) ResizeContainerTTY(id string, height, width int) error : solved with dockerpty
 // and/or func (c *Client) ResizeExecTTY(id string, height, width int) error
 // TODO: report bug "StartExec Error: %s read /dev/stdin: bad file descriptor" when executing several commands : post issue on dockerpty
-func execInContainer(commands []string, project Project) {
+// func execMacro(macro Config.Macro) {
+func execInContainer(commands []string, config Config.Config, context Utils.Context) {
     log.Debug("commands (len = ", len(commands), ") : ", commands)
     var cmdConfig []string
     if len(commands) == 0 {
@@ -30,9 +33,9 @@ func execInContainer(commands []string, project Project) {
     }
     log.Debug("cmdConfig: ", cmdConfig)
 
-    imageName, err := project.getBaseEnv().getDockerImageName()
-    if err != nil {
-        log.Error(err.Error())
+    imageName := Config.GetDockerImage(config)
+    if imageName == "" {
+        log.Error("Docker image has not been defined.")
         return
     }
 
@@ -63,7 +66,7 @@ func execInContainer(commands []string, project Project) {
 
     // prepare names of directories to mount
     // inspired from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
-    mountingPoints := project.getMountingPoints()
+    mountingPoints := Config.GetVolumes(config, context)
     binds := make([]string, 0, len(mountingPoints))
     portBindings := map[docker.Port][]docker.PortBinding{}
     exposedPorts := map[docker.Port]struct{}{}
@@ -72,21 +75,21 @@ func execInContainer(commands []string, project Project) {
     devices := []docker.Device{}
 
     for _, directory := range(mountingPoints) {
-        hostPath, hostPathErr := directory.fullHostPath()
-        containerPath, containerPathErr := directory.fullContainerPath()
+        hostPath, hostPathErr := Config.GetFullHostPath(directory, context)
+        containerPath, containerPathErr := Config.GetFullContainerPath(directory, context)
         if hostPathErr != nil {
             log.Error("Couldn't mount host directory: ", hostPathErr.Error())
             return
         }
         if containerPathErr != nil {
-            log.Error("Couldn't container host directory: ", containerPathErr.Error())
+            log.Error("Couldn't mount container directory: ", containerPathErr.Error())
             return
         }
         binds = append(binds, hostPath + ":" + containerPath)
     }
     log.Debug("binds", binds)
 
-    for _, value := range project.getPorts() {
+    for _, value := range Config.GetPorts(config) {
         parts := strings.Split(value, ":") // TODO: support ranges of ports
         hostPort := ""
         containerPort := ""
@@ -108,11 +111,11 @@ func execInContainer(commands []string, project Project) {
             // {HostIP: "0.0.0.0", HostPort: "8080",}}
             {HostPort: hostPort,}} // TODO: support HostIP
     }
-    for name, value := range project.getEnvironmentVariables() {
+    for name, value := range Config.GetEnvironmentVariables(config) {
         envVariables = append(envVariables, name + "=" + value)
     }
-    if project.getEnableGui() {
-        portBindingsGUI, envVariablesGUI, bindsGUI, err := enableGui(project)
+    if Config.IsGUIEnabled(config) {
+        portBindingsGUI, envVariablesGUI, bindsGUI, err := enableGui()
         if err != nil {
             log.Error("Could not enable GUI: ", err)
         } else {
@@ -123,7 +126,7 @@ func execInContainer(commands []string, project Project) {
             }
         }
     }
-    if project.getEnableNvidiaDevices() {
+    if Config.IsNvidiaDevicesEnabled(config) {
         nvidiaDevices, driverName, driverVolume, err := nvidia.GetConfiguration()
         if err != nil {
             log.Error("Could not enable Nvidia devices: ", err,
@@ -143,7 +146,7 @@ func execInContainer(commands []string, project Project) {
     }
 
     //Try to create a container from the imageID
-    config := docker.Config{
+    dockerConfig := docker.Config{
         Image: imageName,
         Cmd:          cmdConfig,
         OpenStdin:    true,
@@ -152,7 +155,7 @@ func execInContainer(commands []string, project Project) {
         AttachStdout: true,
         AttachStderr: true,
         Tty:          true,
-        WorkingDir:   project.getWorkingDir(),
+        WorkingDir:   Config.GetWorkingDir(config),
         Env:          envVariables,
         ExposedPorts: exposedPorts,
         VolumeDriver: volumeDriver,
@@ -161,8 +164,8 @@ func execInContainer(commands []string, project Project) {
     // User: set it to the user of the host, instead of root, to manage file permissions properly
 
     // TODO: ? Give the container a name? Can be done with docker.CreateContainerOptions{Name: "nut_myproject"}
-    // opts2 := docker.CreateContainerOptions{Name: "nut_" + , Config: &config}
-    opts2 := docker.CreateContainerOptions{Config: &config}
+    // opts2 := docker.CreateContainerOptions{Name: "nut_" + , Config: &dockerConfig}
+    opts2 := docker.CreateContainerOptions{Config: &dockerConfig}
     container, err := client.CreateContainer(opts2)
     if err != nil {
         log.Error("Couldn't create container: ", err.Error())
@@ -182,14 +185,30 @@ func execInContainer(commands []string, project Project) {
     }
     log.Debug("Created container with ID ", container.ID)
 
-    //Try to start the container
-    if err = dockerpty.Start(client, container, &docker.HostConfig{
+    dockerHostConfig := docker.HostConfig{
         Binds: binds,
         PortBindings: portBindings,
-        Privileged: project.getPrivileged(),
+        Privileged: Config.IsPrivileged(config),
+        SecurityOpt: Config.GetSecurityOpts(config),
         Devices: devices,
-    }); err != nil {
-        log.Error(err.Error())
+    }
+
+    //Try to start the container
+    if err = dockerpty.Start(client, container, &dockerHostConfig); err != nil {
+        log.Error("Error while starting container, and attaching to it: ", err.Error(),
+            "\nBinds: ", dockerHostConfig.Binds,
+            "\nPortBindings: ", dockerHostConfig.PortBindings,
+            "\nPrivileged: ", dockerHostConfig.Privileged,
+            "\nSecurityOpt: ", dockerHostConfig.SecurityOpt,
+            "\nDevices: ", dockerHostConfig.Devices,
+
+            "\nImage: ", dockerConfig.Image,
+            "\nCmd: ", dockerConfig.Cmd,
+            "\nWorkingDir: ", dockerConfig.WorkingDir,
+            "\nEnv: ", dockerConfig.Env,
+            "\nExposedPorts: ", dockerConfig.ExposedPorts,
+            "\nVolumeDriver: ", dockerConfig.VolumeDriver,
+            )
         return
     } else {
         // And once it is done with all the commands, remove the container.
@@ -205,6 +224,6 @@ func execInContainer(commands []string, project Project) {
     log.Debug("Started container with ID ", container.ID)
 }
 
-func execMacro(macro Macro, project Project) {
-    execInContainer(macro.getActions(), project)
+func execMacro(macro Config.Macro, context Utils.Context) {
+    execInContainer(Config.GetActions(macro), macro, context)
 }

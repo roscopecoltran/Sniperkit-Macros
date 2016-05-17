@@ -1,7 +1,6 @@
-syntax_version: "4"
+syntax_version: "6"
 project_name: go
-based_on:
-  docker_image: golang:1.5
+docker_image: golang:1.5
 macros:
   build:
     usage: build the project

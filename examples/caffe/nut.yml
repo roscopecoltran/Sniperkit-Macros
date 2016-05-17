@@ -1,11 +1,9 @@
-syntax_version: "5"
+syntax_version: "6"
 project_name: caffe
-based_on:
-  docker_image: matthieudelaro/work-on-caffe
+docker_image: matthieudelaro/work-on-caffe
 container_working_directory: /opt/caffe
-enable_nvidia_devices: true
 mount:
-  caffe:
+  main:
   - ./caffe
   - /opt/caffe
   dataset: # if you store your datasets in another folder, add them this way
@@ -14,8 +12,10 @@ mount:
 macros:
   download:
     usage: download caffe
+    container_working_directory: /opt/
     actions:
-    - git clone https://github.com/BVLC/caffe.git .
+    - git clone https://github.com/BVLC/caffe.git caffe
+    - cd caffe
     - cp Makefile.config.example Makefile.config
   build:
     usage: build the project
@@ -41,10 +41,6 @@ macros:
     usage: build pycaffe
     actions:
     - make pycaffe -j8
-  test:
-    usage: run the tests
-    actions:
-    - make runtest -j8
   test-cpu:
     usage: run the tests in CPU mode only (set CPU_ONLY from Makefile.config on the fly)
     actions:
@@ -52,6 +48,7 @@ macros:
     - make runtest -j8
   test-gpu:
     usage: run the tests in GPU mode (unset CPU_ONLY from Makefile.config on the fly)
+    enable_nvidia_devices: true
     actions:
     - sed -i 's/CPU_ONLY := 1/# CPU_ONLY := 1/' Makefile.config
     - make runtest -j8
@@ -64,6 +61,7 @@ macros:
     - caffe train --solver=examples/mnist/lenet_solver.prototxt
   train-mnist-gpu:
     usage: attemps to train MNIST in GPU mode (solver_mode in examples/mnist/lenet_solver.prototxt on the fly)
+    enable_nvidia_devices: true
     actions:
     - "sed -i 's/solver_mode: CPU/solver_mode: GPU/' examples/mnist/lenet_solver.prototxt"
     - ./data/mnist/get_mnist.sh

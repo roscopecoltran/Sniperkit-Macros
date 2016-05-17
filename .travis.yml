@@ -11,3 +11,4 @@ script:
   - env GOOS=darwin GOARCH=amd64 go build -o `echo $dirName`OSX
   - env GOOS=windows GOARCH=amd64 go build -o `echo $dirName`Windows  # nut does not support Windows in master branch yet
   - go test
+
