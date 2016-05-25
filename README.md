@@ -1,13 +1,14 @@
 [![Build Status](https://travis-ci.org/matthieudelaro/nut.svg?branch=master)](https://travis-ci.org/matthieudelaro/nut)
 
 ### Whetting Your Appetite
-Tired of hearing: "works on my machine"?
-Ever experienced headache to install libraries and dependencies?
-Ever had to deal with two incompatible versions of a program at once?
-Ever wished to try out a new language first, and install it only if it pleases you?
-Ever wished to develop for Linux when you use Mac OS or Windows?
-Ever wished to develop in Go from the folder of your choice?
-Ever wished to have a unified development tool, across all platforms, customizable to any languages?
+Tired of hearing: "works on my machine"?  
+Ever experienced headache to install libraries and dependencies?  
+Ever had to deal with two incompatible versions of a program at once?  
+Ever wished to try out a new language first, and install it only if it pleases you?  
+Ever wished to develop for Linux when you use Mac OS or Windows?  
+Ever wished to develop in Go from the folder of your choice?  
+Ever wished to have a unified development tool, across all platforms, customizable to any languages?  
+Ever wished to simplify and share your research on neural networks in Docker, running on GPU, with reproducible results?
 
 ### Nut
 **Nut** is a command line tool which offers a solution to common frustrations of developers. It hides the complexity of development environments, and extends them with customizable macros. Whether you develop in Swift, Go, Java, or C++, what you need is build/run/test the app. So just do it:
