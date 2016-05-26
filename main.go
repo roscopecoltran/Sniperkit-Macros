@@ -81,7 +81,7 @@ func main() {
             }
         }
     } else {
-        log.Error("Could not parse nut.yml: " + err.Error())
+        log.Error("Could not parse configuration: " + err.Error())
         macros = []cli.Command{}
     }
 

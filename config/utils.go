@@ -12,6 +12,7 @@ import (
 )
 
 const NutFileName = "nut.yml"
+const NutOverrideFileName = "nut.override.yml"
 
 /// Returns the boolean value, and whether there is or not a value
 func TruthyString(s string) (bool, bool) {
@@ -158,7 +159,8 @@ func FindProject(context Utils.Context) (Project, Utils.Context, error) {
     var store Persist.Store
 
     foundDirectory := context.GetUserDirectory()
-    fullpath := filepath.Join(foundDirectory, NutFileName)
+    // fullpath := filepath.Join(foundDirectory, NutFileName)
+    fullpath := filepath.Join(foundDirectory, NutOverrideFileName)
     previousFullpath := ""
     var exists bool
 
@@ -169,12 +171,20 @@ func FindProject(context Utils.Context) (Project, Utils.Context, error) {
             found = true
             searchHigher = false
         } else {
-            foundDirectory = filepath.Dir(foundDirectory)
-            previousFullpath = fullpath
             fullpath = filepath.Join(foundDirectory, NutFileName)
 
-            if fullpath == previousFullpath {
+            if exists, err = Utils.FileExists(fullpath); exists && err == nil {
+                found = true
                 searchHigher = false
+            } else {
+                foundDirectory = filepath.Dir(foundDirectory)
+                previousFullpath = fullpath
+                // fullpath = filepath.Join(foundDirectory, NutFileName)
+                fullpath = filepath.Join(foundDirectory, NutOverrideFileName)
+
+                if fullpath == previousFullpath {
+                    searchHigher = false
+                }
             }
         }
     }
