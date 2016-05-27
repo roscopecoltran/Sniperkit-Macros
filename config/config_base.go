@@ -35,6 +35,9 @@ type ConfigBase struct {
         func (self *ConfigBase) getUTSMode() string {
             return ""
         }
+        func (self *ConfigBase) getNetworkMode() string {
+            return ""
+        }
         func (self *ConfigBase) getParent() Config {
             return nil
         }

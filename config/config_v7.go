@@ -57,10 +57,14 @@ type ConfigV7 struct {
     SecurityOpts []string `yaml:"security_opts,omitempty"`
     Detached string `yaml:"detached,omitempty"`
     UTSMode string `yaml:"uts,omitempty"`
+    NetworkMode string `yaml:"net,omitempty"`
     parent Config
 }
         func (self *ConfigV7) getDockerImage() string {
             return self.DockerImage
+        }
+        func (self *ConfigV7) getNetworkMode() string {
+            return self.NetworkMode
         }
         func (self *ConfigV7) getUTSMode() string {
             return self.UTSMode

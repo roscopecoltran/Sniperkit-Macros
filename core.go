@@ -192,6 +192,7 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         SecurityOpt: Config.GetSecurityOpts(config),
         Devices: devices,
         UTSMode: Config.GetUTSMode(config),
+        NetworkMode: Config.GetNetworkMode(config),
     }
 
     //Try to start the container

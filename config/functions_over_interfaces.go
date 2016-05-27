@@ -49,6 +49,16 @@ func GetDockerImage(config Config) string {
     }
 }
 
+func GetNetworkMode(config Config) string {
+    if item := config.getNetworkMode(); item != "" {
+        return item
+    } else if parent := config.getParent(); parent != nil {
+        return GetNetworkMode(parent)
+    } else {
+        return ""
+    }
+}
+
 func GetUTSMode(config Config) string {
     if item := config.getUTSMode(); item != "" {
         return item

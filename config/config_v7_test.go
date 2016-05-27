@@ -303,6 +303,7 @@ func TestParsingV7(t *testing.T) {
         docker_image string
         detached bool
         UTSMode string
+        NetworkMode string
     }
 
     nutFiles := []Tuple{}
@@ -344,6 +345,7 @@ environment:
 ports:
   - "3000:3000"
   - 100:100
+net: none
 `,
 env: map[string]string{
     "A": "1",
@@ -354,6 +356,7 @@ env: map[string]string{
 },
 docker_image: "golang:1.7",
 detached: false,
+NetworkMode: "none",
 },
 
 Tuple{ file:`
@@ -392,6 +395,9 @@ detached: true,
 
         assert.Equal(t, GetUTSMode(project), tuple.UTSMode,
                 "Error with tuple " + strconv.Itoa(index) + ": not same UTSMode")
+
+        assert.Equal(t, GetNetworkMode(project), tuple.NetworkMode,
+                "Error with tuple " + strconv.Itoa(index) + ": not same NetworkMode")
 
         envVariables := project.getEnvironmentVariables()
         assert.Equal(t, len(reflect.ValueOf(tuple.env).MapKeys()),
