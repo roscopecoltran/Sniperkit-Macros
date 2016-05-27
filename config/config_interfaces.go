@@ -6,6 +6,9 @@ import (
 
 
 type Volume interface {
+    getHostPath() string
+    getContainerPath() string
+    getOptions() (string)
     fullHostPath(context Utils.Context) (string, error)
     fullContainerPath(context Utils.Context) (string, error)
 }
@@ -27,6 +30,7 @@ type Config interface {
     getVolumes() map[string]Volume
     getMacros() map[string]Macro
     getEnvironmentVariables() map[string]string
+    getDevices() map[string]Volume
     getPorts() []string
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
@@ -52,6 +56,7 @@ type Project interface { // extends Config interface
     getVolumes() map[string]Volume
     getMacros() map[string]Macro
     getEnvironmentVariables() map[string]string
+    getDevices() map[string]Volume
     getPorts() []string
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
@@ -81,6 +86,7 @@ type Macro interface { // extends Config interface
     getVolumes() map[string]Volume
     getMacros() map[string]Macro
     getEnvironmentVariables() map[string]string
+    getDevices() map[string]Volume
     getPorts() []string
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)

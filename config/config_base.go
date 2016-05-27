@@ -8,6 +8,15 @@ import (
 
 type VolumeBase struct {
 }
+        func (self *VolumeBase) getHostPath() string {
+            return ""
+        }
+        func (self *VolumeBase) getContainerPath() string {
+            return ""
+        }
+        func (self *VolumeBase) getOptions() string {
+            return ""
+        }
         func (self *VolumeBase) fullHostPath(context Utils.Context) (string, error) {
             return "", errors.New("VolumeBase.fullHostPath() must be overloaded.")
         }
@@ -59,6 +68,9 @@ type ConfigBase struct {
         }
         func (self *ConfigBase) getEnvironmentVariables() map[string]string {
             return make(map[string]string)
+        }
+        func (self *ConfigBase) getDevices() map[string]Volume {
+            return make(map[string]Volume)
         }
         func (self *ConfigBase) getPorts() []string {
             return []string{}

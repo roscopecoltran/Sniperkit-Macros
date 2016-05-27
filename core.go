@@ -126,6 +126,13 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             }
         }
     }
+    for _, device := range Config.GetDevices(config) {
+        devices = append(devices, docker.Device{
+            PathOnHost: Config.GetHostPath(device),
+            PathInContainer: Config.GetContainerPath(device),
+            CgroupPermissions: Config.GetOptions(device),
+        })
+    }
     if Config.IsNvidiaDevicesEnabled(config) {
         nvidiaDevices, driverName, driverVolume, err := nvidia.GetConfiguration()
         if err != nil {
@@ -139,7 +146,7 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
                 devices = append(devices, docker.Device{
                     PathOnHost: devicePath,
                     PathInContainer: devicePath,
-                    CgroupPermissions: "mrw", // TODO: discuss proper CgroupPermissions
+                    CgroupPermissions: "mrw", // DONE: discuss proper CgroupPermissions
                 })
             }
         }

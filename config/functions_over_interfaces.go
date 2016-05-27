@@ -6,7 +6,15 @@ import (
 )
 
 // Define methods over interfaces
-
+func GetHostPath(volume Volume) string {
+    return volume.getHostPath()
+}
+func GetContainerPath(volume Volume) string {
+    return volume.getContainerPath()
+}
+func GetOptions(volume Volume) string {
+    return volume.getOptions()
+}
 
 func GetFullHostPath(volume Volume, context Utils.Context) (string, error) {
     return volume.fullHostPath(context)
@@ -137,6 +145,21 @@ func GetEnvironmentVariables(config Config) map[string]string {
     var parent = config.getParent()
     for parent != nil {
         for name, item := range parent.getEnvironmentVariables() {
+            if _, ok := items[name]; !ok {
+                items[name] = item
+            }
+        }
+        parent = parent.getParent()
+    }
+    return items
+}
+
+func GetDevices(config Config) map[string]Volume {
+    items := config.getDevices()
+
+    var parent = config.getParent()
+    for parent != nil {
+        for name, item := range parent.getDevices() {
             if _, ok := items[name]; !ok {
                 items[name] = item
             }

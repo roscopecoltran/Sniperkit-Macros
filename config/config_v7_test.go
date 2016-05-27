@@ -304,11 +304,44 @@ func TestParsingV7(t *testing.T) {
         detached bool
         UTSMode string
         NetworkMode string
+        Devices map[string]Volume
     }
 
     nutFiles := []Tuple{}
 
     nutFiles = append(nutFiles,
+Tuple{ file:`
+syntax_version: "7"
+docker_image: golang:1.7
+devices:
+  first:
+    host_path: "/dev/1"
+    container_path: "/dev/1"
+    options: "rw"
+`,
+  // second: /dev/2:/dev/2
+ports: []string{},
+docker_image: "golang:1.7",
+detached: false,
+Devices: map[string]Volume{
+        "first": &VolumeV7{
+            Host: "/dev/1",
+            Container: "/dev/1",
+            Options: "rw",
+        },
+        // "second": "/dev/2:/dev/2",
+    },
+},
+
+Tuple{ file:`
+syntax_version: "7"
+docker_image: golang:1.7
+`,
+ports: []string{},
+docker_image: "golang:1.7",
+detached: false,
+},
+
 Tuple{ file:`
 syntax_version: "7"
 docker_image: golang:1.7
@@ -398,6 +431,11 @@ detached: true,
 
         assert.Equal(t, GetNetworkMode(project), tuple.NetworkMode,
                 "Error with tuple " + strconv.Itoa(index) + ": not same NetworkMode")
+
+        for name, value := range GetDevices(project) {
+            assert.Equal(t, value, tuple.Devices[name],
+                "Error with tuple " + strconv.Itoa(index) + ": not same device " + name)
+        }
 
         envVariables := project.getEnvironmentVariables()
         assert.Equal(t, len(reflect.ValueOf(tuple.env).MapKeys()),

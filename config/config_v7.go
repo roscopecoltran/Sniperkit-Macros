@@ -9,9 +9,19 @@ import(
 type VolumeV7 struct {
     VolumeBase `yaml:"inheritedValues,inline"`
 
-    Host string `yaml:host_path`
-    Container string `yaml:container_path`
+    Host string `yaml:"host_path,omitempty"`
+    Container string `yaml:"container_path,omitempty"`
+    Options string `yaml:"options,omitempty"`
 }
+        func (self *VolumeV7) getHostPath() string {
+            return self.Host
+        }
+        func (self *VolumeV7) getContainerPath() string {
+            return self.Container
+        }
+        func (self *VolumeV7) getOptions() string {
+            return self.Options
+        }
         func (self *VolumeV7) fullHostPath(context Utils.Context) (string, error) {
             clean := filepath.Clean(self.Host)
             if filepath.IsAbs(clean) {
@@ -21,7 +31,6 @@ type VolumeV7 struct {
             }
         }
         func (self *VolumeV7) fullContainerPath(context Utils.Context) (string, error) {
-
             clean := containerFilepath.Clean(self.Container)
             if containerFilepath.IsAbs(clean) {
                 return clean, nil
@@ -29,6 +38,7 @@ type VolumeV7 struct {
                 return containerFilepath.Join(context.GetRootDirectory(), clean), nil
             }
         }
+
 
 type BaseEnvironmentV7 struct {
     BaseEnvironmentBase `yaml:"inheritedValues,inline"`
@@ -58,6 +68,7 @@ type ConfigV7 struct {
     Detached string `yaml:"detached,omitempty"`
     UTSMode string `yaml:"uts,omitempty"`
     NetworkMode string `yaml:"net,omitempty"`
+    Devices map[string]VolumeV7 `yaml:"devices,omitempty"`
     parent Config
 }
         func (self *ConfigV7) getDockerImage() string {
@@ -87,6 +98,13 @@ type ConfigV7 struct {
         }
         func (self *ConfigV7) getEnvironmentVariables() map[string]string {
             return self.EnvironmentVariables
+        }
+        func (self *ConfigV7) getDevices() map[string]Volume {
+            cacheVolumes := make(map[string]Volume)
+            for name, data := range(self.Devices) {
+                cacheVolumes[name] = &data
+            }
+            return cacheVolumes
         }
         func (self *ConfigV7) getPorts() []string {
             return self.Ports
