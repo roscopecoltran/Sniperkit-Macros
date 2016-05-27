@@ -49,6 +49,16 @@ func GetDockerImage(config Config) string {
     }
 }
 
+func GetUTSMode(config Config) string {
+    if item := config.getUTSMode(); item != "" {
+        return item
+    } else if parent := config.getParent(); parent != nil {
+        return GetUTSMode(parent)
+    } else {
+        return ""
+    }
+}
+
 func GetSyntaxVersion(config Config) string {
     if item := config.getSyntaxVersion(); item != "" {
         return item

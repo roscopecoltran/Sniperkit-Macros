@@ -191,6 +191,7 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         Privileged: Config.IsPrivileged(config),
         SecurityOpt: Config.GetSecurityOpts(config),
         Devices: devices,
+        UTSMode: Config.GetUTSMode(config),
     }
 
     //Try to start the container

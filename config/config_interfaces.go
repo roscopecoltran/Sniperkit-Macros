@@ -18,6 +18,7 @@ type BaseEnvironment interface {
 type Config interface {
     getDockerImage() string
     getProjectName() string
+    getUTSMode() string
     getParent() Config
     getSyntaxVersion() string
     getBaseEnv() BaseEnvironment
@@ -40,6 +41,7 @@ type Project interface { // extends Config interface
     // Config methods
     getDockerImage() string
     getProjectName() string
+    getUTSMode() string
     getParent() Config
     getParentProject() Project
     getSyntaxVersion() string
@@ -68,6 +70,7 @@ type Macro interface { // extends Config interface
     // Config methods
     getDockerImage() string
     getProjectName() string
+    getUTSMode() string
     getParent() Config
     getSyntaxVersion() string
     getBaseEnv() BaseEnvironment
