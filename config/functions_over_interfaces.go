@@ -178,6 +178,16 @@ func IsPrivileged(config Config) bool {
     }
 }
 
+func IsDetached(config Config) bool {
+    value, defined := config.getDetached()
+    parent := config.getParent()
+    if defined || parent == nil {
+        return value
+    } else {
+        return IsDetached(parent)
+    }
+}
+
 func GetProjectName(config Config) string {
     if item := config.getProjectName(); item != "" {
         return item

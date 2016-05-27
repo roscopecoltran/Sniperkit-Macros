@@ -66,6 +66,9 @@ type ConfigBase struct {
         func (self *ConfigBase) getPrivileged() (bool, bool)  {
             return false, false
         }
+        func (self *ConfigBase) getDetached() (bool, bool)  {
+            return false, false
+        }
         func (self *ConfigBase) getSecurityOpts() []string {
             return []string{}
         }

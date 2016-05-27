@@ -47,6 +47,7 @@ func CheckConflict(context Utils.Context, key string, newPoint Volume, mountingP
 
 func GetSyntaxes() []Project {
     return []Project{
+        NewProjectV7(nil),
         NewProjectV6(nil),
         NewProjectV5(nil),
         // NewProjectV4(), // represented by V5

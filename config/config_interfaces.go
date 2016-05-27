@@ -29,6 +29,7 @@ type Config interface {
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
     getPrivileged() (bool, bool)
+    getDetached() (bool, bool)
     getSecurityOpts() []string
 }
 type Project interface { // extends Config interface
@@ -51,6 +52,7 @@ type Project interface { // extends Config interface
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
     getPrivileged() (bool, bool)
+    getDetached() (bool, bool)
     getSecurityOpts() []string
 
 }
@@ -77,6 +79,7 @@ type Macro interface { // extends Config interface
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
     getPrivileged() (bool, bool)
+    getDetached() (bool, bool)
     getSecurityOpts() []string
 }
 

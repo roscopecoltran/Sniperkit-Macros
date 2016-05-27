@@ -11,4 +11,4 @@ nut.sublime-workspace
 debug*
 .vscode
 
-/nut.override.yml
+nut.override.yml
