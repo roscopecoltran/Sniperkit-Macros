@@ -54,6 +54,8 @@ macros:
     usage: test the project
     actions:
     - go test
+    - cd config
+    - go test
   code:
     usage: open this project in vscode
     docker_image: ctaggart/golang-vscode

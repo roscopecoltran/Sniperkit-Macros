@@ -6,21 +6,24 @@ import (
 )
 
 // Define methods over interfaces
-func GetHostPath(volume Volume) string {
+func GetHostPath(volume Device) string {
     return volume.getHostPath()
 }
-func GetContainerPath(volume Volume) string {
+func GetContainerPath(volume Device) string {
     return volume.getContainerPath()
 }
-func GetOptions(volume Volume) string {
-    return volume.getOptions()
+func GetOptions(bind Bind) string {
+    return bind.getOptions()
 }
 
+func GetVolumeName(volume Volume) string {
+    return volume.getVolumeName()
+}
 func GetFullHostPath(volume Volume, context Utils.Context) (string, error) {
-    return volume.fullHostPath(context)
+    return volume.getFullHostPath(context)
 }
 func GetFullContainerPath(volume Volume, context Utils.Context) (string, error) {
-    return volume.fullContainerPath(context)
+    return volume.getFullContainerPath(context)
 }
 
 func SetParentProject(child Project, parent Project) {
@@ -154,7 +157,7 @@ func GetEnvironmentVariables(config Config) map[string]string {
     return items
 }
 
-func GetDevices(config Config) map[string]Volume {
+func GetDevices(config Config) map[string]Device {
     items := config.getDevices()
 
     var parent = config.getParent()

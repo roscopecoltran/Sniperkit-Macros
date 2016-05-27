@@ -12,7 +12,7 @@ type VolumeV5 struct {
     Host string `yaml:host_path`
     Container string `yaml:container_path`
 }
-        func (self *VolumeV5) fullHostPath(context Utils.Context) (string, error) {
+        func (self *VolumeV5) getFullHostPath(context Utils.Context) (string, error) {
             clean := filepath.Clean(self.Host)
             if filepath.IsAbs(clean) {
                 return clean, nil
@@ -20,7 +20,7 @@ type VolumeV5 struct {
                 return filepath.Join(context.GetRootDirectory(), clean), nil
             }
         }
-        func (self *VolumeV5) fullContainerPath(context Utils.Context) (string, error) {
+        func (self *VolumeV5) getFullContainerPath(context Utils.Context) (string, error) {
             clean := containerFilepath.Clean(self.Container)
             if containerFilepath.IsAbs(clean) {
                 return clean, nil

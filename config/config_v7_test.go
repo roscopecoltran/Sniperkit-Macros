@@ -17,7 +17,6 @@ func TestFromNutPackageV7(t *testing.T) {
     log.Debug("------Tests of main.go")
 
     var volume Volume
-    volume = &VolumeBase{}
     volume = &VolumeV7{}
     log.Debug("OK ", volume)
 
@@ -304,7 +303,7 @@ func TestParsingV7(t *testing.T) {
         detached bool
         UTSMode string
         NetworkMode string
-        Devices map[string]Volume
+        Devices map[string]Device
     }
 
     nutFiles := []Tuple{}
@@ -323,8 +322,8 @@ devices:
 ports: []string{},
 docker_image: "golang:1.7",
 detached: false,
-Devices: map[string]Volume{
-        "first": &VolumeV7{
+Devices: map[string]Device{
+        "first": &DeviceV7{
             Host: "/dev/1",
             Container: "/dev/1",
             Options: "rw",

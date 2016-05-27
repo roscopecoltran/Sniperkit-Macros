@@ -18,7 +18,6 @@ func TestFromNutPackage(t *testing.T) {
     log.Debug("------Tests of main.go")
 
     var volume Volume
-    volume = &VolumeBase{}
     volume = &VolumeV6{}
     log.Debug("OK ", volume)
 

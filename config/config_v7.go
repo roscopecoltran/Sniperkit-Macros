@@ -1,6 +1,7 @@
 package config
 
 import(
+    "errors"
     "path/filepath"
     Utils "github.com/matthieudelaro/nut/utils"
     containerFilepath "github.com/matthieudelaro/nut/container/filepath"
@@ -9,34 +10,58 @@ import(
 type VolumeV7 struct {
     VolumeBase `yaml:"inheritedValues,inline"`
 
+    VolumeName string `yaml:"volume_name,omitempty"`
     Host string `yaml:"host_path,omitempty"`
-    Container string `yaml:"container_path,omitempty"`
+    Container string `yaml:"container_path"`
     Options string `yaml:"options,omitempty"`
 }
-        func (self *VolumeV7) getHostPath() string {
-            return self.Host
-        }
-        func (self *VolumeV7) getContainerPath() string {
-            return self.Container
+        func (self *VolumeV7) getVolumeName() string {
+            return self.VolumeName
         }
         func (self *VolumeV7) getOptions() string {
             return self.Options
         }
-        func (self *VolumeV7) fullHostPath(context Utils.Context) (string, error) {
-            clean := filepath.Clean(self.Host)
-            if filepath.IsAbs(clean) {
-                return clean, nil
+        func (self *VolumeV7) getFullHostPath(context Utils.Context) (string, error) {
+            if self.Host == "" {
+                return "", errors.New("Undefined host path")
             } else {
-                return filepath.Join(context.GetRootDirectory(), clean), nil
+                clean := filepath.Clean(self.Host)
+                if filepath.IsAbs(clean) {
+                    return clean, nil
+                } else {
+                    return filepath.Join(context.GetRootDirectory(), clean), nil
+                }
             }
         }
-        func (self *VolumeV7) fullContainerPath(context Utils.Context) (string, error) {
-            clean := containerFilepath.Clean(self.Container)
-            if containerFilepath.IsAbs(clean) {
-                return clean, nil
+        func (self *VolumeV7) getFullContainerPath(context Utils.Context) (string, error) {
+            if self.Container == "" {
+                return "", errors.New("Undefined container path")
             } else {
-                return containerFilepath.Join(context.GetRootDirectory(), clean), nil
+                clean := containerFilepath.Clean(self.Container)
+                if containerFilepath.IsAbs(clean) {
+                    return clean, nil
+                } else {
+                    return containerFilepath.Join(context.GetRootDirectory(), clean), nil
+                }
             }
+        }
+
+
+type DeviceV7 struct {
+    DeviceBase `yaml:"inheritedValues,inline"`
+
+    Host string `yaml:"host_path"`
+    Container string `yaml:"container_path"`
+    Options string `yaml:"options,omitempty"`
+}
+        func (self *DeviceV7) getHostPath() string {
+            return self.Host
+        }
+        func (self *DeviceV7) getContainerPath() string {
+            return self.Container
+        }
+        func (self *DeviceV7) getOptions() string {
+            return self.Options
         }
 
 
@@ -57,7 +82,7 @@ type ConfigV7 struct {
     ConfigBase `yaml:"inheritedValues,inline"`
 
     DockerImage string `yaml:"docker_image,omitempty"`
-    Mount map[string][]string `yaml:"mount,omitempty"`
+    Volume map[string]VolumeV7 `yaml:"volumes,omitempty"`
     WorkingDir string `yaml:"container_working_directory,omitempty"`
     EnvironmentVariables map[string]string `yaml:"environment,omitempty"`
     Ports []string `yaml:"ports,omitempty"`
@@ -68,7 +93,7 @@ type ConfigV7 struct {
     Detached string `yaml:"detached,omitempty"`
     UTSMode string `yaml:"uts,omitempty"`
     NetworkMode string `yaml:"net,omitempty"`
-    Devices map[string]VolumeV7 `yaml:"devices,omitempty"`
+    Devices map[string]DeviceV7 `yaml:"devices,omitempty"`
     parent Config
 }
         func (self *ConfigV7) getDockerImage() string {
@@ -88,19 +113,16 @@ type ConfigV7 struct {
         }
         func (self *ConfigV7) getVolumes() map[string]Volume {
             cacheVolumes := make(map[string]Volume)
-            for name, data := range(self.Mount) {
-                cacheVolumes[name] = &VolumeV7{
-                    Host: data[0],
-                    Container: data[1],
-                }
+            for name, data := range(self.Volume) {
+                cacheVolumes[name] = &data
             }
             return cacheVolumes
         }
         func (self *ConfigV7) getEnvironmentVariables() map[string]string {
             return self.EnvironmentVariables
         }
-        func (self *ConfigV7) getDevices() map[string]Volume {
-            cacheVolumes := make(map[string]Volume)
+        func (self *ConfigV7) getDevices() map[string]Device {
+            cacheVolumes := make(map[string]Device)
             for name, data := range(self.Devices) {
                 cacheVolumes[name] = &data
             }
@@ -207,7 +229,7 @@ type MacroV7 struct {
 
 func NewConfigV7(parent Config) *ConfigV7 {
     return &ConfigV7{
-        Mount: make(map[string][]string),
+        Volume: make(map[string]VolumeV7),
         parent: parent,
     }
 }

@@ -1,27 +1,28 @@
 package config
 
 import (
-    "errors"
     containerFilepath "github.com/matthieudelaro/nut/container/filepath"
-    Utils "github.com/matthieudelaro/nut/utils"
 )
 
 type VolumeBase struct {
 }
-        func (self *VolumeBase) getHostPath() string {
-            return ""
-        }
-        func (self *VolumeBase) getContainerPath() string {
+        func (self *VolumeBase) getVolumeName() string {
             return ""
         }
         func (self *VolumeBase) getOptions() string {
             return ""
         }
-        func (self *VolumeBase) fullHostPath(context Utils.Context) (string, error) {
-            return "", errors.New("VolumeBase.fullHostPath() must be overloaded.")
+
+type DeviceBase struct {
+}
+        func (self *DeviceBase) getHostPath() string {
+            return ""
         }
-        func (self *VolumeBase) fullContainerPath(context Utils.Context) (string, error) {
-            return "", errors.New("VolumeBase.fullContainerPath() must be overloaded.")
+        func (self *DeviceBase) getContainerPath() string {
+            return ""
+        }
+        func (self *DeviceBase) getOptions() string {
+            return ""
         }
 
 type BaseEnvironmentBase struct {
@@ -69,8 +70,8 @@ type ConfigBase struct {
         func (self *ConfigBase) getEnvironmentVariables() map[string]string {
             return make(map[string]string)
         }
-        func (self *ConfigBase) getDevices() map[string]Volume {
-            return make(map[string]Volume)
+        func (self *ConfigBase) getDevices() map[string]Device {
+            return make(map[string]Device)
         }
         func (self *ConfigBase) getPorts() []string {
             return []string{}

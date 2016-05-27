@@ -4,19 +4,28 @@ import (
     Utils "github.com/matthieudelaro/nut/utils"
 )
 
-
+type Bind interface {
+    getOptions() (string)
+}
 type Volume interface {
+    getVolumeName() string
+    getFullHostPath(context Utils.Context) (string, error)
+    getFullContainerPath(context Utils.Context) (string, error)
+
+    // implement Bind
+    getOptions() (string)
+}
+type Device interface {
     getHostPath() string
     getContainerPath() string
+
+    // implement Bind
     getOptions() (string)
-    fullHostPath(context Utils.Context) (string, error)
-    fullContainerPath(context Utils.Context) (string, error)
 }
 type BaseEnvironment interface {
     getFilePath() string
     getGitHub() string
 }
-
 
 type Config interface {
     getDockerImage() string
@@ -30,7 +39,7 @@ type Config interface {
     getVolumes() map[string]Volume
     getMacros() map[string]Macro
     getEnvironmentVariables() map[string]string
-    getDevices() map[string]Volume
+    getDevices() map[string]Device
     getPorts() []string
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
@@ -56,7 +65,7 @@ type Project interface { // extends Config interface
     getVolumes() map[string]Volume
     getMacros() map[string]Macro
     getEnvironmentVariables() map[string]string
-    getDevices() map[string]Volume
+    getDevices() map[string]Device
     getPorts() []string
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
@@ -86,7 +95,7 @@ type Macro interface { // extends Config interface
     getVolumes() map[string]Volume
     getMacros() map[string]Macro
     getEnvironmentVariables() map[string]string
-    getDevices() map[string]Volume
+    getDevices() map[string]Device
     getPorts() []string
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)

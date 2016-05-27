@@ -27,18 +27,22 @@ func TruthyString(s string) (bool, bool) {
 // Returns the first conflict element from the map, or nil if
 // there wasn't any conflict.
 func CheckConflict(context Utils.Context, key string, newPoint Volume, mountingPoints map[string]Volume) Volume {
-    h, errh := newPoint.fullHostPath(context)
-    c, errc := newPoint.fullContainerPath(context)
+    h, errh := newPoint.getFullHostPath(context)
+    c, errc := newPoint.getFullContainerPath(context)
 
     for key2, mountingPoint2 := range mountingPoints {
         // log.Debug("child point ", key)
-        h2, errh2 := mountingPoint2.fullHostPath(context)
-        c2, errc2 := mountingPoint2.fullContainerPath(context)
+        h2, errh2 := mountingPoint2.getFullHostPath(context)
+        c2, errc2 := mountingPoint2.getFullContainerPath(context)
         if key2 == key ||
            h == h2 ||
            c == c2 ||
-           errh != nil || errc != nil || errh2 != nil || errc2 != nil {
+           (newPoint.getVolumeName() != "" && newPoint.getVolumeName() == mountingPoint2.getVolumeName()){
+           // || errh != nil || errc != nil || errh2 != nil || errc2 != nil {
             // log.Debug("conflic between mounting points ", key, " and ", key2)
+            if errh != nil || errc != nil || errh2 != nil || errc2 != nil {
+                log.Debug("warning while checking conflic between volumes ", key, " and ", key2)
+            }
             return mountingPoint2
        }
     }
