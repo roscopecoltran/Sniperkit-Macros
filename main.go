@@ -31,12 +31,13 @@ func main() {
     var macros []cli.Command
     project, projectContext, err := Config.FindProject(context)
     log.Debug("main second context: ", projectContext)
+    projectMacros := map[string]Config.Macro{}
 
     if err == nil {
         // Macros are stored in a random order.
         // But we want to display them in the same order everytime.
         // So sort the names of the macros.
-        projectMacros := Config.GetMacros(project)
+        projectMacros = Config.GetMacros(project)
         macroNamesOrdered := make([]string, 0, len(projectMacros))
         for key, _ := range projectMacros {
             macroNamesOrdered = append(macroNamesOrdered, key)
@@ -90,6 +91,7 @@ func main() {
     cleanFlag := false
     execFlag := ""
     gitHubFlag := ""
+    macroFlag := ""
 
     app := cli.NewApp()
     app.Name = "nut"
@@ -122,30 +124,42 @@ func main() {
             Usage: "execute a command in a container.",
             Destination: &execFlag,
         },
+        cli.StringFlag{
+            Name:  "macro",
+            Usage: "Name of the macro to execute. Use with --logs.",
+            Destination: &macroFlag,
+        },
     }
     defaultAction := app.Action
     app.Action = func(c *cli.Context) {
         if logsFlag {
             log.SetLevel(log.DebugLevel)
         }
+
         if cleanFlag {
             persist.CleanStoreFromProject(".") // TODO: do better than "."
-        }
-        if initFlag {
+        } else if initFlag {
             log.Debug("main context for init: ", context)
             initSubcommand(c, context, gitHubFlag)
-            return
-        }
-        if execFlag != "" {
+            // return
+        } else if execFlag != "" {
             if project != nil {
-                // exec(project, c, execFlag)
                 execInContainer([]string{execFlag}, project, projectContext)
             } else {
                 log.Error("Could not find nut configuration.")
+                defaultAction(c)
             }
-            return
+            // return
+        } else if macroFlag != "" {
+            if macro, ok := projectMacros[macroFlag]; ok && project!= nil {
+                execMacro(macro, projectContext)
+            } else {
+                log.Error("Undefined macro " + macroFlag)
+                defaultAction(c)
+            }
+        } else {
+            defaultAction(c)
         }
-        defaultAction(c)
     }
 
     app.Commands = macros
