@@ -95,7 +95,10 @@ func TestFromNutPackageV7(t *testing.T) {
 
 func makeProjectV7(name string, workingDir string, enableGui string) Project {
     p := NewProjectV7(nil)
-    p.Mount["main"] = []string{".", "/go/src/project"}
+    p.ConfigV7.Volumes["main"] = &VolumeV7{
+        Host:".",
+        Container:"/go/src/project",
+    }
     p.Macros["build"] = &MacroV7{
         Usage: "build the project",
         Actions: []string{"go build -o nut"},
@@ -304,6 +307,7 @@ func TestParsingV7(t *testing.T) {
         UTSMode string
         NetworkMode string
         Devices map[string]Device
+        EnableCurrentUser bool
     }
 
     nutFiles := []Tuple{}
@@ -378,6 +382,7 @@ ports:
   - "3000:3000"
   - 100:100
 net: none
+enable_current_user: true
 `,
 env: map[string]string{
     "A": "1",
@@ -389,6 +394,7 @@ env: map[string]string{
 docker_image: "golang:1.7",
 detached: false,
 NetworkMode: "none",
+EnableCurrentUser: true,
 },
 
 Tuple{ file:`
@@ -430,6 +436,9 @@ detached: true,
 
         assert.Equal(t, GetNetworkMode(project), tuple.NetworkMode,
                 "Error with tuple " + strconv.Itoa(index) + ": not same NetworkMode")
+
+        assert.Equal(t, IsCurrentUserEnabled(project), tuple.EnableCurrentUser,
+                "Error with tuple " + strconv.Itoa(index) + ": not same EnableCurrentUser")
 
         for name, value := range GetDevices(project) {
             assert.Equal(t, value, tuple.Devices[name],

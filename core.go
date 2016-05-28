@@ -8,6 +8,7 @@ import (
     "strings"
     "fmt"
     "github.com/matthieudelaro/nut/nvidia"
+    "os/user"
     Config "github.com/matthieudelaro/nut/config"
     Utils "github.com/matthieudelaro/nut/utils"
 )
@@ -73,6 +74,7 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
     envVariables := []string{}
     volumeDriver := ""
     devices := []docker.Device{}
+    hostUidGid := ""
 
     for key, volume := range(volumes) {
         volumeName := Config.GetVolumeName(volume)
@@ -180,6 +182,16 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         }
     }
 
+    // DONE : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
+    // User: set it to the user of the host, instead of root, to manage file permissions properly
+    if Config.IsCurrentUserEnabled(config) {
+        if hostUser, err := user.Current(); err != nil {
+            log.Error("Couldn't inspect host current user: ", err.Error())
+        } else {
+            hostUidGid = hostUser.Uid + ":" + hostUser.Gid
+        }
+    }
+
     //Try to create a container from the imageID
     dockerConfig := docker.Config{
         Image: imageName,
@@ -194,9 +206,8 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         Env:          envVariables,
         ExposedPorts: exposedPorts,
         VolumeDriver: volumeDriver,
+        User:         hostUidGid,
     }
-    // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
-    // User: set it to the user of the host, instead of root, to manage file permissions properly
 
     // TODO: ? Give the container a name? Can be done with docker.CreateContainerOptions{Name: "nut_myproject"}
     // opts2 := docker.CreateContainerOptions{Name: "nut_" + , Config: &dockerConfig}
@@ -238,6 +249,8 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             "\nPrivileged: ", dockerHostConfig.Privileged,
             "\nSecurityOpt: ", dockerHostConfig.SecurityOpt,
             "\nDevices: ", dockerHostConfig.Devices,
+            "\nUTSMode: ", dockerHostConfig.UTSMode,
+            "\nNetworkMode: ", dockerHostConfig.NetworkMode,
 
             "\nImage: ", dockerConfig.Image,
             "\nCmd: ", dockerConfig.Cmd,
@@ -245,6 +258,7 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             "\nEnv: ", dockerConfig.Env,
             "\nExposedPorts: ", dockerConfig.ExposedPorts,
             "\nVolumeDriver: ", dockerConfig.VolumeDriver,
+            "\nUser: ", dockerConfig.User,
             )
         return
     } else {

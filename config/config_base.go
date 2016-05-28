@@ -88,6 +88,9 @@ type ConfigBase struct {
         func (self *ConfigBase) getDetached() (bool, bool)  {
             return false, false
         }
+        func (self *ConfigBase) getEnableCurrentUser() (bool, bool)  {
+            return false, false
+        }
         func (self *ConfigBase) getSecurityOpts() []string {
             return []string{}
         }

@@ -234,6 +234,16 @@ func IsDetached(config Config) bool {
     }
 }
 
+func IsCurrentUserEnabled(config Config) bool {
+    value, defined := config.getEnableCurrentUser()
+    parent := config.getParent()
+    if defined || parent == nil {
+        return value
+    } else {
+        return IsCurrentUserEnabled(parent)
+    }
+}
+
 func GetProjectName(config Config) string {
     if item := config.getProjectName(); item != "" {
         return item

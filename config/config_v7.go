@@ -82,7 +82,7 @@ type ConfigV7 struct {
     ConfigBase `yaml:"inheritedValues,inline"`
 
     DockerImage string `yaml:"docker_image,omitempty"`
-    Volume map[string]VolumeV7 `yaml:"volumes,omitempty"`
+    Volumes map[string]*VolumeV7 `yaml:"volumes,omitempty"`
     WorkingDir string `yaml:"container_working_directory,omitempty"`
     EnvironmentVariables map[string]string `yaml:"environment,omitempty"`
     Ports []string `yaml:"ports,omitempty"`
@@ -93,7 +93,8 @@ type ConfigV7 struct {
     Detached string `yaml:"detached,omitempty"`
     UTSMode string `yaml:"uts,omitempty"`
     NetworkMode string `yaml:"net,omitempty"`
-    Devices map[string]DeviceV7 `yaml:"devices,omitempty"`
+    Devices map[string]*DeviceV7 `yaml:"devices,omitempty"`
+    EnableCurrentUser string `yaml:"enable_current_user,omitempty"`
     parent Config
 }
         func (self *ConfigV7) getDockerImage() string {
@@ -113,8 +114,8 @@ type ConfigV7 struct {
         }
         func (self *ConfigV7) getVolumes() map[string]Volume {
             cacheVolumes := make(map[string]Volume)
-            for name, data := range(self.Volume) {
-                cacheVolumes[name] = &data
+            for name, data := range(self.Volumes) {
+                cacheVolumes[name] = data
             }
             return cacheVolumes
         }
@@ -124,7 +125,7 @@ type ConfigV7 struct {
         func (self *ConfigV7) getDevices() map[string]Device {
             cacheVolumes := make(map[string]Device)
             for name, data := range(self.Devices) {
-                cacheVolumes[name] = &data
+                cacheVolumes[name] = data
             }
             return cacheVolumes
         }
@@ -142,6 +143,9 @@ type ConfigV7 struct {
         }
         func (self *ConfigV7) getDetached() (bool, bool) {
             return TruthyString(self.Detached)
+        }
+        func (self *ConfigV7) getEnableCurrentUser() (bool, bool) {
+            return TruthyString(self.EnableCurrentUser)
         }
         func (self *ConfigV7) getSecurityOpts() []string {
             return self.SecurityOpts
@@ -229,7 +233,8 @@ type MacroV7 struct {
 
 func NewConfigV7(parent Config) *ConfigV7 {
     return &ConfigV7{
-        Volume: make(map[string]VolumeV7),
+        Volumes: make(map[string]*VolumeV7),
+        Devices: make(map[string]*DeviceV7),
         parent: parent,
     }
 }
