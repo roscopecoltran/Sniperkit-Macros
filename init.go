@@ -96,7 +96,7 @@ func initSubcommand(c *cli.Context, context Utils.Context, gitHubFlag string) {
             if err != nil {
                 log.Error(err)
             } else {
-                fmt.Printf("Project configuration saved in %s.", nutfileName) // TODO: make sure that bug Project configuration saved in %!(EXTRA string=./nut.yml) is fixed.
+                fmt.Println("Project configuration saved in %s.", nutfileName) // TODO: make sure that bug Project configuration saved in %!(EXTRA string=./nut.yml) is fixed.
             }
         }
     }
