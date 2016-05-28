@@ -186,7 +186,15 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
     // User: set it to the user of the host, instead of root, to manage file permissions properly
     if Config.IsCurrentUserEnabled(config) {
         if hostUser, err := user.Current(); err != nil {
-            log.Error("Couldn't inspect host current user: ", err.Error())
+            if err.Error() == "user: Current not implemented on darwin/amd64" {
+                // This error is expected on osx. It is not a problem since
+                // files created by container (both Docker for Mac and
+                // Docker Toolbox) have the UID and GID of the current user
+                // by default
+            } else {
+                log.Error("Couldn't inspect host current user: ", err.Error())
+                return
+            }
         } else {
             hostUidGid = hostUser.Uid + ":" + hostUser.Gid
         }
