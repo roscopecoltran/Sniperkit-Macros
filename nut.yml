@@ -20,7 +20,7 @@ macros:
     - echo Building for OSX...
     - env GOOS=darwin GOARCH=amd64 go build -o `echo $dirName`OSX
     - echo Building for Windows...
-    - env GOOS=windows GOARCH=amd64 go build -o `echo $dirName`Windows
+    - env GOOS=windows GOARCH=amd64 go build -o `echo $dirName`Windows.exe
     aliases:
     - ba
   build-linux:
