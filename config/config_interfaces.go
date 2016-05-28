@@ -4,20 +4,34 @@ import (
     Utils "github.com/matthieudelaro/nut/utils"
 )
 
-
+type Bind interface {
+    getOptions() (string)
+}
 type Volume interface {
-    fullHostPath(context Utils.Context) (string, error)
-    fullContainerPath(context Utils.Context) (string, error)
+    getVolumeName() string
+    getFullHostPath(context Utils.Context) (string, error)
+    getFullContainerPath(context Utils.Context) (string, error)
+
+    // implement Bind
+    getOptions() (string)
+}
+type Device interface {
+    getHostPath() string
+    getContainerPath() string
+
+    // implement Bind
+    getOptions() (string)
 }
 type BaseEnvironment interface {
     getFilePath() string
     getGitHub() string
 }
 
-
 type Config interface {
     getDockerImage() string
     getProjectName() string
+    getNetworkMode() string
+    getUTSMode() string
     getParent() Config
     getSyntaxVersion() string
     getBaseEnv() BaseEnvironment
@@ -25,10 +39,13 @@ type Config interface {
     getVolumes() map[string]Volume
     getMacros() map[string]Macro
     getEnvironmentVariables() map[string]string
+    getDevices() map[string]Device
     getPorts() []string
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
     getPrivileged() (bool, bool)
+    getDetached() (bool, bool)
+    getEnableCurrentUser() (bool, bool)
     getSecurityOpts() []string
 }
 type Project interface { // extends Config interface
@@ -39,6 +56,8 @@ type Project interface { // extends Config interface
     // Config methods
     getDockerImage() string
     getProjectName() string
+    getNetworkMode() string
+    getUTSMode() string
     getParent() Config
     getParentProject() Project
     getSyntaxVersion() string
@@ -47,10 +66,13 @@ type Project interface { // extends Config interface
     getVolumes() map[string]Volume
     getMacros() map[string]Macro
     getEnvironmentVariables() map[string]string
+    getDevices() map[string]Device
     getPorts() []string
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
     getPrivileged() (bool, bool)
+    getDetached() (bool, bool)
+    getEnableCurrentUser() (bool, bool)
     getSecurityOpts() []string
 
 }
@@ -66,6 +88,8 @@ type Macro interface { // extends Config interface
     // Config methods
     getDockerImage() string
     getProjectName() string
+    getNetworkMode() string
+    getUTSMode() string
     getParent() Config
     getSyntaxVersion() string
     getBaseEnv() BaseEnvironment
@@ -73,10 +97,13 @@ type Macro interface { // extends Config interface
     getVolumes() map[string]Volume
     getMacros() map[string]Macro
     getEnvironmentVariables() map[string]string
+    getDevices() map[string]Device
     getPorts() []string
     getEnableGui() (bool, bool)
     getEnableNvidiaDevices() (bool, bool)
     getPrivileged() (bool, bool)
+    getDetached() (bool, bool)
+    getEnableCurrentUser() (bool, bool)
     getSecurityOpts() []string
 }
 

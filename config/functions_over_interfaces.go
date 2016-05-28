@@ -6,13 +6,24 @@ import (
 )
 
 // Define methods over interfaces
+func GetHostPath(volume Device) string {
+    return volume.getHostPath()
+}
+func GetContainerPath(volume Device) string {
+    return volume.getContainerPath()
+}
+func GetOptions(bind Bind) string {
+    return bind.getOptions()
+}
 
-
+func GetVolumeName(volume Volume) string {
+    return volume.getVolumeName()
+}
 func GetFullHostPath(volume Volume, context Utils.Context) (string, error) {
-    return volume.fullHostPath(context)
+    return volume.getFullHostPath(context)
 }
 func GetFullContainerPath(volume Volume, context Utils.Context) (string, error) {
-    return volume.fullContainerPath(context)
+    return volume.getFullContainerPath(context)
 }
 
 func SetParentProject(child Project, parent Project) {
@@ -44,6 +55,26 @@ func GetDockerImage(config Config) string {
         return item
     } else if parent := config.getParent(); parent != nil {
         return GetDockerImage(parent)
+    } else {
+        return ""
+    }
+}
+
+func GetNetworkMode(config Config) string {
+    if item := config.getNetworkMode(); item != "" {
+        return item
+    } else if parent := config.getParent(); parent != nil {
+        return GetNetworkMode(parent)
+    } else {
+        return ""
+    }
+}
+
+func GetUTSMode(config Config) string {
+    if item := config.getUTSMode(); item != "" {
+        return item
+    } else if parent := config.getParent(); parent != nil {
+        return GetUTSMode(parent)
     } else {
         return ""
     }
@@ -126,6 +157,21 @@ func GetEnvironmentVariables(config Config) map[string]string {
     return items
 }
 
+func GetDevices(config Config) map[string]Device {
+    items := config.getDevices()
+
+    var parent = config.getParent()
+    for parent != nil {
+        for name, item := range parent.getDevices() {
+            if _, ok := items[name]; !ok {
+                items[name] = item
+            }
+        }
+        parent = parent.getParent()
+    }
+    return items
+}
+
 func GetPorts(config Config) []string {
     items := config.getPorts()
 
@@ -175,6 +221,26 @@ func IsPrivileged(config Config) bool {
         return value
     } else {
         return IsPrivileged(parent)
+    }
+}
+
+func IsDetached(config Config) bool {
+    value, defined := config.getDetached()
+    parent := config.getParent()
+    if defined || parent == nil {
+        return value
+    } else {
+        return IsDetached(parent)
+    }
+}
+
+func IsCurrentUserEnabled(config Config) bool {
+    value, defined := config.getEnableCurrentUser()
+    parent := config.getParent()
+    if defined || parent == nil {
+        return value
+    } else {
+        return IsCurrentUserEnabled(parent)
     }
 }
 

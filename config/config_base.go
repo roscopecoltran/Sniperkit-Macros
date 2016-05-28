@@ -1,18 +1,28 @@
 package config
 
 import (
-    "errors"
     containerFilepath "github.com/matthieudelaro/nut/container/filepath"
-    Utils "github.com/matthieudelaro/nut/utils"
 )
 
 type VolumeBase struct {
 }
-        func (self *VolumeBase) fullHostPath(context Utils.Context) (string, error) {
-            return "", errors.New("VolumeBase.fullHostPath() must be overloaded.")
+        func (self *VolumeBase) getVolumeName() string {
+            return ""
         }
-        func (self *VolumeBase) fullContainerPath(context Utils.Context) (string, error) {
-            return "", errors.New("VolumeBase.fullContainerPath() must be overloaded.")
+        func (self *VolumeBase) getOptions() string {
+            return ""
+        }
+
+type DeviceBase struct {
+}
+        func (self *DeviceBase) getHostPath() string {
+            return ""
+        }
+        func (self *DeviceBase) getContainerPath() string {
+            return ""
+        }
+        func (self *DeviceBase) getOptions() string {
+            return ""
         }
 
 type BaseEnvironmentBase struct {
@@ -30,6 +40,12 @@ type ConfigBase struct {
             return ""
         }
         func (self *ConfigBase) getProjectName() string {
+            return ""
+        }
+        func (self *ConfigBase) getUTSMode() string {
+            return ""
+        }
+        func (self *ConfigBase) getNetworkMode() string {
             return ""
         }
         func (self *ConfigBase) getParent() Config {
@@ -54,6 +70,9 @@ type ConfigBase struct {
         func (self *ConfigBase) getEnvironmentVariables() map[string]string {
             return make(map[string]string)
         }
+        func (self *ConfigBase) getDevices() map[string]Device {
+            return make(map[string]Device)
+        }
         func (self *ConfigBase) getPorts() []string {
             return []string{}
         }
@@ -64,6 +83,12 @@ type ConfigBase struct {
             return false, false
         }
         func (self *ConfigBase) getPrivileged() (bool, bool)  {
+            return false, false
+        }
+        func (self *ConfigBase) getDetached() (bool, bool)  {
+            return false, false
+        }
+        func (self *ConfigBase) getEnableCurrentUser() (bool, bool)  {
             return false, false
         }
         func (self *ConfigBase) getSecurityOpts() []string {

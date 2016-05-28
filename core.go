@@ -8,6 +8,7 @@ import (
     "strings"
     "fmt"
     "github.com/matthieudelaro/nut/nvidia"
+    "os/user"
     Config "github.com/matthieudelaro/nut/config"
     Utils "github.com/matthieudelaro/nut/utils"
 )
@@ -66,26 +67,55 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
 
     // prepare names of directories to mount
     // inspired from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
-    mountingPoints := Config.GetVolumes(config, context)
-    binds := make([]string, 0, len(mountingPoints))
+    volumes := Config.GetVolumes(config, context)
+    binds := make([]string, 0, len(volumes))
     portBindings := map[docker.Port][]docker.PortBinding{}
     exposedPorts := map[docker.Port]struct{}{}
     envVariables := []string{}
     volumeDriver := ""
     devices := []docker.Device{}
+    hostUidGid := ""
 
-    for _, directory := range(mountingPoints) {
-        hostPath, hostPathErr := Config.GetFullHostPath(directory, context)
-        containerPath, containerPathErr := Config.GetFullContainerPath(directory, context)
-        if hostPathErr != nil {
-            log.Error("Couldn't mount host directory: ", hostPathErr.Error())
-            return
-        }
+    for key, volume := range(volumes) {
+        volumeName := Config.GetVolumeName(volume)
+        hostPath, hostPathErr := Config.GetFullHostPath(volume, context)
+        containerPath, containerPathErr := Config.GetFullContainerPath(volume, context)
+        log.Debug(key, " / ", len(volumes), " volume", volume)
         if containerPathErr != nil {
-            log.Error("Couldn't mount container directory: ", containerPathErr.Error())
+            log.Error("Couldn't mount container directory (" + containerPath + "): ", containerPathErr.Error())
             return
         }
-        binds = append(binds, hostPath + ":" + containerPath)
+        if hostPathErr != nil { // volume must have either a hostPath to a directory, ...
+            log.Debug(key, " unproper hostPath", hostPath)
+            if volumeName != "" { // ..., or a volumeName
+                log.Debug(key, " volume name", volumeName)
+                // prepare volume
+                var dockerVolume *docker.Volume
+                if dockerVolume, err = client.InspectVolume(volumeName); err != nil {
+                    fmt.Println("Could not inspect volume", imageName, ":", err.Error())
+                    fmt.Println("Creating volume...")
+
+                    if dockerVolume, err = client.CreateVolume(
+                        docker.CreateVolumeOptions{Name: volumeName}); err != nil {
+                        log.Error("Could not create volume: ", err.Error())
+                        return
+                    }
+                    fmt.Println("Volume created.")
+                }
+                log.Debug(key, " dockerVolume ", dockerVolume)
+                log.Debug(key, " dockerVolume ", dockerVolume.Name)
+                log.Debug(key, " dockerVolume ", dockerVolume.Mountpoint)
+                log.Debug(key, " dockerVolume ", dockerVolume.Driver)
+                binds = append(binds, dockerVolume.Mountpoint + ":" + containerPath)
+                // TODO?: take dockerVolume.Driver into account?
+            } else {
+                log.Error("Couldn't mount host directory (" + hostPath + "): ", hostPathErr.Error())
+                return
+            }
+        } else {
+            log.Debug(key, " proper host path", hostPath, hostPathErr)
+            binds = append(binds, hostPath + ":" + containerPath)
+        }
     }
     log.Debug("binds", binds)
 
@@ -126,6 +156,13 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             }
         }
     }
+    for _, device := range Config.GetDevices(config) {
+        devices = append(devices, docker.Device{
+            PathOnHost: Config.GetHostPath(device),
+            PathInContainer: Config.GetContainerPath(device),
+            CgroupPermissions: Config.GetOptions(device),
+        })
+    }
     if Config.IsNvidiaDevicesEnabled(config) {
         nvidiaDevices, driverName, driverVolume, err := nvidia.GetConfiguration()
         if err != nil {
@@ -139,9 +176,27 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
                 devices = append(devices, docker.Device{
                     PathOnHost: devicePath,
                     PathInContainer: devicePath,
-                    CgroupPermissions: "mrw", // TODO: discuss proper CgroupPermissions
+                    CgroupPermissions: "mrw", // DONE: discuss proper CgroupPermissions
                 })
             }
+        }
+    }
+
+    // DONE : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
+    // User: set it to the user of the host, instead of root, to manage file permissions properly
+    if Config.IsCurrentUserEnabled(config) {
+        if hostUser, err := user.Current(); err != nil {
+            if err.Error() == "user: Current not implemented on darwin/amd64" {
+                // This error is expected on osx. It is not a problem since
+                // files created by container (both Docker for Mac and
+                // Docker Toolbox) have the UID and GID of the current user
+                // by default
+            } else {
+                log.Error("Couldn't inspect host current user: ", err.Error())
+                return
+            }
+        } else {
+            hostUidGid = hostUser.Uid + ":" + hostUser.Gid
         }
     }
 
@@ -159,9 +214,8 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         Env:          envVariables,
         ExposedPorts: exposedPorts,
         VolumeDriver: volumeDriver,
+        User:         hostUidGid,
     }
-    // TODO : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
-    // User: set it to the user of the host, instead of root, to manage file permissions properly
 
     // TODO: ? Give the container a name? Can be done with docker.CreateContainerOptions{Name: "nut_myproject"}
     // opts2 := docker.CreateContainerOptions{Name: "nut_" + , Config: &dockerConfig}
@@ -191,6 +245,8 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         Privileged: Config.IsPrivileged(config),
         SecurityOpt: Config.GetSecurityOpts(config),
         Devices: devices,
+        UTSMode: Config.GetUTSMode(config),
+        NetworkMode: Config.GetNetworkMode(config),
     }
 
     //Try to start the container
@@ -201,6 +257,8 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             "\nPrivileged: ", dockerHostConfig.Privileged,
             "\nSecurityOpt: ", dockerHostConfig.SecurityOpt,
             "\nDevices: ", dockerHostConfig.Devices,
+            "\nUTSMode: ", dockerHostConfig.UTSMode,
+            "\nNetworkMode: ", dockerHostConfig.NetworkMode,
 
             "\nImage: ", dockerConfig.Image,
             "\nCmd: ", dockerConfig.Cmd,
@@ -208,6 +266,7 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             "\nEnv: ", dockerConfig.Env,
             "\nExposedPorts: ", dockerConfig.ExposedPorts,
             "\nVolumeDriver: ", dockerConfig.VolumeDriver,
+            "\nUser: ", dockerConfig.User,
             )
         return
     } else {
