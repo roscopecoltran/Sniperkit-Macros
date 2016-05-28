@@ -84,6 +84,10 @@ cd nut
 #### Using NPM
 [@RnbWd](https://github.com/RnbWd) developed a npm package with Nut binaries: https://github.com/RnbWd/nut-bin
 
+#### Download Binaries
+Manually built binaries for Linux, OSX, and Windows are available in [release](https://github.com/matthieudelaro/nut/tree/manualbuild/release) folder. _It is a temporary solution._
+
+
 ### Nut File Syntax
 #### Example
 Here is an example of `nut.yml` to develop in Go. You can generate a sample configuration with  :
