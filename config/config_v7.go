@@ -256,6 +256,7 @@ func NewConfigV7(parent Config) *ConfigV7 {
     return &ConfigV7{
         Volumes: make(map[string]*VolumeV7),
         Devices: make(map[string]*DeviceV7),
+        EnvironmentVariables: map[string]string{},
         parent: parent,
     }
 }

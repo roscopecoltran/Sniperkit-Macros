@@ -110,6 +110,9 @@ func GetWorkingDir(config Config) string {
 
 func GetVolumes(config Config, context Utils.Context) map[string]Volume {
     items := config.getVolumes()
+    if items == nil {
+        items = map[string]Volume{}
+    }
 
     var parent = config.getParent()
     for parent != nil {
@@ -125,6 +128,9 @@ func GetVolumes(config Config, context Utils.Context) map[string]Volume {
 
 func GetMacros(config Project) map[string]Macro {
     items := config.getMacros()
+    if items == nil {
+        items = map[string]Macro{}
+    }
 
     var parent = config.getParent()
     for parent != nil {
@@ -144,6 +150,9 @@ func GetMacros(config Project) map[string]Macro {
 
 func GetEnvironmentVariables(config Config) map[string]string {
     items := config.getEnvironmentVariables()
+    if items == nil {
+        items = map[string]string{}
+    }
 
     var parent = config.getParent()
     for parent != nil {
@@ -159,6 +168,9 @@ func GetEnvironmentVariables(config Config) map[string]string {
 
 func GetDevices(config Config) map[string]Device {
     items := config.getDevices()
+    if items == nil {
+        items = map[string]Device{}
+    }
 
     var parent = config.getParent()
     for parent != nil {

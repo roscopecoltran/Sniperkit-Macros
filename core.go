@@ -222,35 +222,6 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
     }
 
     if useDockerCLI {
-        // c := exec.Command("pwd") // works
-        // c := exec.Command("bash", "-c", "pwd") // works
-        // c := exec.Command("docker", "run", "-it", "--rm", "golang:1.6", "echo", "helloworld") // works
-        // c := exec.Command("bash", "-c", "docker", "run", "-it", "--rm", "golang:1.6", "echo", "helloworld") // bad usage
-        // c := exec.Command("bash", "-c", "docker run -it --rm golang:1.6 echo helloworld") // works
-        // c := exec.Command("bash", "-c", "docker run -it --rm golang:1.6 bash -c 'pwd; echo hello'") // works
-
-        // cmdConfig = []string{"bash", "-c", strings.Join([]string{"echo hello", "echo world"}, "; ")}
-        // c := exec.Command("bash", "-c", "docker run -it --rm golang:1.6 " + strings.Join(cmdConfig, " ")) // prints new line, and world
-
-        // cmdConfig = []string{"bash", "-c", strings.Join([]string{"pwd", "pwd"}, "; ")} // works
-        // dockercall := []string{"run", "-it", "--rm", "golang:1.6"}
-        // dockercall = append(dockercall, cmdConfig...)
-        // log.Error(dockercall)
-        // c := exec.Command("docker", dockercall...)
-
-        // cmdConfig = []string{"bash", "-c", strings.Join([]string{"pwd", "pwd", "pwd && pwd"}, "; ")} // works
-        // dockercall := []string{"run", "-it", "--rm", "golang:1.6"}
-        // dockercall = append(dockercall, cmdConfig...)
-        // log.Error(dockercall)
-        // c := exec.Command("docker", dockercall...)
-
-        // c.Stdout = os.Stdout
-        // c.Stdin = os.Stdin
-        // c.Stderr = os.Stderr
-        // if err = c.Run(); err != nil {
-        //     log.Error("Error while calling Docker CLI: ", err.Error())
-        // }
-
         dockercall := []string{"run", "-it", "--rm"}
         if dockerConfig.WorkingDir != "" {
             dockercall = append(dockercall, "--workdir=" + dockerConfig.WorkingDir)

@@ -204,6 +204,7 @@ type MacroV5 struct {
 func NewConfigV5(parent Config) *ConfigV5 {
     return &ConfigV5{
         Mount: make(map[string][]string),
+        EnvironmentVariables: map[string]string{},
         parent: parent,
     }
 }
