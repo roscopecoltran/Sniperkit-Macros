@@ -1,10 +1,13 @@
 package config
 
 import(
-    "errors"
     "path/filepath"
     Utils "github.com/matthieudelaro/nut/utils"
     containerFilepath "github.com/matthieudelaro/nut/container/filepath"
+
+    log "github.com/Sirupsen/logrus"
+    "errors"
+    "strings"
 )
 
 type VolumeV7 struct {
@@ -21,26 +24,44 @@ type VolumeV7 struct {
         func (self *VolumeV7) getOptions() string {
             return self.Options
         }
+        // TODO: move the content of the two next function to an appropriate place
+        // Same for V6 and V5
         func (self *VolumeV7) getFullHostPath(context Utils.Context) (string, error) {
             if self.Host == "" {
                 return "", errors.New("Undefined host path")
             } else {
-                clean := filepath.Clean(self.Host)
-                if filepath.IsAbs(clean) {
-                    return clean, nil
-                } else {
-                    return filepath.Join(context.GetRootDirectory(), clean), nil
+                log.Debug("getFullHostPath value ", self.Host)
+                res := filepath.Clean(self.Host)
+                log.Debug("getFullHostPath clean ", res)
+                if !filepath.IsAbs(res) {
+                    log.Debug("getFullHostPath is not Abs")
+                    res = filepath.Join(context.GetRootDirectory(), res)
                 }
+                log.Debug("getFullHostPath value ", res)
+                if strings.Contains(res, `:\`) { // path on windows. Eg: C:\\Users\
+                    log.Debug("getFullHostPath windows ", `:\`)
+                    parts := strings.Split(res, `:\`)
+                    parts[0] = strings.ToLower(parts[0]) // drive letter should be lower case
+                    res = "//" + parts[0] + "/" + filepath.ToSlash(parts[1])
+                }
+
+                log.Debug("getFullHostPath res ", res)
+                return res, nil
             }
         }
         func (self *VolumeV7) getFullContainerPath(context Utils.Context) (string, error) {
             if self.Container == "" {
                 return "", errors.New("Undefined container path")
             } else {
-                clean := containerFilepath.Clean(self.Container)
+                log.Debug("getFullContainerPath value ", self.Container)
+                clean := containerFilepath.ToSlash(containerFilepath.Clean(self.Container))
+                log.Debug("getFullContainerPath clean ", clean)
                 if containerFilepath.IsAbs(clean) {
+                    log.Debug("getFullContainerPath isAbs")
                     return clean, nil
                 } else {
+                    log.Debug("getFullContainerPath is not Abs")
+                    log.Debug("getFullContainerPath return ", containerFilepath.Join(context.GetRootDirectory(), clean))
                     return containerFilepath.Join(context.GetRootDirectory(), clean), nil
                 }
             }

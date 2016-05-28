@@ -39,7 +39,7 @@ macros:
   build-windows:
     usage: build the project for Windows
     actions:
-    - env GOOS=windows GOARCH=amd64 go build -o `pwd | xargs basename`Windows
+    - env GOOS=windows GOARCH=amd64 go build -o `pwd | xargs basename`Windows.exe
     aliases:
     - bw
   run:

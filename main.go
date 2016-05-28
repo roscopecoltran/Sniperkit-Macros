@@ -76,7 +76,7 @@ func main() {
                     UsageText: Config.GetUsageText(macro),
                     Description: Config.GetDescription(macro),
                     Action: func(c *cli.Context) {
-                        execMacro(macro, projectContext)
+                        execMacro(macro, projectContext, false)
                     },
                 }
             }
@@ -92,6 +92,7 @@ func main() {
     execFlag := ""
     gitHubFlag := ""
     macroFlag := ""
+    useDockerCLIFlag := DOCKERCLI_FLAG_DEFAULT_VALUE
 
     app := cli.NewApp()
     app.Name = "nut"
@@ -130,6 +131,19 @@ func main() {
             Destination: &macroFlag,
         },
     }
+    if DOCKERCLI_FLAG_DEFAULT_VALUE == false {
+        app.Flags = append(app.Flags, cli.BoolFlag{
+            Name:  "dockercli",
+            Usage: "Use Docker CLI, instead of using Docker API to reach the host directly.",
+            Destination: &useDockerCLIFlag,
+        })
+    } else {
+        app.Flags = append(app.Flags, cli.BoolFlag{
+            Name:  "dockerapi",
+            Usage: "Use Docker API to reach the host directly, instead of using Docker CLI.",
+            Destination: &useDockerCLIFlag,
+        })
+    }
     defaultAction := app.Action
     app.Action = func(c *cli.Context) {
         if logsFlag {
@@ -137,14 +151,16 @@ func main() {
         }
 
         if cleanFlag {
-            persist.CleanStoreFromProject(".") // TODO: do better than "."
+            if project != nil {
+                persist.CleanStoreFromProject(projectContext.GetRootDirectory())
+            }
         } else if initFlag {
             log.Debug("main context for init: ", context)
             initSubcommand(c, context, gitHubFlag)
             // return
         } else if execFlag != "" {
             if project != nil {
-                execInContainer([]string{execFlag}, project, projectContext)
+                execInContainer([]string{execFlag}, project, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
             } else {
                 log.Error("Could not find nut configuration.")
                 defaultAction(c)
@@ -152,7 +168,7 @@ func main() {
             // return
         } else if macroFlag != "" {
             if macro, ok := projectMacros[macroFlag]; ok && project!= nil {
-                execMacro(macro, projectContext)
+                execMacro(macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
             } else {
                 log.Error("Undefined macro " + macroFlag)
                 defaultAction(c)
