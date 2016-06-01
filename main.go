@@ -90,6 +90,7 @@ func main() {
     logsFlag := false
     cleanFlag := false
     execFlag := ""
+    inheriteConfigMacroFlag := ""
     gitHubFlag := ""
     macroFlag := ""
     useDockerCLIFlag := DOCKERCLI_FLAG_DEFAULT_VALUE
@@ -130,6 +131,11 @@ func main() {
             Usage: "Name of the macro to execute. Use with --logs.",
             Destination: &macroFlag,
         },
+        cli.StringFlag{
+            Name:  "extend-macro",
+            Usage: "Use with --exec: name of the macro from which to inherite the configuration",
+            Destination: &inheriteConfigMacroFlag,
+        },
     }
     if DOCKERCLI_FLAG_DEFAULT_VALUE == false {
         app.Flags = append(app.Flags, cli.BoolFlag{
@@ -160,14 +166,21 @@ func main() {
             // return
         } else if execFlag != "" {
             if project != nil {
-                execInContainer([]string{execFlag}, project, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
+                if inheriteConfigMacroFlag == "" {
+                    execInContainer([]string{execFlag}, project, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
+                } else if macro, ok := projectMacros[inheriteConfigMacroFlag]; ok && project != nil {
+                    execInContainer([]string{execFlag}, macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
+                } else {
+                    log.Error("Undefined macro " + macroFlag)
+                    defaultAction(c)
+                }
             } else {
                 log.Error("Could not find nut configuration.")
                 defaultAction(c)
             }
             // return
         } else if macroFlag != "" {
-            if macro, ok := projectMacros[macroFlag]; ok && project!= nil {
+            if macro, ok := projectMacros[macroFlag]; ok && project != nil {
                 execMacro(macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
             } else {
                 log.Error("Undefined macro " + macroFlag)
