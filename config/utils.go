@@ -6,7 +6,6 @@ import (
     "fmt"
     "io/ioutil"
     "path/filepath"
-    "strings"
     log "github.com/Sirupsen/logrus"
     Utils "github.com/matthieudelaro/nut/utils"
     Persist "github.com/matthieudelaro/nut/persist"
@@ -93,42 +92,25 @@ func ProjectFromYAML(bytes []byte) (Project, error) {
 /// Returns the name of the file where
 /// it has been saved from Github, and an error.
 func DownloadFromGithub(name string, store Persist.Store) (string, error) {
-    parts := strings.Split(name, "/")
-    if !strings.Contains(parts[len(parts)-1], ".yml") {
-        parts = append(parts, NutFileName)
-    }
-    if len(parts) < 3 {
-        return "", errors.New("invalid format")
-    } else {
-        owner := parts[0]
-        repo := parts[1]
-        path := parts[2:]
-
-        githubFilePath := []string{Persist.EnvironmentsFolder}
-        githubFilePath = append(githubFilePath, "github.com")
-        githubFilePath = append(githubFilePath, owner)
-        githubFilePath = append(githubFilePath, repo)
-        githubFilePath = append(githubFilePath, path...)
-        githubFile := filepath.Join(githubFilePath...)
-        _, fullPath, err := Persist.ReadFile(store, githubFile)
+    githubFile := filepath.Join(Persist.EnvironmentsFolder, name, NutFileName)
+    _, fullPath, err := Persist.ReadFile(store, githubFile)
+    if err != nil {
+        fmt.Println("File from GitHub (" + name + ") not available yet. Downloading...")
+        fullPath, err = Persist.StoreFile(store,
+            githubFile,
+            []byte{0})
         if err != nil {
-            fmt.Println("File from GitHub (" + name + ") not available yet. Downloading...")
-            fullPath, err = Persist.StoreFile(store,
-                githubFile,
-                []byte{0})
-            if err != nil {
-                return "", errors.New(
-                    "Could not prepare destination for file from GitHub: " + err.Error())
-            }
-            err = Utils.Wget("https://raw.githubusercontent.com/" + owner + "/" + repo + "/master/" + strings.Join(path, "/"),
-                fullPath)
-            if err != nil {
-                return "", errors.New("Could not download from GitHub: " + err.Error())
-            }
-            fmt.Println("File from GitHub (" + name + ") downloaded.")
+            return "", errors.New(
+                "Could not prepare destination for file from GitHub: " + err.Error())
         }
-        return fullPath, nil
+        err = Utils.Wget("https://raw.githubusercontent.com/" + name + "/master/nut.yml",
+            fullPath)
+        if err != nil {
+            return "", errors.New("Could not download from GitHub: " + err.Error())
+        }
+        fmt.Println("File from GitHub (" + name + ") downloaded.")
     }
+    return fullPath, nil
 }
 
 /// Parse Project from file. Given filename must be absolute.
@@ -171,6 +153,7 @@ func ResolveDependencies(project Project, store Persist.Store, nutFilePath strin
     return
 }
 
+
 /// Look for a file from which to parse configuration (nut.yml in current
 /// directory). Parse the file, and returns an updated context (root directory)
 /// TODO: look for nut.yml file in parent folders
@@ -184,7 +167,7 @@ func FindProject(context Utils.Context) (Project, Utils.Context, error) {
     foundDirectory := context.GetUserDirectory()
     // fullpath := filepath.Join(foundDirectory, NutFileName)
     fullpath := filepath.Join(foundDirectory, NutOverrideFileName)
-    previousFullpath := ""
+    previousFoundDirectory := ""
     var exists bool
 
     searchHigher := true
@@ -200,12 +183,12 @@ func FindProject(context Utils.Context) (Project, Utils.Context, error) {
                 found = true
                 searchHigher = false
             } else {
+                previousFoundDirectory = foundDirectory
                 foundDirectory = filepath.Dir(foundDirectory)
-                previousFullpath = fullpath
                 // fullpath = filepath.Join(foundDirectory, NutFileName)
                 fullpath = filepath.Join(foundDirectory, NutOverrideFileName)
 
-                if fullpath == previousFullpath {
+                if foundDirectory == previousFoundDirectory {
                     searchHigher = false
                 }
             }
