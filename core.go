@@ -137,9 +137,24 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             // {HostIP: "0.0.0.0", HostPort: "8080",}}
             {HostPort: hostPort,}} // TODO: support HostIP
     }
+
+    // Add environment variables.
+    // Timezone feature: in order to synchronize the timezone
+    //     of the container with the one of the host, set the variable TZ.
+    //     (See http://www.cyberciti.biz/faq/linux-unix-set-tz-environment-variable/)
+    //     So, if TZ variable is not set in the configuration, then set
+    //     it to the host timezone information.
+    foundTZvariable := false
     for name, value := range Config.GetEnvironmentVariables(config) {
         envVariables = append(envVariables, name + "=" + value)
+        if name == "TZ" {
+            foundTZvariable = true
+        }
     }
+    if !foundTZvariable {
+        envVariables = append(envVariables, "TZ" + "=" + Utils.GetTimezoneOffsetToTZEnvironmentVariableFormat())
+    }
+
     if Config.IsGUIEnabled(config) {
         portBindingsGUI, envVariablesGUI, bindsGUI, err := enableGui()
         if err != nil {
