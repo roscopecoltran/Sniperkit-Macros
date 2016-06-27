@@ -1,12 +1,17 @@
 syntax_version: "6"
 project_name: nut
-docker_image: golang:1.6
+docker_image: matthieudelaro/golang:1.6-cross
 container_working_directory: /go/src/github.com/matthieudelaro/nut
 mount:
   main: # mount current directory
   - .
   - /go/src/github.com/matthieudelaro/nut
 macros:
+  setup:
+    usage: call after pulling the project, to install dependencies
+    actions:
+    - govendor list
+    - govendor fetch +missing
   build:
     usage: build the project
     actions:
@@ -20,7 +25,7 @@ macros:
     - echo Building for OSX...
     - env GOOS=darwin GOARCH=amd64 go build -o `echo $dirName`OSX
     - echo Building for Windows...
-    - env GOOS=windows GOARCH=amd64 go build -o `echo $dirName`Windows
+    - env GOOS=windows GOARCH=amd64 go build -o `echo $dirName`Windows.exe
     aliases:
     - ba
   build-linux:
@@ -39,7 +44,7 @@ macros:
   build-windows:
     usage: build the project for Windows
     actions:
-    - env GOOS=windows GOARCH=amd64 go build -o `pwd | xargs basename`Windows
+    - env GOOS=windows GOARCH=amd64 go build -o `pwd | xargs basename`Windows.exe
     aliases:
     - bw
   run:

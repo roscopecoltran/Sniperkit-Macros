@@ -153,6 +153,7 @@ func ResolveDependencies(project Project, store Persist.Store, nutFilePath strin
     return
 }
 
+
 /// Look for a file from which to parse configuration (nut.yml in current
 /// directory). Parse the file, and returns an updated context (root directory)
 /// TODO: look for nut.yml file in parent folders
@@ -166,7 +167,7 @@ func FindProject(context Utils.Context) (Project, Utils.Context, error) {
     foundDirectory := context.GetUserDirectory()
     // fullpath := filepath.Join(foundDirectory, NutFileName)
     fullpath := filepath.Join(foundDirectory, NutOverrideFileName)
-    previousFullpath := ""
+    previousFoundDirectory := ""
     var exists bool
 
     searchHigher := true
@@ -182,12 +183,12 @@ func FindProject(context Utils.Context) (Project, Utils.Context, error) {
                 found = true
                 searchHigher = false
             } else {
+                previousFoundDirectory = foundDirectory
                 foundDirectory = filepath.Dir(foundDirectory)
-                previousFullpath = fullpath
                 // fullpath = filepath.Join(foundDirectory, NutFileName)
                 fullpath = filepath.Join(foundDirectory, NutOverrideFileName)
 
-                if fullpath == previousFullpath {
+                if foundDirectory == previousFoundDirectory {
                     searchHigher = false
                 }
             }

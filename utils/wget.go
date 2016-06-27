@@ -5,6 +5,7 @@ import (
     "net/http"
     "net/url"
     "os"
+    "errors"
 )
 
 // inspired from https://www.socketloop.com/tutorials/golang-download-file-example
@@ -35,8 +36,11 @@ func Wget(rawURL string, fileName string) error {
         return err
     }
     defer resp.Body.Close()
-    _, err = io.Copy(file, resp.Body)
 
+    if resp.StatusCode != 200 {
+        return errors.New("Couldn't download file (from " + rawURL + ") properly. Status: " + resp.Status)
+    }
+    _, err = io.Copy(file, resp.Body)
     if err != nil {
         return err
     }

@@ -12,15 +12,16 @@ Ever wished to simplify and share your research on neural networks in Docker, ru
 
 ### Nut
 **Nut** is a command line tool which offers a solution to common frustrations of developers. It hides the complexity of development environments, and extends them with customizable macros. Whether you develop in Swift, Go, Java, or C++, what you need is build/run/test the app. So just do it:
-
-    $ nut --init # create nut.yml file (equivalent of package.json for npm)
-    $ nut build
-    $ nut run
-    $ nut test
+```bash
+$ nut --init # create nut.yml file (equivalent of package.json for npm)
+$ nut build
+$ nut run
+$ nut test
+```
 
 **Nut** mounts the current folder in a [Docker](https://www.docker.com/) container, and executes commands on your behalf, according to the project configuration. The configuration is read from `nut.yml` file, in the current/parent folder. You can choose the Docker image to use, declare volumes to mount, and define commands (called macros) such as *build*, *run*, and *test*.
 
-Nut is in early stage of development. It has been tested on Ubuntu and on MacOS with *Docker for Mac* and *Docker Toolbox*. Feedbacks and contributions to add features and to [make Nut run on Windows](https://github.com/matthieudelaro/nut/issues/4) are welcome.
+Nut is in early stage of development. It has been tested on Ubuntu, on MacOS with *Docker for Mac* and *Docker Toolbox*, and on Windows with *Docker Toolbox*. Feedbacks and contributions to add features and to [improve Windows support](https://github.com/matthieudelaro/nut/issues/4) are welcome.
 
 Check the [wiki](https://github.com/matthieudelaro/nut/wiki) to learn about Nut [implementation](https://github.com/matthieudelaro/nut/wiki/Nut:-Under-The-Hood), and to read some tutorials (GPU support, Caffe, TensorFlow, etc).
 
@@ -33,12 +34,12 @@ This creates `nut.yml` file that inherites the configuration defined in the nut 
 This configuration can be overloaded by defining/redefining docker image, macros, mounting points, ... It makes it easy for developers to use libraries and development tools that provide a nut file.
 
 To inspect an environment, you can use `--exec` flag:
-
-    $ # --exec="command to run in the container"
-    $ nut --exec="pwd"  # will display the path in working directory of the container
-    $ nut --exec="ls"  # will display the files in the container working directory
-    $ nut --exec="echo hello && echo world!" --logs  # --logs will display the logs for developers
-
+```bash
+$ # --exec="command to run in the container"
+$ nut --exec="pwd"  # will display the path in working directory of the container
+$ nut --exec="ls"  # will display the files in the container working directory
+$ nut --exec="echo hello && echo world!" --logs  # --logs will display the logs for developers
+```
 `--exec` flag can be really handy to build and test **Nut** on OSX:
 
     $ nut build-osx && nut --exec="./nut --init --logs && ls -lah .nut"
@@ -48,23 +49,25 @@ To inspect an environment, you can use `--exec` flag:
 Provided that you use Docker, you don't need to install anything on your computer.
 Not even Go!
 ```bash
-# 1 - Download sources
-git clone https://github.com/matthieudelaro/nut.git --recursive
-    # if you don't have git, you can download a zip file https://github.com/matthieudelaro/nut/archive/master.zip
+# 1 - Download sources and dependencies
+    # unix
+    docker run --rm -v $PWD:/go/src/github.com/matthieudelaro/ -w /go/src/github.com/matthieudelaro/ matthieudelaro/golang:1.6-cross bash -c 'git clone https://github.com/matthieudelaro/nut.git && cd nut && govendor fetch +missing'
+
+    # windows
+    docker run --rm -v ${PWD}:/go/src/github.com/matthieudelaro/ -w /go/src/github.com/matthieudelaro/ matthieudelaro/golang:1.6-cross bash -c 'git clone https://github.com/matthieudelaro/nut.git && cd nut && govendor fetch +missing'
 
 # 2 - Move to nut folder
-cd nut
+    cd nut
 
 # 3 - Build Nut
     # Build Nut for Linux, in a container
-    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 go build -o nut
+    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut matthieudelaro/golang:1.6-cross go build -o nut
 
     # Build Nut for OSX, in a container
-    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=darwin GOARCH=amd64 go build -o nut
+    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut matthieudelaro/golang:1.6-cross env GOOS=darwin GOARCH=amd64 go build -o nut
 
     # Build Nut for Windows, in a container.
-    # Keep in mind that support for Windows is still under development.
-    docker run -i -t --rm -v ${PWD}:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut golang:1.6 env GOOS=windows GOARCH=amd64 go build -o nut.exe
+    docker run -i -t --rm -v ${PWD}:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut matthieudelaro/golang:1.6-cross env GOOS=windows GOARCH=amd64 go build -o nut.exe
 
 # Run nut
 ./nut   # or .\nut.exe on Windows
@@ -84,6 +87,10 @@ cd nut
 #### Using NPM
 [@RnbWd](https://github.com/RnbWd) developed a npm package with Nut binaries: https://github.com/RnbWd/nut-bin
 
+#### Download Binaries
+Manually built binaries for Linux, OSX, and Windows are available in [release](https://github.com/matthieudelaro/nut/tree/manualbuild/release) folder. _It is a temporary solution._
+
+
 ### Nut File Syntax
 #### Example
 Here is an example of `nut.yml` to develop in Go. You can generate a sample configuration with  :
@@ -98,7 +105,7 @@ enable_gui: yes # forward X11 to run graphical application from within the conta
 privileged: true # run container with --privileged flag
 
 based_on: # configuration can be inherited from:
-  github: matthieudelaro/nutfile_go1.6 # a GitHub repository
+  github: matthieudelaro/nutfiles/golang1.6 # a GitHub repository
   nut_file_path: ../go1.5/nut.yml # a local file
   # You can inherite either from GitHub or from a file, not both.
 
@@ -205,7 +212,7 @@ Device #0
 
 
 ### What the Nut???
-- build [Nut](https://github.com/matthieudelaro/nut/blob/master/nut.yml) within Nut (never installed Go, and never going to :)
+- build [Nut](https://github.com/matthieudelaro/nut/blob/master/nut.yml) within Nut (I never installed Go, and I'm never going to :)
 - build [Docker](https://github.com/matthieudelaro/nut/blob/master/examples/docker/nut.yml)
 - build and run [Caffe](https://github.com/matthieudelaro/nut/blob/master/examples/caffe/nut.yml) with `nut build`, `nut test`, `nut train-mnist`.
 - compile CUDA code on a Mac Book Air, which hasn't got any Nvidia GPU. Just `nut build`
@@ -216,14 +223,13 @@ Device #0
 
 ### Milestones
 - create container only once, and store its ID in .nut file
-- add support for GPU (--device)
-- add support for Windows
-- add support for *Docker Toolbox* on Mac
-- add support for port bindings
-- plugin for Sublime Text, to call `nut run`, `nut build`, and `nut test` from the editor.
+- improve support for Windows
+- plugin for Sublime Text, to call `nut run`, `nut build`, and `nut test` from the editor
+- create a registery for `nut.yml` files
+- see [issues](https://github.com/matthieudelaro/nut/issues)
 
-### Stay Tune
+### Stay Tuned
 Wanna receive updates? Or share your thoughts? You can post an issue or follow me on [Twitter](https://twitter.com/matthieudelaro).
 
 ### Authors and Contributors
-@matthieudelaro and @gdevillele
+@matthieudelaro and @gdevillele, as well as authors of PRs

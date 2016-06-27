@@ -31,12 +31,13 @@ func main() {
     var macros []cli.Command
     project, projectContext, err := Config.FindProject(context)
     log.Debug("main second context: ", projectContext)
+    projectMacros := map[string]Config.Macro{}
 
     if err == nil {
         // Macros are stored in a random order.
         // But we want to display them in the same order everytime.
         // So sort the names of the macros.
-        projectMacros := Config.GetMacros(project)
+        projectMacros = Config.GetMacros(project)
         macroNamesOrdered := make([]string, 0, len(projectMacros))
         for key, _ := range projectMacros {
             macroNamesOrdered = append(macroNamesOrdered, key)
@@ -74,8 +75,9 @@ func main() {
                     Aliases: Config.GetAliases(macro),
                     UsageText: Config.GetUsageText(macro),
                     Description: Config.GetDescription(macro),
-                    Action: func(c *cli.Context) {
-                        execMacro(macro, projectContext)
+                    Action: func(c *cli.Context) error {
+                        execMacro(macro, projectContext, false)
+                        return nil
                     },
                 }
             }
@@ -89,11 +91,14 @@ func main() {
     logsFlag := false
     cleanFlag := false
     execFlag := ""
+    inheriteConfigMacroFlag := ""
     gitHubFlag := ""
+    macroFlag := ""
+    useDockerCLIFlag := DOCKERCLI_FLAG_DEFAULT_VALUE
 
     app := cli.NewApp()
     app.Name = "nut"
-    app.Version = "0.1.2 dev"
+    app.Version = "0.1.3 dev"
     app.Usage = "the development environment, containerized"
     // app.EnableBashCompletion = true
     app.Flags = []cli.Flag {
@@ -122,30 +127,70 @@ func main() {
             Usage: "execute a command in a container.",
             Destination: &execFlag,
         },
+        cli.StringFlag{
+            Name:  "macro",
+            Usage: "Name of the macro to execute. Use with --logs.",
+            Destination: &macroFlag,
+        },
+        cli.StringFlag{
+            Name:  "extend-macro",
+            Usage: "Use with --exec: name of the macro from which to inherite the configuration",
+            Destination: &inheriteConfigMacroFlag,
+        },
+    }
+    if DOCKERCLI_FLAG_DEFAULT_VALUE == false {
+        app.Flags = append(app.Flags, cli.BoolFlag{
+            Name:  "dockercli",
+            Usage: "Use Docker CLI, instead of using Docker API to reach the host directly.",
+            Destination: &useDockerCLIFlag,
+        })
+    } else {
+        app.Flags = append(app.Flags, cli.BoolFlag{
+            Name:  "dockerapi",
+            Usage: "Use Docker API to reach the host directly, instead of using Docker CLI.",
+            Destination: &useDockerCLIFlag,
+        })
     }
     defaultAction := app.Action
-    app.Action = func(c *cli.Context) {
+    app.Action = func(c *cli.Context) error {
         if logsFlag {
             log.SetLevel(log.DebugLevel)
         }
+
         if cleanFlag {
-            persist.CleanStoreFromProject(".") // TODO: do better than "."
-        }
-        if initFlag {
+            if project != nil {
+                persist.CleanStoreFromProject(projectContext.GetRootDirectory())
+            }
+        } else if initFlag {
             log.Debug("main context for init: ", context)
             initSubcommand(c, context, gitHubFlag)
-            return
-        }
-        if execFlag != "" {
+            // return
+        } else if execFlag != "" {
             if project != nil {
-                // exec(project, c, execFlag)
-                execInContainer([]string{execFlag}, project, projectContext)
+                if inheriteConfigMacroFlag == "" {
+                    execInContainer([]string{execFlag}, project, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
+                } else if macro, ok := projectMacros[inheriteConfigMacroFlag]; ok && project != nil {
+                    execInContainer([]string{execFlag}, macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
+                } else {
+                    log.Error("Undefined macro " + macroFlag)
+                    cli.HandleAction(defaultAction, c)
+                }
             } else {
                 log.Error("Could not find nut configuration.")
+                cli.HandleAction(defaultAction, c)
             }
-            return
+            // return
+        } else if macroFlag != "" {
+            if macro, ok := projectMacros[macroFlag]; ok && project != nil {
+                execMacro(macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
+            } else {
+                log.Error("Undefined macro " + macroFlag)
+                cli.HandleAction(defaultAction, c)
+            }
+        } else {
+            cli.HandleAction(defaultAction, c)
         }
-        defaultAction(c)
+        return nil
     }
 
     app.Commands = macros

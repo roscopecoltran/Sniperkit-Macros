@@ -1,6 +1,8 @@
 package main
 
 import (
+    "os"
+    "os/exec"
     "github.com/fsouza/go-dockerclient"
     // "github.com/fgrehm/go-dockerpty"
     "github.com/matthieudelaro/go-dockerpty"
@@ -11,6 +13,7 @@ import (
     "os/user"
     Config "github.com/matthieudelaro/nut/config"
     Utils "github.com/matthieudelaro/nut/utils"
+    // "errors"
 )
 
 // Start the container, execute the list of commands, and then stops the container.
@@ -21,16 +24,16 @@ import (
 // and/or func (c *Client) ResizeExecTTY(id string, height, width int) error
 // TODO: report bug "StartExec Error: %s read /dev/stdin: bad file descriptor" when executing several commands : post issue on dockerpty
 // func execMacro(macro Config.Macro) {
-func execInContainer(commands []string, config Config.Config, context Utils.Context) {
+func execInContainer(commands []string, config Config.Config, context Utils.Context, useDockerCLI bool) {
     log.Debug("commands (len = ", len(commands), ") : ", commands)
     var cmdConfig []string
     if len(commands) == 0 {
         log.Debug("Given list of commands is empty.")
         cmdConfig = []string{}
     } else if len(commands) == 1 {
-        cmdConfig = []string{"bash", "-c", commands[0]}
+        cmdConfig = []string{"sh", "-c", commands[0]}
     } else {
-        cmdConfig = []string{"bash", "-c", strings.Join(commands, "; ")}
+        cmdConfig = []string{"sh", "-c", strings.Join(commands, "; ")}
     }
     log.Debug("cmdConfig: ", cmdConfig)
 
@@ -40,30 +43,19 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         return
     }
 
-    // endpoint := getDockerEndpoint()
-    // client, err := docker.NewClient(endpoint) // TODO : fix https for boot2docker (with https://github.com/fsouza/go-dockerclient/issues/166)
-    client, err := getDockerClient() // TODO : fix https for boot2docker (with https://github.com/fsouza/go-dockerclient/issues/166)
-    if err != nil {
-        // log.Error("Could not reach Docker host (", endpoint, "): ", err.Error())
-        log.Error(err)
-        return
-    }
-    log.Debug("Created client")
-
-    //Pull image from Registry, if not present
-    _, err = client.InspectImage(imageName)
-    if err != nil {
-        fmt.Println("Could not inspect image", imageName, ":", err.Error())
-
-        fmt.Println("Pulling image...")
-        opts := docker.PullImageOptions{Repository: imageName}
-        err = client.PullImage(opts, docker.AuthConfiguration{})
+    var client *docker.Client
+    var err error
+    if !useDockerCLI {
+        client, err = getDockerClient()
         if err != nil {
-            log.Error("Could not pull image ", imageName, ": ", err.Error())
+            log.Error("Could not reach Docker host: ", err.Error())
             return
         }
-        fmt.Println("Pulled image")
+        log.Debug("Created client")
+    } else {
+        log.Debug("Using Docker CLI")
     }
+
 
     // prepare names of directories to mount
     // inspired from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
@@ -89,25 +81,29 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             log.Debug(key, " unproper hostPath", hostPath)
             if volumeName != "" { // ..., or a volumeName
                 log.Debug(key, " volume name", volumeName)
-                // prepare volume
-                var dockerVolume *docker.Volume
-                if dockerVolume, err = client.InspectVolume(volumeName); err != nil {
-                    fmt.Println("Could not inspect volume", imageName, ":", err.Error())
-                    fmt.Println("Creating volume...")
+                if useDockerCLI {
+                    binds = append(binds, volumeName + ":" + containerPath)
+                } else {
+                    // prepare volume
+                    var dockerVolume *docker.Volume
+                    if dockerVolume, err = client.InspectVolume(volumeName); err != nil {
+                        fmt.Println("Could not inspect volume", imageName, ":", err.Error())
+                        fmt.Println("Creating volume...")
 
-                    if dockerVolume, err = client.CreateVolume(
-                        docker.CreateVolumeOptions{Name: volumeName}); err != nil {
-                        log.Error("Could not create volume: ", err.Error())
-                        return
+                        if dockerVolume, err = client.CreateVolume(
+                            docker.CreateVolumeOptions{Name: volumeName}); err != nil {
+                            log.Error("Could not create volume: ", err.Error())
+                            return
+                        }
+                        fmt.Println("Volume created.")
                     }
-                    fmt.Println("Volume created.")
+                    log.Debug(key, " dockerVolume ", dockerVolume)
+                    log.Debug(key, " dockerVolume ", dockerVolume.Name)
+                    log.Debug(key, " dockerVolume ", dockerVolume.Mountpoint)
+                    log.Debug(key, " dockerVolume ", dockerVolume.Driver)
+                    binds = append(binds, dockerVolume.Mountpoint + ":" + containerPath)
+                    // TODO?: take dockerVolume.Driver into account?
                 }
-                log.Debug(key, " dockerVolume ", dockerVolume)
-                log.Debug(key, " dockerVolume ", dockerVolume.Name)
-                log.Debug(key, " dockerVolume ", dockerVolume.Mountpoint)
-                log.Debug(key, " dockerVolume ", dockerVolume.Driver)
-                binds = append(binds, dockerVolume.Mountpoint + ":" + containerPath)
-                // TODO?: take dockerVolume.Driver into account?
             } else {
                 log.Error("Couldn't mount host directory (" + hostPath + "): ", hostPathErr.Error())
                 return
@@ -141,13 +137,28 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             // {HostIP: "0.0.0.0", HostPort: "8080",}}
             {HostPort: hostPort,}} // TODO: support HostIP
     }
+
+    // Add environment variables.
+    // Timezone feature: in order to synchronize the timezone
+    //     of the container with the one of the host, set the variable TZ.
+    //     (See http://www.cyberciti.biz/faq/linux-unix-set-tz-environment-variable/)
+    //     So, if TZ variable is not set in the configuration, then set
+    //     it to the host timezone information.
+    foundTZvariable := false
     for name, value := range Config.GetEnvironmentVariables(config) {
         envVariables = append(envVariables, name + "=" + value)
+        if name == "TZ" {
+            foundTZvariable = true
+        }
     }
+    if !foundTZvariable {
+        envVariables = append(envVariables, "TZ" + "=" + Utils.GetTimezoneOffsetToTZEnvironmentVariableFormat())
+    }
+
     if Config.IsGUIEnabled(config) {
         portBindingsGUI, envVariablesGUI, bindsGUI, err := enableGui()
         if err != nil {
-            log.Error("Could not enable GUI: ", err)
+            log.Error("Could not enable GUI: ", err.Error())
         } else {
             envVariables = append(envVariables, envVariablesGUI...)
             binds = append(binds, bindsGUI...)
@@ -176,14 +187,12 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
                 devices = append(devices, docker.Device{
                     PathOnHost: devicePath,
                     PathInContainer: devicePath,
-                    CgroupPermissions: "mrw", // DONE: discuss proper CgroupPermissions
+                    CgroupPermissions: "mrw",
                 })
             }
         }
     }
 
-    // DONE : set following config options: https://godoc.org/github.com/fsouza/go-dockerclient#Config
-    // User: set it to the user of the host, instead of root, to manage file permissions properly
     if Config.IsCurrentUserEnabled(config) {
         if hostUser, err := user.Current(); err != nil {
             if err.Error() == "user: Current not implemented on darwin/amd64" {
@@ -202,7 +211,7 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
 
     //Try to create a container from the imageID
     dockerConfig := docker.Config{
-        Image: imageName,
+        Image:        imageName,
         Cmd:          cmdConfig,
         OpenStdin:    true,
         StdinOnce:    true,
@@ -217,28 +226,6 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         User:         hostUidGid,
     }
 
-    // TODO: ? Give the container a name? Can be done with docker.CreateContainerOptions{Name: "nut_myproject"}
-    // opts2 := docker.CreateContainerOptions{Name: "nut_" + , Config: &dockerConfig}
-    opts2 := docker.CreateContainerOptions{Config: &dockerConfig}
-    container, err := client.CreateContainer(opts2)
-    if err != nil {
-        log.Error("Couldn't create container: ", err.Error())
-        return
-    } else {
-        defer func() {
-            err = client.RemoveContainer(docker.RemoveContainerOptions{
-                ID: container.ID,
-                Force: true,
-            })
-            if( err != nil) {
-                log.Error("Coundn't remove container: ", container.ID, ": ", err.Error())
-                return
-            }
-            log.Debug("Removed container with ID ", container.ID)
-        }()
-    }
-    log.Debug("Created container with ID ", container.ID)
-
     dockerHostConfig := docker.HostConfig{
         Binds: binds,
         PortBindings: portBindings,
@@ -249,9 +236,98 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         NetworkMode: Config.GetNetworkMode(config),
     }
 
-    //Try to start the container
-    if err = dockerpty.Start(client, container, &dockerHostConfig); err != nil {
-        log.Error("Error while starting container, and attaching to it: ", err.Error(),
+    if useDockerCLI {
+        dockercall := []string{"run", "-it", "--rm"}
+        if dockerConfig.WorkingDir != "" {
+            dockercall = append(dockercall, "--workdir=" + dockerConfig.WorkingDir)
+        }
+        for _, volumeName := range dockerHostConfig.Binds {
+            dockercall = append(dockercall, "--volume=" + volumeName)
+        }
+        if dockerConfig.VolumeDriver != "" {
+            dockercall = append(dockercall, "--volume-driver=" + dockerConfig.VolumeDriver)
+        }
+        if dockerConfig.User != "" {
+            dockercall = append(dockercall, "--user=" + dockerConfig.User)
+        }
+        for _, envVariable := range dockerConfig.Env {
+            dockercall = append(dockercall, "--env=\"" + envVariable + "\"")
+        }
+        for _, port := range Config.GetPorts(config) { // TODO: use dockerConfig.ExposedPorts instead (after fixing it)
+            dockercall = append(dockercall, "--publish=\"" + port + "\"")
+        }
+        if dockerHostConfig.Privileged {
+            dockercall = append(dockercall, "--privileged")
+        }
+        if value := dockerHostConfig.NetworkMode; value != "" {
+            dockercall = append(dockercall, "--uts=\"" + value + "\"")
+        }
+        if value := dockerHostConfig.UTSMode; value != "" {
+            dockercall = append(dockercall, "--net=\"" + value + "\"")
+        }
+        for _, value := range dockerHostConfig.SecurityOpt {
+            dockercall = append(dockercall, "--security-opt=\"" + value + "\"")
+        }
+        for _, device := range dockerHostConfig.Devices {
+            value := device.PathOnHost + ":" + device.PathInContainer
+            if device.CgroupPermissions != "" {
+                value += ":" + device.CgroupPermissions
+            }
+            dockercall = append(dockercall, "--device=\"" + value + "\"")
+        }
+        dockercall = append(dockercall, imageName)
+        dockercall = append(dockercall, dockerConfig.Cmd...)
+        log.Debug(append([]string{"docker"}, dockercall...))
+        c := exec.Command("docker", dockercall...)
+
+        c.Stdout = os.Stdout
+        c.Stdin = os.Stdin
+        c.Stderr = os.Stderr
+        if err = c.Run(); err != nil {
+            log.Error("Error while calling Docker CLI: ", err.Error())
+        }
+    } else {
+        //Pull image from Registry, if not present
+        _, err = client.InspectImage(imageName)
+        if err != nil {
+            fmt.Println("Could not inspect image", imageName, ":", err.Error())
+
+            fmt.Println("Pulling image...")
+            opts := docker.PullImageOptions{Repository: imageName}
+            err = client.PullImage(opts, docker.AuthConfiguration{})
+            if err != nil {
+                log.Error("Could not pull image ", imageName, ": ", err.Error())
+                return
+            }
+            fmt.Println("Pulled image")
+        }
+
+        // TODO: ? Give the container a name? Can be done with docker.CreateContainerOptions{Name: "nut_myproject"}
+        // opts2 := docker.CreateContainerOptions{Name: "nut_" + , Config: &dockerConfig}
+        opts2 := docker.CreateContainerOptions{
+            Config: &dockerConfig,
+            HostConfig: &dockerHostConfig,
+        }
+        container, err := client.CreateContainer(opts2)
+        if err != nil {
+            log.Error("Couldn't create container: ", err.Error())
+            return
+        } else {
+            defer func() {
+                err = client.RemoveContainer(docker.RemoveContainerOptions{
+                    ID: container.ID,
+                    Force: true,
+                })
+                if( err != nil) {
+                    log.Error("Coundn't remove container: ", container.ID, ": ", err.Error())
+                    return
+                }
+                log.Debug("Removed container with ID ", container.ID)
+            }()
+        }
+        log.Debug("Created container with ID ", container.ID)
+
+        log.Debug("About to start and attach to container with following options: ",
             "\nBinds: ", dockerHostConfig.Binds,
             "\nPortBindings: ", dockerHostConfig.PortBindings,
             "\nPrivileged: ", dockerHostConfig.Privileged,
@@ -268,21 +344,43 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
             "\nVolumeDriver: ", dockerConfig.VolumeDriver,
             "\nUser: ", dockerConfig.User,
             )
-        return
-    } else {
-        // And once it is done with all the commands, remove the container.
-        defer func () {
-            err = client.StopContainer(container.ID, 0)
-            if( err != nil) {
-                log.Debug("Could not stop container ", container.ID, ": ", err.Error())
-                return
-            }
-            log.Debug("Stopped container with ID ", container.ID)
-        }()
+
+        //Try to start the container
+        // if err = dockerpty.Start(client, container, &dockerHostConfig); err != nil {  // HostConfig is deprecated: https://github.com/fsouza/go-dockerclient/issues/537
+        if err = dockerpty.Start(client, container, nil); err != nil {
+            log.Error("Error while starting container, and attaching to it: ", err.Error(),
+                "\nBinds: ", dockerHostConfig.Binds,
+                "\nPortBindings: ", dockerHostConfig.PortBindings,
+                "\nPrivileged: ", dockerHostConfig.Privileged,
+                "\nSecurityOpt: ", dockerHostConfig.SecurityOpt,
+                "\nDevices: ", dockerHostConfig.Devices,
+                "\nUTSMode: ", dockerHostConfig.UTSMode,
+                "\nNetworkMode: ", dockerHostConfig.NetworkMode,
+
+                "\nImage: ", dockerConfig.Image,
+                "\nCmd: ", dockerConfig.Cmd,
+                "\nWorkingDir: ", dockerConfig.WorkingDir,
+                "\nEnv: ", dockerConfig.Env,
+                "\nExposedPorts: ", dockerConfig.ExposedPorts,
+                "\nVolumeDriver: ", dockerConfig.VolumeDriver,
+                "\nUser: ", dockerConfig.User,
+                )
+            return
+        } else {
+            // And once it is done with all the commands, remove the container.
+            defer func () {
+                err = client.StopContainer(container.ID, 0)
+                if( err != nil) {
+                    log.Debug("Could not stop container ", container.ID, ": ", err.Error())
+                    return
+                }
+                log.Debug("Stopped container with ID ", container.ID)
+            }()
+        }
+        log.Debug("Started container with ID ", container.ID)
     }
-    log.Debug("Started container with ID ", container.ID)
 }
 
-func execMacro(macro Config.Macro, context Utils.Context) {
-    execInContainer(Config.GetActions(macro), macro, context)
+func execMacro(macro Config.Macro, context Utils.Context, useDockerCLI bool) {
+    execInContainer(Config.GetActions(macro), macro, context, useDockerCLI)
 }

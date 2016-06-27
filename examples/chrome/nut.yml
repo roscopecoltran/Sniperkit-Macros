@@ -4,5 +4,7 @@ macros:
   run:
     usage: run chrome in the container
     docker_image: jess/chrome
-    privileged: true
+    # privileged: true
     enable_gui: true
+    security_opts:
+    - seccomp=unconfined

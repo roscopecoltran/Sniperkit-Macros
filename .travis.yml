@@ -4,11 +4,16 @@ go:
   - 1.6
 
 install:
+  - go get -u github.com/kardianos/govendor
   - go get github.com/stretchr/testify/assert  # for fsouza/go-dockerclient
+  - govendor list
+  - govendor fetch +missing
 
 script:
   - env GOOS=linux GOARCH=amd64 go build -o `echo $dirName`Linux
   - env GOOS=darwin GOARCH=amd64 go build -o `echo $dirName`OSX
   - env GOOS=windows GOARCH=amd64 go build -o `echo $dirName`Windows  # nut does not support Windows in master branch yet
+  - go test
+  - cd config
   - go test
 
