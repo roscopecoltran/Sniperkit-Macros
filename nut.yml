@@ -1,6 +1,6 @@
 syntax_version: "6"
 project_name: nut
-docker_image: golang:1.6
+docker_image: matthieudelaro/golang:1.6-cross
 container_working_directory: /go/src/github.com/matthieudelaro/nut
 mount:
   main: # mount current directory
