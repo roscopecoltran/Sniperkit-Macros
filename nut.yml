@@ -10,7 +10,6 @@ macros:
   setup:
     usage: call after pulling the project, to install dependencies
     actions:
-    - govendor list
     - govendor fetch +missing
   build:
     usage: build the project
