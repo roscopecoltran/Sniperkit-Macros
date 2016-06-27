@@ -75,8 +75,9 @@ func main() {
                     Aliases: Config.GetAliases(macro),
                     UsageText: Config.GetUsageText(macro),
                     Description: Config.GetDescription(macro),
-                    Action: func(c *cli.Context) {
+                    Action: func(c *cli.Context) error {
                         execMacro(macro, projectContext, false)
+                        return nil
                     },
                 }
             }
@@ -151,7 +152,7 @@ func main() {
         })
     }
     defaultAction := app.Action
-    app.Action = func(c *cli.Context) {
+    app.Action = func(c *cli.Context) error {
         if logsFlag {
             log.SetLevel(log.DebugLevel)
         }
@@ -172,11 +173,11 @@ func main() {
                     execInContainer([]string{execFlag}, macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
                 } else {
                     log.Error("Undefined macro " + macroFlag)
-                    defaultAction(c)
+                    cli.HandleAction(defaultAction, c)
                 }
             } else {
                 log.Error("Could not find nut configuration.")
-                defaultAction(c)
+                cli.HandleAction(defaultAction, c)
             }
             // return
         } else if macroFlag != "" {
@@ -184,11 +185,12 @@ func main() {
                 execMacro(macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
             } else {
                 log.Error("Undefined macro " + macroFlag)
-                defaultAction(c)
+                cli.HandleAction(defaultAction, c)
             }
         } else {
-            defaultAction(c)
+            cli.HandleAction(defaultAction, c)
         }
+        return nil
     }
 
     app.Commands = macros

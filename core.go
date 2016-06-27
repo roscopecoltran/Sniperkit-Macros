@@ -304,7 +304,10 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
 
         // TODO: ? Give the container a name? Can be done with docker.CreateContainerOptions{Name: "nut_myproject"}
         // opts2 := docker.CreateContainerOptions{Name: "nut_" + , Config: &dockerConfig}
-        opts2 := docker.CreateContainerOptions{Config: &dockerConfig}
+        opts2 := docker.CreateContainerOptions{
+            Config: &dockerConfig,
+            HostConfig: &dockerHostConfig,
+        }
         container, err := client.CreateContainer(opts2)
         if err != nil {
             log.Error("Couldn't create container: ", err.Error())
@@ -324,9 +327,27 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         }
         log.Debug("Created container with ID ", container.ID)
 
+        log.Debug("About to start and attach to container with following options: ",
+            "\nBinds: ", dockerHostConfig.Binds,
+            "\nPortBindings: ", dockerHostConfig.PortBindings,
+            "\nPrivileged: ", dockerHostConfig.Privileged,
+            "\nSecurityOpt: ", dockerHostConfig.SecurityOpt,
+            "\nDevices: ", dockerHostConfig.Devices,
+            "\nUTSMode: ", dockerHostConfig.UTSMode,
+            "\nNetworkMode: ", dockerHostConfig.NetworkMode,
+
+            "\nImage: ", dockerConfig.Image,
+            "\nCmd: ", dockerConfig.Cmd,
+            "\nWorkingDir: ", dockerConfig.WorkingDir,
+            "\nEnv: ", dockerConfig.Env,
+            "\nExposedPorts: ", dockerConfig.ExposedPorts,
+            "\nVolumeDriver: ", dockerConfig.VolumeDriver,
+            "\nUser: ", dockerConfig.User,
+            )
 
         //Try to start the container
-        if err = dockerpty.Start(client, container, &dockerHostConfig); err != nil {
+        // if err = dockerpty.Start(client, container, &dockerHostConfig); err != nil {  // HostConfig is deprecated: https://github.com/fsouza/go-dockerclient/issues/537
+        if err = dockerpty.Start(client, container, nil); err != nil {
             log.Error("Error while starting container, and attaching to it: ", err.Error(),
                 "\nBinds: ", dockerHostConfig.Binds,
                 "\nPortBindings: ", dockerHostConfig.PortBindings,
