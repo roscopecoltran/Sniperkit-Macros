@@ -31,9 +31,9 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
         log.Debug("Given list of commands is empty.")
         cmdConfig = []string{}
     } else if len(commands) == 1 {
-        cmdConfig = []string{"bash", "-c", commands[0]}
+        cmdConfig = []string{"sh", "-c", commands[0]}
     } else {
-        cmdConfig = []string{"bash", "-c", strings.Join(commands, "; ")}
+        cmdConfig = []string{"sh", "-c", strings.Join(commands, "; ")}
     }
     log.Debug("cmdConfig: ", cmdConfig)
 
