@@ -6,7 +6,6 @@ go:
 install:
   - go get -u github.com/kardianos/govendor
   - go get github.com/stretchr/testify/assert  # for fsouza/go-dockerclient
-  - govendor list
   - govendor fetch +missing
 
 script:
