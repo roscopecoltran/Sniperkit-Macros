@@ -19,7 +19,7 @@ $ nut run
 $ nut test
 ```
 
-**Nut** mounts the current folder in a [Docker](https://www.docker.com/) container, and executes commands on your behalf, according to the project configuration. The configuration is read from `nut.yml` file, in the current/parent folder. You can choose the Docker image to use, declare volumes to mount, and define commands (called macros) such as *build*, *run*, and *test*.
+**Nut** mounts the current folder in a [Docker](https://www.docker.com/) container, and executes commands on your behalf, according to the project configuration. The configuration is read from `nut.yml` file, in the current/parent folder. You can choose the Docker image to use, declare volumes to mount, and define commands (called macros) such as *build*, *run*, and *test*. Nut also [synchronizes timezone](https://github.com/matthieudelaro/nut/wiki/Nut:-Under-The-Hood#synchronize-timezones)
 
 Nut is in early stage of development. It has been tested on Ubuntu, on MacOS with *Docker for Mac* and *Docker Toolbox*, and on Windows with *Docker Toolbox*. Feedbacks and contributions to add features and to [improve Windows support](https://github.com/matthieudelaro/nut/issues/4) are welcome.
 
@@ -27,9 +27,9 @@ Check the [wiki](https://github.com/matthieudelaro/nut/wiki) to learn about Nut 
 
 ### Share and reuse environments
 You can initialize **Nut** with an environment from a GitHub repository:
-
-    $ nut --init --github=matthieudelaro/nutfile_go1.6
-
+```bash
+$ nut --init --github=matthieudelaro/nutfiles/golang1.6
+```
 This creates `nut.yml` file that inherites the configuration defined in the nut file at the root of the repository.
 This configuration can be overloaded by defining/redefining docker image, macros, mounting points, ... It makes it easy for developers to use libraries and development tools that provide a nut file.
 
@@ -41,9 +41,9 @@ $ nut --exec="ls"  # will display the files in the container working directory
 $ nut --exec="echo hello && echo world!" --logs  # --logs will display the logs for developers
 ```
 `--exec` flag can be really handy to build and test **Nut** on OSX:
-
-    $ nut build-osx && nut --exec="./nut --init --logs && ls -lah .nut"
-
+```bash
+$ nut build-osx && nut --exec="./nut --init --logs && ls -lah .nut"
+```
 ### Getting Nut
 #### Compiling from source
 Provided that you use Docker, you don't need to install anything on your computer.
@@ -93,16 +93,15 @@ Manually built binaries for Linux, OSX, and Windows are available in [release](h
 
 ### Nut File Syntax
 #### Example
-Here is an example of `nut.yml` to develop in Go. You can generate a sample configuration with  :
+Here is an example of `nut.yml` to develop in Go. You can generate a sample configuration with:
 
 `nut --init`
 ```yaml
 # nut.yml
 project_name: nut
-enable_gui: yes # forward X11 to run graphical application from within the container
-                # On OSX, you have to install an X11 server first : XQuartz (http://www.xquartz.org/) (and you may need to restart your terminal or to reboot, in order to initialize environment variables properly)
-                # On Ubuntu, depending on your config, you may need to run "xhost+" before running nut.
-privileged: true # run container with --privileged flag
+enable_gui: true # forward X11 to run graphical application from within the container
+                 # On OSX, you have to install an X11 server first : XQuartz (http://www.xquartz.org/) (and you may need to restart your terminal or to reboot, in order to initialize environment variables properly)
+                 # On Ubuntu, depending on your config, you may need to run "xhost+" before running nut.
 
 based_on: # configuration can be inherited from:
   github: matthieudelaro/nutfiles/golang1.6 # a GitHub repository
@@ -111,10 +110,14 @@ based_on: # configuration can be inherited from:
 
 docker_image: golang:1.6 # the Docker image. Will override image inherited from file or from GitHub
 
-mount: # declare folders to mount in the container
+volumes: # declare folders to mount in the container
   main: # give each folder any name that you like
-  - .               # this folder (from your computer) will be mounted as
-  - /go/src/project # this folder (in the container)
+    host_path: .               # this folder (from your computer) will be mounted as
+    # volume_name: somevolume  # (or this docker volumes will be mounted as)
+    container_path: /go/src/project # this folder (in the container)
+  shared:
+    volume_name: somevolume  # this docker volumes will be mounted as
+    container_path: /tmp/shared # this folder (in the container)
 
 macros: # macros define operations that Nut can perform
   build: # call this macro with "nut build"
@@ -124,6 +127,8 @@ macros: # macros define operations that Nut can perform
     - echo Done
   run: # call this macro with "nut run"
     usage: run the project in the container
+    # settings can be overridden for each macro
+    enable_current_user: true # login as host user, instead of root
     actions:
     - ./nut
   test:
@@ -132,12 +137,33 @@ macros: # macros define operations that Nut can perform
     - go test
 
 container_working_directory: /go/src/project # where macros will be executed
-syntax_version: "6" # Nut evolves quickly ; its configuration file syntax as well.
+syntax_version: "7" # Nut evolves quickly ; its configuration file syntax as well.
                     # So nut files are versioned to ensure backward compatibility.
+                    
+# extra configuration:   
+privileged: true # run container with --privileged flag
+environment: # set environment variables
+  var_A: hello # equivalent to: export var_A=hello
+  var_B: world
+  # environment variables beginning with NUT_ should be reserved for internal usage.
+ports: # open ports
+  - "3000:3000"
+  - 100:100
+net: host # docker run --net
+uts: host # docker run --uts
+security_opts: # docker run --security-opt
+  - seccomp=unconfined 
+devices: # expose devices to the container
+  # On OSX and Windows, docker runs into a VM which does not support devices.
+  # So Nut supports devices on linux only.
+  first:
+    host_path: "/dev/1"
+    container_path: "/dev/1"
+    options: "rw"
 
 ```
 
-Here are other instructive examples:
+Here are other instructive [examples](https://github.com/matthieudelaro/nut/blob/master/examples/):
 - [Dynamic folder name](https://github.com/matthieudelaro/nutfile_go1.5/blob/master/nut.yml)
 - [GUI application](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml)
 
@@ -217,9 +243,10 @@ Device #0
 - build and run [Caffe](https://github.com/matthieudelaro/nut/blob/master/examples/caffe/nut.yml) with `nut build`, `nut test`, `nut train-mnist`.
 - compile CUDA code on a Mac Book Air, which hasn't got any Nvidia GPU. Just `nut build`
 - test code in a whole infrastructure, by defining a macro running *docker-compose* in a container.
-- run linux [graphical applications](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml) on your Mac after installing [XQuartz](http://www.xquartz.org/):
+- run linux graphical applications such as [geary](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml) and [chrome](https://github.com/matthieudelaro/nut/blob/master/examples/chrome/nut.yml) on your Mac after installing [XQuartz](http://www.xquartz.org/):
 
-![Linux application on your Mac](https://camo.githubusercontent.com/b32c086f7da89f3365062f9a6a49b7f64377cb35/687474703a2f2f692e696d6775722e636f6d2f4b6650676d72322e676966)
+![Geary application on your Mac](https://camo.githubusercontent.com/b32c086f7da89f3365062f9a6a49b7f64377cb35/687474703a2f2f692e696d6775722e636f6d2f4b6650676d72322e676966)
+![Chrome application on your Mac](https://pbs.twimg.com/media/Cl90rCuVYAATcsz.jpg:large)
 
 ### Milestones
 - create container only once, and store its ID in .nut file

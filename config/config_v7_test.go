@@ -13,9 +13,6 @@ import (
 func TestFromNutPackageV7(t *testing.T) {
     log.SetLevel(log.DebugLevel)
 
-
-    log.Debug("------Tests of main.go")
-
     var volume Volume
     volume = &VolumeV7{}
     log.Debug("OK ", volume)

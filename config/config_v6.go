@@ -20,16 +20,16 @@ type VolumeV6 struct {
             if self.Host == "" {
                 return "", errors.New("Undefined host path")
             } else {
-                log.Debug("getFullHostPath value ", self.Host)
+                // log.Debug("getFullHostPath value ", self.Host)
                 res := filepath.Clean(self.Host)
-                log.Debug("getFullHostPath clean ", res)
+                // log.Debug("getFullHostPath clean ", res)
                 if !filepath.IsAbs(res) {
-                    log.Debug("getFullHostPath is not Abs")
+                    // log.Debug("getFullHostPath is not Abs")
                     res = filepath.Join(context.GetRootDirectory(), res)
                 }
-                log.Debug("getFullHostPath value ", res)
+                // log.Debug("getFullHostPath value ", res)
                 if strings.Contains(res, `:\`) { // path on windows. Eg: C:\\Users\
-                    log.Debug("getFullHostPath windows ", `:\`)
+                    // log.Debug("getFullHostPath windows ", `:\`)
                     parts := strings.Split(res, `:\`)
                     parts[0] = strings.ToLower(parts[0]) // drive letter should be lower case
                     res = "//" + parts[0] + "/" + filepath.ToSlash(parts[1])
@@ -43,14 +43,14 @@ type VolumeV6 struct {
             if self.Container == "" {
                 return "", errors.New("Undefined container path")
             } else {
-                log.Debug("getFullContainerPath value ", self.Container)
+                // log.Debug("getFullContainerPath value ", self.Container)
                 clean := containerFilepath.ToSlash(containerFilepath.Clean(self.Container))
-                log.Debug("getFullContainerPath clean ", clean)
+                // log.Debug("getFullContainerPath clean ", clean)
                 if containerFilepath.IsAbs(clean) {
-                    log.Debug("getFullContainerPath isAbs")
+                    // log.Debug("getFullContainerPath isAbs")
                     return clean, nil
                 } else {
-                    log.Debug("getFullContainerPath is not Abs")
+                    // log.Debug("getFullContainerPath is not Abs")
                     log.Debug("getFullContainerPath return ", containerFilepath.Join(context.GetRootDirectory(), clean))
                     return containerFilepath.Join(context.GetRootDirectory(), clean), nil
                 }

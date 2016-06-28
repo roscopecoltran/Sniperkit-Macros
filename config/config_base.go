@@ -94,6 +94,9 @@ type ConfigBase struct {
         func (self *ConfigBase) getSecurityOpts() []string {
             return []string{}
         }
+        func (self *ConfigBase) getWorkInProjectFolderAs() string {
+            return ""
+        }
 
 type ProjectBase struct {
 }

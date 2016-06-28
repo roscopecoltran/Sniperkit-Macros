@@ -1,16 +1,11 @@
-syntax_version: "6"
+syntax_version: "7"
 project_name: nut
 docker_image: matthieudelaro/golang:1.6-cross
-container_working_directory: /go/src/github.com/matthieudelaro/nut
-mount:
-  main: # mount current directory
-  - .
-  - /go/src/github.com/matthieudelaro/nut
+work_in_project_folder_as: /go/src/github.com/matthieudelaro/nut
 macros:
   setup:
     usage: call after pulling the project, to install dependencies
     actions:
-    - govendor list
     - govendor fetch +missing
   build:
     usage: build the project
@@ -49,10 +44,10 @@ macros:
     - bw
   run:
     usage: run the project in the container
-    mount:
+    volumes:
       dockersock: # mount docker socket run nut in a container
-      - /var/run/docker.sock
-      - /var/run/docker.sock
+        host_path: /var/run/docker.sock
+        container_path: /var/run/docker.sock
     actions:
     - ./`pwd | xargs basename`
   test:
@@ -65,10 +60,10 @@ macros:
     usage: open this project in vscode
     docker_image: ctaggart/golang-vscode
     enable_gui: true
-    mount:
+    volumes:
       dockersock: # mount docker socket run nut in a container
-      - /var/run/docker.sock
-      - /var/run/docker.sock
+        host_path: /var/run/docker.sock
+        container_path: /var/run/docker.sock
     security_opts:
     - seccomp=unconfined
     actions:
