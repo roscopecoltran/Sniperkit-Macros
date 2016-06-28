@@ -33,6 +33,15 @@ func main() {
     log.Debug("main second context: ", projectContext)
     projectMacros := map[string]Config.Macro{}
 
+    initFlag := false
+    logsFlag := false
+    cleanFlag := false
+    execFlag := ""
+    inheriteConfigMacroFlag := ""
+    gitHubFlag := ""
+    macroFlag := ""
+    useDockerCLIFlag := DOCKERCLI_FLAG_DEFAULT_VALUE
+
     if err == nil {
         // Macros are stored in a random order.
         // But we want to display them in the same order everytime.
@@ -76,7 +85,10 @@ func main() {
                     UsageText: Config.GetUsageText(macro),
                     Description: Config.GetDescription(macro),
                     Action: func(c *cli.Context) error {
-                        execMacro(macro, projectContext, false)
+                        if logsFlag {
+                            log.SetLevel(log.DebugLevel)
+                        }
+                        execMacro(macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
                         return nil
                     },
                 }
@@ -87,14 +99,6 @@ func main() {
         macros = []cli.Command{}
     }
 
-    initFlag := false
-    logsFlag := false
-    cleanFlag := false
-    execFlag := ""
-    inheriteConfigMacroFlag := ""
-    gitHubFlag := ""
-    macroFlag := ""
-    useDockerCLIFlag := DOCKERCLI_FLAG_DEFAULT_VALUE
 
     app := cli.NewApp()
     app.Name = "nut"
@@ -151,6 +155,7 @@ func main() {
             Destination: &useDockerCLIFlag,
         })
     }
+
     defaultAction := app.Action
     app.Action = func(c *cli.Context) error {
         if logsFlag {
@@ -164,7 +169,6 @@ func main() {
         } else if initFlag {
             log.Debug("main context for init: ", context)
             initSubcommand(c, context, gitHubFlag)
-            // return
         } else if execFlag != "" {
             if project != nil {
                 if inheriteConfigMacroFlag == "" {
@@ -173,19 +177,21 @@ func main() {
                     execInContainer([]string{execFlag}, macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
                 } else {
                     log.Error("Undefined macro " + macroFlag)
-                    cli.HandleAction(defaultAction, c)
+                    cli.ShowAppHelp(c)
+                    return cli.NewExitError("", 42)
                 }
             } else {
                 log.Error("Could not find nut configuration.")
-                cli.HandleAction(defaultAction, c)
+                cli.ShowAppHelp(c)
+                return cli.NewExitError("", 42)
             }
-            // return
         } else if macroFlag != "" {
             if macro, ok := projectMacros[macroFlag]; ok && project != nil {
                 execMacro(macro, projectContext, useDockerCLIFlag != DOCKERCLI_FLAG_DEFAULT_VALUE)
             } else {
                 log.Error("Undefined macro " + macroFlag)
-                cli.HandleAction(defaultAction, c)
+                cli.ShowAppHelp(c)
+                return cli.NewExitError("", 42)
             }
         } else {
             cli.HandleAction(defaultAction, c)
@@ -194,6 +200,11 @@ func main() {
     }
 
     app.Commands = macros
+    app.CommandNotFound = func(c *cli.Context, macroName string) {
+        log.Error("Undefined macro " + macroName)
+        cli.ShowAppHelp(c)
+        os.Exit(42)
+    }
 
     app.Run(os.Args)
 }
