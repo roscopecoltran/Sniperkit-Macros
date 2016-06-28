@@ -102,7 +102,9 @@ func main() {
 
     app := cli.NewApp()
     app.Name = "nut"
-    app.Version = "0.1.4 dev"
+    // Upon release (by running "nut release"), the release placeholder on the
+    // next line will be replaced with information to identify the build.
+    app.Version = "0.1.4 dev"  //RELEASE_BUILD_PLACEHOLDER//
     app.Usage = "the development environment, containerized"
     // app.EnableBashCompletion = true
     app.Flags = []cli.Flag {
