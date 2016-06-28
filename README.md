@@ -113,7 +113,6 @@ docker_image: golang:1.6 # the Docker image. Will override image inherited from 
 volumes: # declare folders to mount in the container
   main: # give each folder any name that you like
     host_path: .               # this folder (from your computer) will be mounted as
-    # volume_name: somevolume  # (or this docker volumes will be mounted as)
     container_path: /go/src/project # this folder (in the container)
   shared:
     volume_name: somevolume  # this docker volumes will be mounted as
@@ -137,6 +136,10 @@ macros: # macros define operations that Nut can perform
     - go test
 
 container_working_directory: /go/src/project # where macros will be executed
+work_in_project_folder_as: /go/src/github.com/matthieudelaro/nut 
+  # Mount the folder of the project (where nut.yml is located) to the given
+  # location inside the container. Also set the working directory to this 
+  # location. This is equivalent to container_working_directory + volume
 syntax_version: "7" # Nut evolves quickly ; its configuration file syntax as well.
                     # So nut files are versioned to ensure backward compatibility.
                     
