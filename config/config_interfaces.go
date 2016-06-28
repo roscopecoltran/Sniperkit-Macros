@@ -47,6 +47,7 @@ type Config interface {
     getDetached() (bool, bool)
     getEnableCurrentUser() (bool, bool)
     getSecurityOpts() []string
+    getWorkInProjectFolderAs() string
 }
 type Project interface { // extends Config interface
     // pure Project methods
@@ -74,6 +75,7 @@ type Project interface { // extends Config interface
     getDetached() (bool, bool)
     getEnableCurrentUser() (bool, bool)
     getSecurityOpts() []string
+    getWorkInProjectFolderAs() string
 
 }
 type Macro interface { // extends Config interface
@@ -105,5 +107,6 @@ type Macro interface { // extends Config interface
     getDetached() (bool, bool)
     getEnableCurrentUser() (bool, bool)
     getSecurityOpts() []string
+    getWorkInProjectFolderAs() string
 }
 

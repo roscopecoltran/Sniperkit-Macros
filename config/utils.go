@@ -13,6 +13,7 @@ import (
 
 const NutFileName = "nut.yml"
 const NutOverrideFileName = "nut.override.yml"
+const NutProjectFolderKey = "NUT_PROJECT_FOLDER"
 
 /// Returns the boolean value, and whether there is or not a value
 func TruthyString(s string) (bool, bool) {
@@ -39,7 +40,7 @@ func CheckConflict(context Utils.Context, key string, newPoint Volume, mountingP
            c == c2 ||
            (newPoint.getVolumeName() != "" && newPoint.getVolumeName() == mountingPoint2.getVolumeName()){
            // || errh != nil || errc != nil || errh2 != nil || errc2 != nil {
-            // log.Debug("conflic between mounting points ", key, " and ", key2)
+            log.Debug("conflic between mounting points ", key, " and ", key2)
             if errh != nil || errc != nil || errh2 != nil || errc2 != nil {
                 log.Debug("warning while checking conflic between volumes ", key, " and ", key2)
             }

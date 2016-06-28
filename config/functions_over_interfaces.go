@@ -101,11 +101,21 @@ func GetBaseEnv(config Config) BaseEnvironment {
 }
 
 func GetWorkingDir(config Config) string {
-    if config.getWorkingDir() == "" && config.getParent() != nil {
-        return GetWorkingDir(config.getParent())
+    if item := config.getWorkingDir(); item != "" {
+        return item
+    } else if item := config.getWorkInProjectFolderAs(); item != "" {
+        return item
+    } else if parent := config.getParent(); parent != nil {
+        return GetWorkingDir(parent)
     } else {
-        return config.getWorkingDir()
+        return ""
     }
+
+    // if config.getWorkingDir() == "" && config.getParent() != nil {
+    //     return GetWorkingDir(config.getParent())
+    // } else {
+    //     return config.getWorkingDir()
+    // }
 }
 
 func GetVolumes(config Config, context Utils.Context) map[string]Volume {
@@ -114,15 +124,32 @@ func GetVolumes(config Config, context Utils.Context) map[string]Volume {
         items = map[string]Volume{}
     }
 
-    var parent = config.getParent()
-    for parent != nil {
-        for name, item := range parent.getVolumes() {
+    // add project folder if need be, and if there is no conflict
+    if destination := config.getWorkInProjectFolderAs(); destination != "" {
+        // check that there is no conflict with explicit volumes, and add the
+        // project's root folder as a volume if there is not conflict.
+        projectFolderVolume := &VolumeV7 {
+            VolumeName: "",
+            Host: context.GetRootDirectory(),
+            Container: destination,
+            Options: "",
+        }
+        if conflict := CheckConflict(context, NutProjectFolderKey,
+            projectFolderVolume, items); conflict == nil {
+            items[NutProjectFolderKey] = projectFolderVolume
+        }
+    }
+
+    // inherite volumes from parent
+    if parent := config.getParent(); parent != nil {
+        parentItems := GetVolumes(parent, context)
+        for name, item := range parentItems {
             if CheckConflict(context, name, item, items) == nil {
                 items[name] = item
             }
         }
-        parent = parent.getParent()
     }
+
     return items
 }
 
@@ -261,6 +288,16 @@ func GetProjectName(config Config) string {
         return item
     } else if parent := config.getParent(); parent != nil {
         return GetProjectName(parent)
+    } else {
+        return ""
+    }
+}
+
+func GetWorkInProjectFolderAs(config Config) string {
+    if item := config.getWorkInProjectFolderAs(); item != "" {
+        return item
+    } else if parent := config.getParent(); parent != nil {
+        return GetWorkInProjectFolderAs(parent)
     } else {
         return ""
     }

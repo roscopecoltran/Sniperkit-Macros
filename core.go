@@ -57,7 +57,7 @@ func execInContainer(commands []string, config Config.Config, context Utils.Cont
     }
 
 
-    // prepare names of directories to mount
+    // prepare names of directories/volumes to mount
     // inspired from https://github.com/fsouza/go-dockerclient/issues/220#issuecomment-77777365
     volumes := Config.GetVolumes(config, context)
     binds := make([]string, 0, len(volumes))
