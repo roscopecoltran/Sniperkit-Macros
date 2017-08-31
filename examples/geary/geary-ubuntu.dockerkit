@@ -2,6 +2,16 @@ syntax_version: "6"
 project_name: geary
 docker_image: jess/geary
 enable_gui: true
+metas:
+analysis:
+vcs:
+	github:
+		meta:
+		starred:
+		watched:
+		forks:
+		issues:
+		pull_requests:
 macros:
   run:
     usage: run geary in the container

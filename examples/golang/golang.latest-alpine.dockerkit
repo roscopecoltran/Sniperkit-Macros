@@ -1,0 +1,16 @@
+---
+syntax_version: "8"
+project_name: go
+metas:
+analysis:
+vcs:
+	github:
+		meta:
+		starred:
+		watched:
+		forks:
+		issues:
+		pull_requests:
+based_on:
+  github: roscopecoltran/sniperkit-golang
+docker_image: "golang:latest-alpine3.6"

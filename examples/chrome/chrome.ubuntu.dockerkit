@@ -1,5 +1,16 @@
+---
 syntax_version: "6"
 project_name: chrome
+metas:
+analysis:
+vcs:
+	github:
+		meta:
+		starred:
+		watched:
+		forks:
+		issues:
+		pull_requests:
 macros:
   run:
     usage: run chrome in the container

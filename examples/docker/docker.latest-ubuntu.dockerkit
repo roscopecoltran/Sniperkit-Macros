@@ -1,8 +1,19 @@
+---
 syntax_version: "6"
 project_name: docker
 docker_image: dry-run-test
 privileged: true
 container_working_directory: /go/src/github.com/docker/docker
+metas:
+analysis:
+vcs:
+  github:
+    meta:
+    starred:
+    watched:
+    forks:
+    issues:
+    pull_requests:
 mount:
   main: # mount current directory
   - ./docker

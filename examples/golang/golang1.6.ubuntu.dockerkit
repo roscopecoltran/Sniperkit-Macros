@@ -1,0 +1,15 @@
+syntax_version: "8"
+project_name: nut
+metas:
+analysis:
+vcs:
+	github:
+		meta:
+		starred:
+		watched:
+		forks:
+		issues:
+		pull_requests:
+based_on:
+  nut_file_path: ./golang1.5.ubuntu.yml
+docker_image: golang:1.6

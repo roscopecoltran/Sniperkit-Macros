@@ -15,3 +15,5 @@ vendor/*
 !vendor/vendor.json
 
 nut.override.yml
+
+.env

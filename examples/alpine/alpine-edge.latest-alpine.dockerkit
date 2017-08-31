@@ -1,0 +1,19 @@
+---
+syntax_version: "8"
+project_name: alpine:edge-dockerkit
+info:
+analysis:
+vcs:
+	gitlab:
+	bitbucket:
+	github:
+		meta:
+		starred:
+		watched:
+		forks:
+		issues:
+		pull_requests:
+based_on:
+  github: roscopecoltran/Sniperkit-Docker
+  path: dockerfiles/base/alpine
+docker_image: "roscopecoltran/alpine:edge-dockerkit"

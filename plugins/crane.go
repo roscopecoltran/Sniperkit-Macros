@@ -1,5 +1,6 @@
 package plugins
 
+/*
 import (
 	"github.com/michaelsauter/crane/crane"
 )
@@ -7,3 +8,4 @@ import (
 func Crane() {
 	crane.RealMain()
 }
+*/

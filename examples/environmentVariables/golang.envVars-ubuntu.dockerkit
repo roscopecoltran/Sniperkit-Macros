@@ -1,5 +1,18 @@
+---
 syntax_version: "6"
 project_name: nut
+metas:
+analysis:
+metas:
+analysis:
+vcs:
+	github:
+		meta:
+		starred:
+		watched:
+		forks:
+		issues:
+		pull_requests:
 based_on:
   github: matthieudelaro/nutfile_go1.6
 environment:

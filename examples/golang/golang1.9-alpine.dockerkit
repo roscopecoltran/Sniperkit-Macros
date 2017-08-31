@@ -1,6 +1,16 @@
-syntax_version: "6"
+syntax_version: "8"
 project_name: go
-docker_image: golang:1.5
+docker_image: golang:1.9-alpine3.6
+metas:
+analysis:
+vcs:
+    github:
+        meta:
+        starred:
+        watched:
+        forks:
+        issues:
+        pull_requests:
 macros:
   build:
     usage: build the project

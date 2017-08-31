@@ -1,3 +1,4 @@
+---
 syntax_version: "6"
 project_name: tensorflow
 docker_image: b.gcr.io/tensorflow/tensorflow:latest-devel-gpu
@@ -16,4 +17,13 @@ macros:
     usage: start tensorflow interactive session
     actions:
     - python -i -c 'import tensorflow as tf; sess = tf.InteractiveSession()'
-
+metas:
+analysis:
+vcs:
+  github:
+    meta:
+    starred:
+    watched:
+    forks:
+    issues:
+    pull_requests:

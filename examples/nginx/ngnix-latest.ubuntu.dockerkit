@@ -1,3 +1,4 @@
+---
 syntax_version: "6"
 project_name: nginx
 docker_image: nginx
@@ -8,3 +9,13 @@ macros:
   nginx:
     usage: nginx
     actions:
+metas:
+analysis:
+vcs:
+  github:
+    meta:
+    starred:
+    watched:
+    forks:
+    issues:
+    pull_requests:

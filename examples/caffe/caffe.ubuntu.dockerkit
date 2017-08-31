@@ -1,7 +1,18 @@
+---
 syntax_version: "6"
 project_name: caffe
 docker_image: matthieudelaro/work-on-caffe
 container_working_directory: /opt/caffe
+metas:
+analysis:
+vcs:
+  github:
+    meta:
+    starred:
+    watched:
+    forks:
+    issues:
+    pull_requests:
 mount:
   main:
   - ./caffe

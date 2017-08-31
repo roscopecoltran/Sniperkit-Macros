@@ -1,0 +1,140 @@
+{
+  "sniper-gateway": {
+    "version": 1,
+    "name": "Krakend API Gateway",
+    "slug": "krakend-gateway",
+    "port": 8080,
+    "timeout": 10,
+    "cache_ttl": 3600,
+    "host": [
+      "http://127.0.0.1:8080",
+      "http://127.0.0.2:8000",
+      "http://127.0.0.3:9000",
+      "http://127.0.0.4"
+    ],
+    "groups": {
+      "default": [
+        "github",
+        "amazon",
+        "reddit",
+        "hackernews"
+      ],
+      "ecommerce": [
+        "amazon",
+        "ebay"
+      ],
+      "search-meta": [
+        "google",
+        "duckduckgo"
+      ]
+    },
+    "endpoints": [
+      {
+        "endpoint": "/users/{user}",
+        "name": "user_registration",
+        "method": "GET",
+        "backend": [
+          {
+            "host": [
+              "http://127.0.0.3:9000",
+              "http://127.0.0.4"
+            ],
+            "url_pattern": "/registered/{user}",
+            "whitelist": [
+              "some",
+              "what"
+            ],
+            "mapping": {
+              "email": "personal_email"
+            }
+          },
+          {
+            "host": [
+              "http://127.0.0.1:8080"
+            ],
+            "url_pattern": "/users/{user}/permissions",
+            "blacklist": [
+              "spam2",
+              "notwanted2"
+            ]
+          }
+        ],
+        "concurrent_calls": 2,
+        "timeout": 1000,
+        "cache_ttl": 3600,
+        "querystring_params": [
+          "page",
+          "limit"
+        ]
+      },
+      {
+        "endpoint": "/foo/bar",
+        "name": "debug_tupu",
+        "method": "POST",
+        "backend": [
+          {
+            "host": [
+              "https://127.0.0.1:8081"
+            ],
+            "url_pattern": "/__debug/tupu"
+          }
+        ],
+        "concurrent_calls": 1,
+        "timeout": 10000,
+        "cache_ttl": 3600
+      },
+      {
+        "endpoint": "/github",
+        "name": "github-api",
+        "method": "GET",
+        "backend": [
+          {
+            "host": [
+              "https://api.github.com"
+            ],
+            "url_pattern": "/",
+            "whitelist": [
+              "authorizations_url",
+              "code_search_url"
+            ]
+          }
+        ],
+        "concurrent_calls": 2,
+        "timeout": 1000,
+        "cache_ttl": 3600
+      },
+      {
+        "endpoint": "/combination/{id}/{supu}",
+        "name": "jsonplaceholder-test",
+        "method": "GET",
+        "backend": [
+          {
+            "group": "first_post",
+            "host": [
+              "https://jsonplaceholder.typicode.com"
+            ],
+            "url_pattern": "/posts/{id}?supu={supu}",
+            "blacklist": [
+              "userId"
+            ]
+          },
+          {
+            "host": [
+              "https://jsonplaceholder.typicode.com"
+            ],
+            "url_pattern": "/users/{id}",
+            "mapping": {
+              "email": "personal_email"
+            }
+          }
+        ],
+        "concurrent_calls": 3,
+        "timeout": 4000,
+        "querystring_params": [
+          "page",
+          "limit"
+        ]
+      }
+    ]
+  }
+}
