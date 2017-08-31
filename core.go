@@ -9,10 +9,10 @@ import (
     log "github.com/sirupsen/logrus"
     "strings"
     "fmt"
-    "github.com/matthieudelaro/nut/nvidia"
+    "github.com/roscopecoltran/sniperkit-macros/nvidia"
     "os/user"
-    Config "github.com/matthieudelaro/nut/config"
-    Utils "github.com/matthieudelaro/nut/utils"
+    Config "github.com/roscopecoltran/sniperkit-macros/config"
+    Utils "github.com/roscopecoltran/sniperkit-macros/utils"
     // "errors"
 )
 

@@ -7,8 +7,8 @@ import (
     "io/ioutil"
     "path/filepath"
     log "github.com/sirupsen/logrus"
-    Utils "github.com/matthieudelaro/nut/utils"
-    Persist "github.com/matthieudelaro/nut/persist"
+    Utils "github.com/roscopecoltran/sniperkit-macros/utils"
+    Persist "github.com/roscopecoltran/sniperkit-macros/persist"
 )
 
 const NutFileName = "nut.yml"

@@ -88,4 +88,4 @@ macros:
     security_opts:
     - seccomp=unconfined
     actions:
-    - su - vscode -c "export GOPATH=/go; code -w /go/src/github.com/matthieudelaro/nut"
+    - su - vscode -c "export GOPATH=/go; code -w /go/src/github.com/roscopecoltran/sniperkit-macros"

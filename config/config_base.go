@@ -1,7 +1,7 @@
 package config
 
 import (
-    containerFilepath "github.com/matthieudelaro/nut/container/filepath"
+    containerFilepath "github.com/roscopecoltran/sniperkit-macros/container/filepath"
 )
 
 type VolumeBase struct {

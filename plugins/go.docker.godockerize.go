@@ -1,7 +1,5 @@
 package plugins
 
-/*
-
 import (
 	"flag"
 	"fmt"
@@ -56,6 +54,7 @@ type DockerInfo struct {
 }
 
 func Godockerize() {
+
 	expose := flag.String("expose", "3000", "Port to expose in docker")
 	fromTheScratch := flag.Bool("scratch", false, "Build the from the base image scratch")
 
@@ -144,6 +143,4 @@ func buildForLinux(dockerInfo DockerInfo) {
 	}
 
 }
-
-*/
 

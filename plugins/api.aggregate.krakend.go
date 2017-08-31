@@ -12,6 +12,7 @@ import (
 )
 
 func Krakend() {
+
     port := flag.Int("p", 0, "Port of the service")
     logLevel := flag.String("l", "ERROR", "Logging level")
     debug := flag.Bool("d", false, "Enable the debug")
@@ -33,5 +34,6 @@ func Krakend() {
     routerFactory := gin.DefaultFactory(proxy.DefaultFactory(logger), logger)
 
     routerFactory.New().Run(serviceConfig)
+
 }
 */

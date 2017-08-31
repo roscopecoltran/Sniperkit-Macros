@@ -19,11 +19,11 @@ $ nut run
 $ nut test
 ```
 
-**Nut** mounts the current folder in a [Docker](https://www.docker.com/) container, and executes commands on your behalf, according to the project configuration. The configuration is read from `nut.yml` file, in the current/parent folder. You can choose the Docker image to use, declare volumes to mount, and define commands (called macros) such as *build*, *run*, and *test*. Nut also [synchronizes timezone](https://github.com/matthieudelaro/nut/wiki/Nut:-Under-The-Hood#synchronize-timezones)
+**Nut** mounts the current folder in a [Docker](https://www.docker.com/) container, and executes commands on your behalf, according to the project configuration. The configuration is read from `nut.yml` file, in the current/parent folder. You can choose the Docker image to use, declare volumes to mount, and define commands (called macros) such as *build*, *run*, and *test*. Nut also [synchronizes timezone](https://github.com/roscopecoltran/sniperkit-macros/wiki/Nut:-Under-The-Hood#synchronize-timezones)
 
-Nut is in early stage of development. It has been tested on Ubuntu, on MacOS with *Docker for Mac* and *Docker Toolbox*, and on Windows with *Docker Toolbox*. Feedbacks and contributions to add features and to [improve Windows support](https://github.com/matthieudelaro/nut/issues/4) are welcome.
+Nut is in early stage of development. It has been tested on Ubuntu, on MacOS with *Docker for Mac* and *Docker Toolbox*, and on Windows with *Docker Toolbox*. Feedbacks and contributions to add features and to [improve Windows support](https://github.com/roscopecoltran/sniperkit-macros/issues/4) are welcome.
 
-Check the [wiki](https://github.com/matthieudelaro/nut/wiki) to learn about Nut [implementation](https://github.com/matthieudelaro/nut/wiki/Nut:-Under-The-Hood), and to read some tutorials (GPU support, Caffe, TensorFlow, etc).
+Check the [wiki](https://github.com/roscopecoltran/sniperkit-macros/wiki) to learn about Nut [implementation](https://github.com/roscopecoltran/sniperkit-macros/wiki/Nut:-Under-The-Hood), and to read some tutorials (GPU support, Caffe, TensorFlow, etc).
 
 ### Share and reuse environments
 You can initialize **Nut** with an environment from a GitHub repository:
@@ -51,23 +51,23 @@ Not even Go!
 ```bash
 # 1 - Download sources and dependencies
     # unix
-    docker run --rm -v $PWD:/go/src/github.com/matthieudelaro/ -w /go/src/github.com/matthieudelaro/ matthieudelaro/golang:1.7-cross bash -c 'git clone https://github.com/matthieudelaro/nut.git  --progress && cd nut && govendor sync'
+    docker run --rm -v $PWD:/go/src/github.com/matthieudelaro/ -w /go/src/github.com/matthieudelaro/ matthieudelaro/golang:1.7-cross bash -c 'git clone https://github.com/roscopecoltran/sniperkit-macros.git  --progress && cd nut && govendor sync'
 
     # windows
-    docker run --rm -v ${PWD}:/go/src/github.com/matthieudelaro/ -w /go/src/github.com/matthieudelaro/ matthieudelaro/golang:1.7-cross bash -c 'git clone https://github.com/matthieudelaro/nut.git  --progress && cd nut && govendor sync'
+    docker run --rm -v ${PWD}:/go/src/github.com/matthieudelaro/ -w /go/src/github.com/matthieudelaro/ matthieudelaro/golang:1.7-cross bash -c 'git clone https://github.com/roscopecoltran/sniperkit-macros.git  --progress && cd nut && govendor sync'
 
 # 2 - Move to nut folder
     cd nut
 
 # 3 - Build Nut
     # Build Nut for Linux, in a container
-    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut matthieudelaro/golang:1.7-cross go build -o nut
+    docker run -i -t --rm -v $PWD:/go/src/github.com/roscopecoltran/sniperkit-macros -w /go/src/github.com/roscopecoltran/sniperkit-macros matthieudelaro/golang:1.7-cross go build -o nut
 
     # Build Nut for OSX, in a container
-    docker run -i -t --rm -v $PWD:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut matthieudelaro/golang:1.7-cross env GOOS=darwin GOARCH=amd64 go build -o nut
+    docker run -i -t --rm -v $PWD:/go/src/github.com/roscopecoltran/sniperkit-macros -w /go/src/github.com/roscopecoltran/sniperkit-macros matthieudelaro/golang:1.7-cross env GOOS=darwin GOARCH=amd64 go build -o nut
 
     # Build Nut for Windows, in a container.
-    docker run -i -t --rm -v ${PWD}:/go/src/github.com/matthieudelaro/nut -w /go/src/github.com/matthieudelaro/nut matthieudelaro/golang:1.7-cross env GOOS=windows GOARCH=amd64 go build -o nut.exe
+    docker run -i -t --rm -v ${PWD}:/go/src/github.com/roscopecoltran/sniperkit-macros -w /go/src/github.com/roscopecoltran/sniperkit-macros matthieudelaro/golang:1.7-cross env GOOS=windows GOARCH=amd64 go build -o nut.exe
 
 # Run nut
 ./nut   # or .\nut.exe on Windows
@@ -88,7 +88,7 @@ Not even Go!
 [@RnbWd](https://github.com/RnbWd) developed a npm package with Nut binaries: https://github.com/RnbWd/nut-bin
 
 #### Download Binaries
-Manually built binaries for Linux, OSX, and Windows are available in [release](https://github.com/matthieudelaro/nut/tree/manualbuild/release) folder. _It is a temporary solution._
+Manually built binaries for Linux, OSX, and Windows are available in [release](https://github.com/roscopecoltran/sniperkit-macros/tree/manualbuild/release) folder. _It is a temporary solution._
 
 
 ### Nut File Syntax
@@ -136,7 +136,7 @@ macros: # macros define operations that Nut can perform
     - go test
 
 container_working_directory: /go/src/project # where macros will be executed
-work_in_project_folder_as: /go/src/github.com/matthieudelaro/nut
+work_in_project_folder_as: /go/src/github.com/roscopecoltran/sniperkit-macros
   # Mount the folder of the project (where nut.yml is located) to the given
   # location inside the container. Also set the working directory to this
   # location. This is equivalent to container_working_directory + volume
@@ -166,9 +166,9 @@ devices: # expose devices to the container
 
 ```
 
-Here are other instructive [examples](https://github.com/matthieudelaro/nut/blob/master/examples/):
-- [Dynamic folder name](https://github.com/matthieudelaro/nutfile_go1.5/blob/master/nut.yml)
-- [GUI application](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml)
+Here are other instructive [examples](https://github.com/roscopecoltran/sniperkit-macros/blob/master/examples/):
+- [Dynamic folder name](https://github.com/roscopecoltran/sniperkit-macrosfile_go1.5/blob/master/nut.yml)
+- [GUI application](https://github.com/roscopecoltran/sniperkit-macros/blob/master/examples/geary/nut.yml)
 
 
 #### Guidelines
@@ -241,12 +241,12 @@ Device #0
 
 
 ### What the Nut???
-- build [Nut](https://github.com/matthieudelaro/nut/blob/master/nut.yml) within Nut (I never installed Go, and I'm never going to :)
-- build [Docker](https://github.com/matthieudelaro/nut/blob/master/examples/docker/nut.yml)
-- build and run [Caffe](https://github.com/matthieudelaro/nut/blob/master/examples/caffe/nut.yml) with `nut build`, `nut test`, `nut train-mnist`.
+- build [Nut](https://github.com/roscopecoltran/sniperkit-macros/blob/master/nut.yml) within Nut (I never installed Go, and I'm never going to :)
+- build [Docker](https://github.com/roscopecoltran/sniperkit-macros/blob/master/examples/docker/nut.yml)
+- build and run [Caffe](https://github.com/roscopecoltran/sniperkit-macros/blob/master/examples/caffe/nut.yml) with `nut build`, `nut test`, `nut train-mnist`.
 - compile CUDA code on a Mac Book Air, which hasn't got any Nvidia GPU. Just `nut build`
 - test code in a whole infrastructure, by defining a macro running *docker-compose* in a container.
-- run linux graphical applications such as [geary](https://github.com/matthieudelaro/nut/blob/master/examples/geary/nut.yml) and [chrome](https://github.com/matthieudelaro/nut/blob/master/examples/chrome/nut.yml) on your Mac after installing [XQuartz](http://www.xquartz.org/):
+- run linux graphical applications such as [geary](https://github.com/roscopecoltran/sniperkit-macros/blob/master/examples/geary/nut.yml) and [chrome](https://github.com/roscopecoltran/sniperkit-macros/blob/master/examples/chrome/nut.yml) on your Mac after installing [XQuartz](http://www.xquartz.org/):
 
 ![Geary application on your Mac](https://camo.githubusercontent.com/b32c086f7da89f3365062f9a6a49b7f64377cb35/687474703a2f2f692e696d6775722e636f6d2f4b6650676d72322e676966)
 ![Chrome application on your Mac](https://pbs.twimg.com/media/Cl90rCuVYAATcsz.jpg:large)
@@ -256,7 +256,7 @@ Device #0
 - improve support for Windows
 - plugin for Sublime Text, to call `nut run`, `nut build`, and `nut test` from the editor
 - create a registery for `nut.yml` files
-- see [issues](https://github.com/matthieudelaro/nut/issues)
+- see [issues](https://github.com/roscopecoltran/sniperkit-macros/issues)
 
 ### Stay Tuned
 Wanna receive updates? Or share your thoughts? You can post an issue or follow me on [Twitter](https://twitter.com/matthieudelaro).

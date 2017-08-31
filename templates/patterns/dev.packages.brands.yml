@@ -1,0 +1,30 @@
+---
+brands:
+  google:
+  - google
+  - angular
+  - googlecloudplatform
+  - googlechrome
+  - golang
+  - gwtproject
+  - zxing
+  - v8
+  twitter:
+  - twbs
+  - twitter
+  - bower
+  - flightjs
+  facebook:
+  - facebook
+  - facebookarchive
+  - boltsframework
+  github:
+  - atom
+  - github
+  microsoft:
+  - microsoft
+  - dotnet
+  - aspnet
+  - exceptionless
+  - mono
+  - winjs

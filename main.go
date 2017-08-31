@@ -7,9 +7,10 @@ import (
     "github.com/codegangsta/cli"
     log "github.com/sirupsen/logrus"
     "reflect"
-    "github.com/matthieudelaro/nut/persist"
-    Utils "github.com/matthieudelaro/nut/utils"
-    Config "github.com/matthieudelaro/nut/config"
+    "github.com/roscopecoltran/sniperkit-macros/persist"
+    Utils "github.com/roscopecoltran/sniperkit-macros/utils"
+    Plugins "github.com/roscopecoltran/sniperkit-macros/plugins"
+    Config "github.com/roscopecoltran/sniperkit-macros/config"
 )
 
 func main() {
@@ -35,6 +36,7 @@ func main() {
     projectMacros := map[string]Config.Macro{}
 
     initFlag := false
+    scanFlag := false
     logsFlag := false
     cleanFlag := false
     execFlag := ""
@@ -116,6 +118,11 @@ func main() {
             Name:        "init",
             Usage:       "initialize a nut project",
             Destination: &initFlag,
+        },
+        cli.BoolFlag{
+            Name:        "scan",
+            Usage:       "initialize a nut project",
+            Destination: &scanFlag,
         },
         cli.StringFlag{
             Name:  "github",

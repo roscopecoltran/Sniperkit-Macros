@@ -1,0 +1,31 @@
+package: github.com/roscopecoltran/sniperkit-macros
+import:
+- package: github.com/PuerkitoBio/goquery
+- package: github.com/SeeSpotRun/go-disk-utils
+  subpackages:
+  - hddreader
+  - walk
+- package: github.com/agrison/go-tablib
+- package: github.com/codegangsta/cli
+- package: github.com/docopt/docopt-go
+- package: github.com/fsouza/go-dockerclient
+- package: github.com/hoop33/limo
+  subpackages:
+  - config
+- package: github.com/matthieudelaro/go-dockerpty
+- package: github.com/michaelsauter/crane
+  subpackages:
+  - crane
+- package: github.com/Sirupsen/logrus
+  vcs: github
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh
+  - ssh/agent
+  - ssh/terminal
+- package: gopkg.in/yaml.v2
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
+  - require

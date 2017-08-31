@@ -6,10 +6,10 @@ import (
     "github.com/codegangsta/cli"
     "fmt"
     "path/filepath"
-    Config "github.com/matthieudelaro/nut/config"
-    Utils "github.com/matthieudelaro/nut/utils"
-    Persist "github.com/matthieudelaro/nut/persist"
-    containerFilepath "github.com/matthieudelaro/nut/container/filepath"
+    Config "github.com/roscopecoltran/sniperkit-macros/config"
+    Utils "github.com/roscopecoltran/sniperkit-macros/utils"
+    Persist "github.com/roscopecoltran/sniperkit-macros/persist"
+    containerFilepath "github.com/roscopecoltran/sniperkit-macros/container/filepath"
 )
 
 // create a nut.yml at the current path

@@ -2,7 +2,7 @@ package config
 
 import (
     // log "github.com/sirupsen/logrus"
-    Utils "github.com/matthieudelaro/nut/utils"
+    Utils "github.com/roscopecoltran/sniperkit-macros/utils"
 )
 
 // Define methods over interfaces

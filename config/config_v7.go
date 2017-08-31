@@ -2,8 +2,8 @@ package config
 
 import(
     "path/filepath"
-    Utils "github.com/matthieudelaro/nut/utils"
-    containerFilepath "github.com/matthieudelaro/nut/container/filepath"
+    Utils "github.com/roscopecoltran/sniperkit-macros/utils"
+    containerFilepath "github.com/roscopecoltran/sniperkit-macros/container/filepath"
 
     log "github.com/sirupsen/logrus"
     "errors"

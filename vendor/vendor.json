@@ -254,31 +254,31 @@
 		},
 		{
 			"checksumSHA1": "LW67zr6AqWGWi9qtaDSkKIxWqw8=",
-			"path": "github.com/matthieudelaro/nut/config",
+			"path": "github.com/roscopecoltran/sniperkit-macros/config",
 			"revision": "2abc99529661946bed4fea0071e05594c0ff8b6d",
 			"revisionTime": "2017-06-07T17:57:20Z"
 		},
 		{
 			"checksumSHA1": "Wrd9R6prFod+eYbAJWpflOmWy5g=",
-			"path": "github.com/matthieudelaro/nut/container/filepath",
+			"path": "github.com/roscopecoltran/sniperkit-macros/container/filepath",
 			"revision": "2abc99529661946bed4fea0071e05594c0ff8b6d",
 			"revisionTime": "2017-06-07T17:57:20Z"
 		},
 		{
 			"checksumSHA1": "ebssC95DWCoNsguafrK5tYjgtLg=",
-			"path": "github.com/matthieudelaro/nut/nvidia",
+			"path": "github.com/roscopecoltran/sniperkit-macros/nvidia",
 			"revision": "2abc99529661946bed4fea0071e05594c0ff8b6d",
 			"revisionTime": "2017-06-07T17:57:20Z"
 		},
 		{
 			"checksumSHA1": "16Bs5skJEA1z1oCg22HNJH8XZ6A=",
-			"path": "github.com/matthieudelaro/nut/persist",
+			"path": "github.com/roscopecoltran/sniperkit-macros/persist",
 			"revision": "2abc99529661946bed4fea0071e05594c0ff8b6d",
 			"revisionTime": "2017-06-07T17:57:20Z"
 		},
 		{
 			"checksumSHA1": "UUBMPg9GlAi2W9bxj5r9fRN3p2k=",
-			"path": "github.com/matthieudelaro/nut/utils",
+			"path": "github.com/roscopecoltran/sniperkit-macros/utils",
 			"revision": "2abc99529661946bed4fea0071e05594c0ff8b6d",
 			"revisionTime": "2017-06-07T17:57:20Z"
 		},

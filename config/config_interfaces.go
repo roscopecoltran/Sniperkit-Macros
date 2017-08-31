@@ -1,7 +1,7 @@
 package config
 
 import (
-    Utils "github.com/matthieudelaro/nut/utils"
+    Utils "github.com/roscopecoltran/sniperkit-macros/utils"
 )
 
 type Bind interface {
