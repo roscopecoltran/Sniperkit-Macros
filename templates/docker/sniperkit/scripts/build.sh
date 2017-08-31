@@ -5,7 +5,7 @@ set -e
 # Set temp environment vars
 export GOPATH=/tmp/go
 export PATH=${PATH}:${GOPATH}/bin
-export BUILDPATH=${GOPATH}/src/github.com/blippar/git2etcd
+export BUILDPATH=${GOPATH}/src/github.com/roscopecoltran/sniperkit
 export PKG_CONFIG_PATH="/usr/lib/pkgconfig/:/usr/local/lib/pkgconfig/"
 
 # Install build deps
