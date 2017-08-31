@@ -5,7 +5,8 @@ import (
 	"github.com/src-d/enry"
 )
 
-func Scanner() {
+func Enry() {
 
 }
+
 */
