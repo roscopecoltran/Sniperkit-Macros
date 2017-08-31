@@ -6,7 +6,7 @@ import (
     "github.com/fsouza/go-dockerclient"
     // "github.com/fgrehm/go-dockerpty"
     "github.com/matthieudelaro/go-dockerpty"
-    log "github.com/Sirupsen/logrus"
+    log "github.com/sirupsen/logrus"
     "strings"
     "fmt"
     "github.com/matthieudelaro/nut/nvidia"

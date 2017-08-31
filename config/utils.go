@@ -6,7 +6,7 @@ import (
     "fmt"
     "io/ioutil"
     "path/filepath"
-    log "github.com/Sirupsen/logrus"
+    log "github.com/sirupsen/logrus"
     Utils "github.com/matthieudelaro/nut/utils"
     Persist "github.com/matthieudelaro/nut/persist"
 )
@@ -52,6 +52,7 @@ func CheckConflict(context Utils.Context, key string, newPoint Volume, mountingP
 
 func GetSyntaxes() []Project {
     return []Project{
+        NewProjectV8(nil),
         NewProjectV7(nil),
         NewProjectV6(nil),
         NewProjectV5(nil),

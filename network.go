@@ -1,13 +1,13 @@
 package main
 
 import (
-    // "github.com/Sirupsen/logrus"
+    // "github.com/sirupsen/logrus"
     "github.com/fsouza/go-dockerclient"
     // "bytes"
     "os"
     "net"
     "io"
-    log "github.com/Sirupsen/logrus"
+    log "github.com/sirupsen/logrus"
     "errors"
     // "time"
     // "strings" // words := strings.Fields(someString)

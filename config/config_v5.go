@@ -4,7 +4,7 @@ import(
     "path/filepath"
     Utils "github.com/matthieudelaro/nut/utils"
     containerFilepath "github.com/matthieudelaro/nut/container/filepath"
-    log "github.com/Sirupsen/logrus"
+    log "github.com/sirupsen/logrus"
     "strings"
     "errors"
 )

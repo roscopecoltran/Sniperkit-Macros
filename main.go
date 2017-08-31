@@ -3,8 +3,9 @@ package main
 import (
     "os"
     "sort"
+    "strconv"
     "github.com/codegangsta/cli"
-    log "github.com/Sirupsen/logrus"
+    log "github.com/sirupsen/logrus"
     "reflect"
     "github.com/matthieudelaro/nut/persist"
     Utils "github.com/matthieudelaro/nut/utils"
@@ -102,7 +103,7 @@ func main() {
 
     app := cli.NewApp()
     app.Name = "nut"
-    app.Version = "0.1.4 dev"
+    app.Version = "0.1.4 dev"   //RELEASE_BUILD_PLACEHOLDER//
     app.Usage = "the development environment, containerized"
     // app.EnableBashCompletion = true
     app.Flags = []cli.Flag {
@@ -204,6 +205,12 @@ func main() {
         log.Error("Undefined macro " + macroName)
         cli.ShowAppHelp(c)
         os.Exit(42)
+    }
+
+    // Convert app arguments into Env variables similar to Bash.
+    // They will be expanded in macro actions later.
+    for i := range os.Args {
+        os.Setenv(strconv.Itoa(i), os.Args[i])
     }
 
     app.Run(os.Args)

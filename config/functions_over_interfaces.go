@@ -1,7 +1,7 @@
 package config
 
 import (
-    // log "github.com/Sirupsen/logrus"
+    // log "github.com/sirupsen/logrus"
     Utils "github.com/matthieudelaro/nut/utils"
 )
 
