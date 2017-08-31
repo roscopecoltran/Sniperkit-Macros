@@ -22,7 +22,6 @@ services:
     volumes:
 
     # docker
-    - /etc/docker:/etc/docker
     - /var/run/docker.sock:/var/run/docker.sock
 
     # root dir
@@ -542,8 +541,8 @@ services:
     command: ["--help"]
 
   nut:
-    image: "${DOCKER_HUB_ACCOUNT}/crane:${NUT_VERSION}-go${ALPINE_GOLANG_VERSION}-alpine${ALPINE_DEFAULT_VERSION}"
-    container_name: crane-${SQLMAP_VERSION}
+    image: "${DOCKER_HUB_ACCOUNT}/nut:${NUT_VERSION}-go${ALPINE_GOLANG_VERSION}-alpine${ALPINE_DEFAULT_VERSION}"
+    container_name: nut-${SQLMAP_VERSION}
     build:
       context: "./services/dockerfiles/moby/image/nut"
       dockerfile: nut.alpine.dockerfile
