@@ -1,0 +1,19 @@
+# git files
+.git
+.git/**
+.github/
+.github/**
+
+# config(s)
+*.config.env.example
+*.example
+
+# meta
+*.md
+
+# generated data
+./shared/conf.d/*.example
+
+src
+src/
+src/**

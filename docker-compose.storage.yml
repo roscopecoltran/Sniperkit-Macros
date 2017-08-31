@@ -1,0 +1,94 @@
+version: '2.1'
+services:
+  postgres:
+    image: "postgres:${POSTGRES_VERSION}-alpine3.6"
+    build:
+      context: "./dockerfiles/postgres"
+      dockerfile: "postgres${POSTGRES_VERSION}-alpine.dockerfile"
+    container_name: "postgres-${POSTGRES_VERSION}"
+    ports:
+    - 5432:5432
+    expose:
+    - 3306
+    volumes_from:
+    - data
+    env_file:
+    - "./postgres/postgres.config.env"
+
+  mysql:
+    image: "mysql:${MYSQL_VERSION}-alpine3.6"
+    build:
+      context: "./dockerfiles/mysql"
+      dockerfile: "mysql${MYSQL_VERSION}-alpine.dockerfile"
+    container_name: "mysql-${MYSQL_VERSION}"
+    ports:
+    - 3306:3306
+    expose:
+    - 3306
+    volumes_from:
+    - data
+    env_file:
+    - "./mysql/mysql.config.env"
+
+  mariadb:
+    image: "mariadb:${MARIADB_VERSION}-alpine3.6"
+    build:
+      context: "./dockerfiles/mariadb"
+      dockerfile: "mariadb${MARIADB_VERSION}-alpine.dockerfile"
+    container_name: "mariadb-${MARIADB_VERSION}"
+    ports:
+    - 3307:3306
+    expose:
+    - 3307
+    volumes_from:
+    - data
+    env_file:
+    - "./mariadb/mariadb.config.env"
+
+  mongodb:
+    image: "mongo:${MONGODB_VERSION}-alpine3.6"
+    container_name: "mongodb-${MONGODB_VERSION}"
+    build:
+      context: "./dockerfiles/mongodb"
+      dockerfile: mongodb-alpine.dockerfile
+    ports:
+    - 27017:27017
+    expose:
+    - 27017
+    volumes_from:
+    - data
+    env_file:
+    - "./mongodb/mongodb.config.env"
+    command:
+    - "--smallfiles"
+
+  redis:
+    image: "redis:${REDIS_VERSION}-alpine3.6"
+    build:
+      context: "./dockerfiles/redis"
+      dockerfile: "redis${REDIS_VERSION}-alpine.dockerfile"
+    container_name: "redis-${REDIS_VERSION}"
+    ports:
+    - 6379:6379
+    expose:
+    - 6379
+    volumes_from:
+    - data
+    env_file:
+    - "./redis/redis.config.env"
+
+  webdis:
+    image: "${DOCKER_HUB_ACCOUNT}/webdis:latest-${WEBDIS_VERSION}-alpine3.6"
+    container_name: webdis-${WEBDIS_VERSION}
+    build:
+      context: "./dockerfiles/webdis"
+      dockerfile: webdis-alpine.dockerfile
+    ports:
+    - 7379:7379
+    expose:
+    - 7379
+    volumes_from:
+    - data
+    env_file:
+    - "./dockerfiles/webdis/webdis.config.env"
+  
