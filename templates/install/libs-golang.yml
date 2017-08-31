@@ -1,0 +1,14 @@
+---
+packages:
+  macros:    
+  awesome:
+    links:
+  scripts:
+    links:
+  modules:
+    links:
+  examples:
+    links:
+  list:
+  - name: test package
+    slug: test

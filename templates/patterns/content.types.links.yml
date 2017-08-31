@@ -1,0 +1,12 @@
+---
+types:
+  links:
+  - name: web
+    topics:
+    - topic: forum
+    - topic: website
+    - topic: chat
+    - topic: blog
+    - topic: wiki
+    - topic: api
+    - topic: platform

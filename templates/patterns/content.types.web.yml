@@ -1,0 +1,111 @@
+---
+types:
+  content:
+  - name: vcs
+    topics:
+    - topic: commits
+      short: CMITS
+    - topic: releases
+      short: RELS
+      expand: []
+    - topic: forks
+      short: FORKS
+      expand: []
+    - topic: watches
+      short: WATCHS
+      expand: []
+    - topic: branches
+      short: BCHS
+      expand: []
+    - topic: stars
+      short: STARS
+      expand: []
+    - topic: contributors
+      short: CTOR
+      expand: []
+    - topic: issues
+      short: ISS
+      expand: []
+    - topic: pull-requests
+      short: PRS
+      expand: []
+    - topic: licenses
+      short: LIC
+      expand: []
+    - topic: topics
+      short: TOPX
+      expand: []
+  - name: development
+    topics:
+    - topic: contents
+      short: CNT
+      expand: []
+    - topic: community
+      short: COMM
+      expand: []
+    - topic: resources
+      short: RESS
+      expand: []
+    - topic: package-manager
+      short: PKGM
+      expand: []
+    - topic: build-systems
+      short: BUILDS
+      expand: []
+    - topic: modules
+      short: MODS
+      expand: []
+    - topic: utility-scripts
+      short: UTILS
+      expand: []
+    - topic: toolchains
+      short: TOOLC
+      expand: []
+    - topic: tutorial-examples
+      short: TUTO
+      expand: []
+    - topic: other
+      short: OTH
+      expand: []
+    - topic: documentation
+      short: DOC
+      expand: []
+    - topic: wiki
+      short: WIK
+      expand: []
+    - topic: curated-list
+      short: CL
+      expand:
+        - awesome
+        - awesome-go
+        - awesome-cmake     
+        - awesome-cpp
+        - awesome-docker
+    - topic: homework
+      short: HMW
+      expand:
+        - demo
+        - assignment
+        - lecture
+        - exams
+        - class
+        - university
+        - deadline
+        - grading
+    - topic: academic
+      short: ACAD
+      keywords:
+        - arxiv
+    - topic: education
+      short: EDU
+      expand:
+        - course
+        - lecture
+        - guide
+        - book
+        - tips
+        - know
+        - knowledge
+        - teacher
+        - professor
+        - guide

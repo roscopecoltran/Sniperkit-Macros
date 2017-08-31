@@ -39,35 +39,46 @@ import:
 - package: github.com/fcavani/aferoboltdb
 - package: github.com/SidhuG/readGit
 - package: github.com/Ropes/desalinate
-- package: github.com/google/zoekt
-- package: github.com/dns-gh/tojson
-- package: github.com/FKSE/gh-release-fetcher
-- package: github.com/mmcloughlin/ghr
-- package: github.com/motemen/go-generate-jsschema
-- package: github.com/jinzhu/configor
-- package: github.com/go-ozzo/ozzo-config
 
-- package: github.com/ghodss/yaml
-- package: github.com/dahernan/gopherscraper
-- package: github.com/progrium/go-basher
-- package: github.com/strothj/alpine-debtool
-- package: github.com/ajvb/kala
-- package: github.com/rqlite/rqlite
-- package: github.com/pingcap/tidb
-- package: github.com/cayleygraph/cayley
-- package: github.com/kohkimakimoto/bucketstore
-- package: github.com/jmatsu/ghq_ss
-- package: github.com/acro5piano/bhq
-- package: github.com/peco/peco
-- package: github.com/ellisonleao/howdoi
-- package: github.com/palantir/amalgomate
-- package: github.com/mgm702/gitinfo
-# - package: 
-# - package: 
+- package: github.com/nmiyake/ghcli
+- package: github.com/tulip/gh-token
 
-# what i was looking for...both below
-- package: github.com/sonatard/ghs
-- package: github.com/motemen/ghq
+- package: github.com/jabley/ghcli
+- package: github.com/monmaru/ghstar
+- package: github.com/yuta-masano/ghb
+- package: github.com/keith/ghs
+- package: github.com/jojomi/github-opml
+- package: github.com/evermax/stargraph
+
+- package: github.com/serima/github-star-history
+- package: github.com/motemen/github-list-starred
+- package: github.com/Piasy/ghrc
+
+- package: github.com/kyokomi/gh-star-ranking
+- package: github.com/kkdai/githubrss
+- package: github.com/monmaru/ghstar
+- package: github.com/kkeuning/gobservatory
+- package: github.com/FriggaHel/githubbeat
+- package: github.com/grimmer0125/search-github-starred
+- package: github.com/solarnz/starred-releases
+- package: github.com/jpillora/installer
+- package: github.com/jhaynie/github-protobuf
+- package: github.com/rbrumby/goliath
+
+- package: github.com/harshavardhana/github
+
+# CLI tool for listing and searching users' starred repositories on Github
+- package: github.com/dastergon/strgz
+- package: github.com/weirdgiraffe/githubstars
+
+- package: github.com/james65535/ghub-todo-tracker
+- package: github.com/pocke/gh-feeds
+- package: github.com/Tinker-Ware/gh-service
+- package: github.com/rjeczalik/gh
+- package: 
+- package: 
+
+
 
 testImport:
 - package: github.com/stretchr/testify
