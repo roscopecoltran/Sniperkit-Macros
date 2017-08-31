@@ -1,0 +1,13 @@
+---
+version: '2.1'
+options:
+  verbose: true
+syncs:
+  applications-docker-sync:
+    compose-dev-file-path: docker-compose.sync.yml
+    src: "${APPLICATION}"
+    sync_userid: 1000
+    sync_strategy: "${DOCKER_SYNC_STRATEGY}"
+    sync_excludes:
+    - sniperkit
+    - ignored_folder_example

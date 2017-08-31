@@ -1,0 +1,24 @@
+git subtree add --prefix dockerfiles/crane https://github.com/michaelsauter/crane master --squash
+
+git subtree add --prefix dockerfiles/memcached https://github.com/tiredofit/docker-memcached master --squash
+
+
+git subtree add --prefix external/dockerfiles/bhuisgen https://github.com/bhuisgen/docker-alpine master --squash
+
+git subtree add --prefix external/dockerfiles https://github.com/tiredofit/docker-self-service-password
+
+git subtree add --prefix dockerfiles/dind https://github.com/tiredofit/docker-dind master --squash ; \
+git subtree add --prefix dockerfiles/tinc https://github.com/tiredofit/docker-tinc master --squash ; \
+git subtree add --prefix dockerfiles/piwik https://github.com/tiredofit/docker-piwik master --squash ; \
+git subtree add --prefix dockerfiles/nginx-ldap https://github.com/tiredofit/docker-nginx-ldap master --squash ; \
+git subtree add --prefix dockerfiles/mariadb-backup https://github.com/tiredofit/mariadb-backup master --squash ; \ 
+git subtree add --prefix dockerfiles/ruby/2.4 https://github.com/tiredofit/mariadb-backup 2.4 --squash ; \ 
+git subtree add --prefix dockerfiles/ruby/2.3 https://github.com/tiredofit/mariadb-backup 2.3 --squash ; \ 
+git subtree add --prefix dockerfiles/backuppc https://github.com/tiredofit/docker-backuppc master --squash 
+
+Caleydo/pathfinder_graph
+git subtree add --prefix dockerfiles/elasticfence/hepic https://github.com/hepictel/hepic-elasticfence master --squash
+
+https://github.com/kkalugerov/docker-prototype
+
+git subtree add --prefix external/dockerfiles/kkalugerov/spark-pykafka-prototype https://github.com/kkalugerov/docker-prototype master --squash

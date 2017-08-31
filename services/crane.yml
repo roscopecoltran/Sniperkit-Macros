@@ -1,0 +1,49 @@
+services:
+
+groups:
+  default:
+  - data
+  - mariadb
+  - sphinx
+  - redis
+  - aiohttp_admin
+  engines:
+  - searx
+  - sphinx
+  stacks:
+  - aiohttp_admin
+  cache:
+  - redis
+  - webdis
+  - memcached
+  sniper:
+  - data
+  - mariadb
+  - sphinx
+  - mongodb
+  - redis
+  - webdis
+  lemp:
+  - data
+  - nginx
+  - mariadb
+  - mongodb
+  - sphinx
+  kv:
+  - redis
+  sql:
+  - postgres
+  - mariadb
+  nosql:
+  - mongodb
+  search:
+  - sphinx
+  dev:
+  - php
+  - golang
+  - nodejs
+
+#accelerated-mounts:
+#  "$PWD/shared:/shared":
+#    uid: 1000
+#    gid: 1000
